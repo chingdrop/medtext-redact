@@ -1,26 +1,18 @@
 import re
-import pandas as pd
-from pathlib import Path
 
 
-def search_keywords(value, keywords):
-    if isinstance(keywords, str):
-        keywords = [keywords]
+def search_keywords(text, keywords):
     pattern = r'\b(?:' + '|'.join(map(re.escape, keywords)) + r')\b'
-    found_keywords = re.findall(pattern, value, flags=re.IGNORECASE)
-    return set(found_keywords)
+    found_keywords = re.findall(pattern, text, flags=re.IGNORECASE)
+    if found_keywords:
+        print(f"Found the following keywords: {', '.join(set(found_keywords))}")
+    else:
+        print("No keywords found.")
 
-
-def search_single_word(text, keywords):
-    res = search_keywords(text, keywords)
-    if res:
-        res = str(res).title()
-    return res
 
 if __name__ == '__main__':
-    data_path = Path.cwd() / 'data'
-    df = pd.read_excel(data_path / "PRJ116405_ClientFacing_Reference_SpreadsheetvB.xlsx")
-    df['BiopsySide'] = df['ReportText'].apply(lambda x: search_single_word(x, 'left'))
-    df['BiopsySide'] = df['ReportText'].apply(lambda x: search_single_word(x, 'right'))
-    df['BiopsyResult'] = df['ReportText'].apply(lambda x: search_single_word(x, 'benign'))
-    df['BiopsyResult'] = df['ReportText'].apply(lambda x: search_single_word(x, 'malignant'))
+    report_text = input("Please enter the report text: ")
+    search_keywords(report_text, ['left'])
+    search_keywords(report_text, ['right'])
+    search_keywords(report_text, ['benign'])
+    search_keywords(report_text, ['malignant'])
