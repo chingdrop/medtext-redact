@@ -33,5 +33,6 @@ if __name__ == '__main__':
         print_line_with_keywords(report_text, ['wire', 'localization'])
         print_line_with_keywords(report_text, ['benign'])
         print_line_with_keywords(report_text, ['malignant'])
+        print_line_with_keywords(report_text, ['Results:'])
         print_line_with_keywords(report_text, ['Impression:'])
         print_line_with_keywords(report_text, ['Pathology'])
