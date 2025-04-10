@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vega-tools"
+description = "Python-based solution designed to provide tools for extracting, transforming, and loading data."
+authors = [{ name = "Craig Hurley", email = "chingdorp@pm.me" }]
+version = "1.2.0"
+readme = "README.md"
+dependencies = [
+    "Pandas >=2.0.3, <3.0.0",
+    "NumPy >=1.24.3, <2.0.0",
+]
+
+[project.urls]
+Repository = "https://github.com/churley-vega/vega-tools"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages]
+find = { where = ["src"] }
+
+[tool.setuptools.package-dir]
+"" = "src"
