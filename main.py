@@ -11,8 +11,8 @@ def extract_keywords(text, keywords):
 
 
 def print_line_with_keywords(text, keywords):
-    split_text = re.split(r'(?<=\.)\s+', text)
-    pattern = r'(?i)^.*\b(?:' + '|'.join(map(re.escape, keywords)) + r')\b'
+    split_text = re.split(r'(?<=\.)\s*', text)
+    pattern = r'\b(?:' + '|'.join(map(re.escape, keywords)) + r')'
     for line in split_text:
         if re.match(pattern, line, flags=re.IGNORECASE):
             print(line.title())
@@ -27,7 +27,7 @@ if __name__ == '__main__':
             break
 
         print('\n')
-        report_text = re.sub(r'(?<=\.)\s+', '\n', report_text).title()
+        report_text = re.sub(r'(?<=\.)\s*', '\n', report_text).title()
         print(report_text)
         print('\n')
 
