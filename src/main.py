@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 
 
 # def extract_keywords(text, keywords):
@@ -17,22 +18,21 @@ def print_line_with_keywords(text, keywords):
 
 
 if __name__ == '__main__':
-    while True:
-        print(('-' * 79), '\n')
-        report_text = input("Please enter the report text: ")
-        if report_text == 'quit':
-            break
+    data_dir = Path.cwd().parent / 'data'
+    with open(data_dir / 'report_text.txt', 'r') as f:
+        report_text = f.read()
 
-        print('\n')
-        report_text = re.sub(r'(?<=\.)\s*', '\n', report_text).title()
-        print(report_text)
-        print('\n')
+    print(('-' * 79), '\n')
+    report_text = re.sub(r'\s+', ' ', report_text).strip()
+    report_text = re.sub(r'(?<=\.)\s*', '\n', report_text).title()
+    print(report_text)
+    print('\n')
 
-        print_line_with_keywords(report_text, ['left'])
-        print_line_with_keywords(report_text, ['right'])
-        print_line_with_keywords(report_text, ['wire', 'localization'])
-        print_line_with_keywords(report_text, ['benign'])
-        print_line_with_keywords(report_text, ['malignant'])
-        print_line_with_keywords(report_text, ['Results:'])
-        print_line_with_keywords(report_text, ['Impression:'])
-        print_line_with_keywords(report_text, ['Pathology'])
+    print_line_with_keywords(report_text, ['left'])
+    print_line_with_keywords(report_text, ['right'])
+    print_line_with_keywords(report_text, ['wire', 'localization'])
+    print_line_with_keywords(report_text, ['benign'])
+    print_line_with_keywords(report_text, ['malignant'])
+    print_line_with_keywords(report_text, ['Results:'])
+    print_line_with_keywords(report_text, ['Impression:'])
+    print_line_with_keywords(report_text, ['Pathology'])
