@@ -1,8 +1,17 @@
-numpy==2.2.4
-pandas==2.2.3
-python-dateutil==2.9.0.post0
+Bottleneck @ file:///C:/b/abs_816hr2khp1/croot/bottleneck_1731058648110/work
+markdown-it-py==3.0.0
+mdurl==0.1.2
+mkl-service==2.4.0
+mkl_fft @ file:///C:/Users/dev-admin/mkl/mkl_fft_1730823082242/work
+mkl_random @ file:///C:/Users/dev-admin/mkl/mkl_random_1730822522280/work
+numexpr @ file:///C:/b/abs_05o8p7bfml/croot/numexpr_1730215959182/work
+numpy @ file:///C:/b/abs_71ejae7e2v/croot/numpy_and_numpy_base_1742570444043/work/dist/numpy-2.2.4-cp312-cp312-win_amd64.whl#sha256=51cd6ca08057acb115487cc25926841a5f12f8555a06e60179ffc632b9c70638
+pandas @ file:///C:/b/abs_e18w9ay4we/croot/pandas_1732735115740/work/dist/pandas-2.2.3-cp312-cp312-win_amd64.whl#sha256=2c8058e41dda2e7ecfff0740ad1d98f17d528c740f71b038c523a9d24d2321b0
+Pygments==2.19.1
+python-dateutil @ file:///C:/b/abs_3au_koqnbs/croot/python-dateutil_1716495777160/work
 pytz==2025.2
+rich==14.0.0
 setuptools==78.1.0
-six==1.17.0
+six @ file:///C:/b/abs_149wuyuo1o/croot/six_1744271521515/work
 tzdata==2025.2
 wheel==0.45.1
