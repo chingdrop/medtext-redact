@@ -4,13 +4,6 @@ from rich.console import Console
 from rich.text import Text
 
 
-# def extract_keywords(text, keywords):
-#     pattern = r'\b(?:' + '|'.join(map(re.escape, keywords)) + r')'
-#     found_keywords = re.findall(pattern, text, flags=re.IGNORECASE)
-#     if found_keywords:
-#         print(f"Found the following keywords: {', '.join(set(found_keywords))}")
-
-
 def print_line_with_keywords(text, keywords):
     console = Console()
     split_text = re.split(r'(?<=\.)\s*', text)
