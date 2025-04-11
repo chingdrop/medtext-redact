@@ -1,25 +1,25 @@
 import click
 from pathlib import Path
 
-from vega_tools.utils.text_utils import format_text, print_line_with_keywords
+from vega_tools.utils.text_utils import ReportWriter
 
 
 @click.command()
 def main():
     data_dir = Path.cwd() / 'data'
     with open(data_dir / 'report_text.txt', 'r') as f:
-        report_text = f.read()
+        text = f.read()
 
-    report_text = format_text(report_text)
+    rw = ReportWriter(text)
     with open(data_dir / 'new_report_text.txt', 'w') as f:
-        f.write(report_text)
+        f.write(rw.text)
 
     print(('-' * 79), '\n')
-    print_line_with_keywords(report_text, ['left'])
-    print_line_with_keywords(report_text, ['right'])
-    print_line_with_keywords(report_text, ['wire', 'localization'])
-    print_line_with_keywords(report_text, ['benign'])
-    print_line_with_keywords(report_text, ['malignant'])
-    print_line_with_keywords(report_text, ['results'])
-    print_line_with_keywords(report_text, ['impression'])
-    print_line_with_keywords(report_text, ['pathology'])
+    rw.print_line_with_keywords(['left'])
+    rw.print_line_with_keywords(['right'])
+    rw.print_line_with_keywords(['wire', 'localization'])
+    rw.print_line_with_keywords(['benign'])
+    rw.print_line_with_keywords(['malignant'])
+    rw.print_line_with_keywords(['results'])
+    rw.print_line_with_keywords(['impression'])
+    rw.print_line_with_keywords(['pathology'])
