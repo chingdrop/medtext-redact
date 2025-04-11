@@ -1,4 +1,6 @@
 Bottleneck @ file:///C:/b/abs_816hr2khp1/croot/bottleneck_1731058648110/work
+click==8.1.8
+colorama==0.4.6
 markdown-it-py==3.0.0
 mdurl==0.1.2
 mkl-service==2.4.0

@@ -6,15 +6,19 @@ build-backend = "setuptools.build_meta"
 name = "vega-tools"
 description = "Python-based solution designed to provide tools for extracting, transforming, and loading data."
 authors = [{ name = "Craig Hurley", email = "chingdorp@pm.me" }]
-version = "1.2.0"
+version = "1.4.0"
 readme = "README.md"
 dependencies = [
     "Pandas >=2.0.3, <3.0.0",
     "NumPy >=1.24.3, <2.0.0",
+    "click >=7.1.2",
 ]
 
 [project.urls]
 Repository = "https://github.com/churley-vega/vega-tools"
+
+[project.scripts]
+vega-tools = "main:cli"
 
 [tool.setuptools]
 include-package-data = true
