@@ -15,14 +15,14 @@ def print_line_with_keywords(text, keywords):
             console.print(f"[bold green]{', '.join(set(keywords))}[/bold green] -", text_obj)
 
 
-if __name__ == '__main__':
+def main():
     data_dir = Path.cwd() / 'data'
     with open(data_dir / 'report_text.txt', 'r') as f:
         report_text = f.read()
 
     report_text = re.sub(r'\s+', ' ', report_text).strip()
     report_text = re.sub(r'(?<=\.)\s*', '\n', report_text).title()
-    with open(data_dir / 'keywords.txt', 'w') as f:
+    with open(data_dir / 'new_report_text.txt', 'w') as f:
         f.write(report_text)
 
     print(('-' * 79), '\n')
@@ -34,3 +34,7 @@ if __name__ == '__main__':
     print_line_with_keywords(report_text, ['results'])
     print_line_with_keywords(report_text, ['impression'])
     print_line_with_keywords(report_text, ['pathology'])
+
+
+if __name__ == '__main__':
+    main()
