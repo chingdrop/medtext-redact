@@ -1,19 +1,7 @@
-import re
 import click
-from rich.console import Console
-from rich.text import Text
 from pathlib import Path
 
-
-def print_line_with_keywords(text, keywords):
-    console = Console()
-    split_text = re.split(r'(?<=\.)\s*', text)
-    pattern = r'(?i)^.*\b(?:' + '|'.join(map(re.escape, keywords)) + r')'
-    for line in split_text:
-        if re.match(pattern, line, flags=re.IGNORECASE):
-            text_obj = Text(line.title())
-            text_obj.highlight_words(keywords, style="bold yellow", case_sensitive=False)
-            console.print(f"[bold green]{', '.join(set(keywords))}[/bold green] -", text_obj)
+from vega_tools.utils.text_utils import format_text, print_line_with_keywords
 
 
 @click.command()
@@ -22,8 +10,7 @@ def main():
     with open(data_dir / 'report_text.txt', 'r') as f:
         report_text = f.read()
 
-    report_text = re.sub(r'\s+', ' ', report_text).strip()
-    report_text = re.sub(r'(?<=\.)\s*', '\n', report_text).title()
+    report_text = format_text(report_text)
     with open(data_dir / 'new_report_text.txt', 'w') as f:
         f.write(report_text)
 
