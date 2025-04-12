@@ -7,18 +7,22 @@ from typing import List
 
 class ReportWriter:
     def __init__(self, text: str) -> None:
+        self.split_text = None
         self.console = Console()
-        self.__format_text(text)
-        self.__sanitize_dates()
+        self._format_text(text)
+        self._sanitize_dates()
 
-    def __format_text(self, text: str) -> None:
+    def __sub_split_text(self, pattern: str, replace: str) -> List[str]:
+        return [re.sub(pattern, replace, text) for text in self.split_text]
+
+    def _format_text(self, text: str) -> None:
         text = text.replace('M.D.', 'MD')
         text = re.sub(r'\s+', ' ', text).strip()
         self.split_text = re.split(r'(?<=\.)\s+(?=\D)', text.title())
 
-    def __sanitize_dates(self) -> None:
+    def _sanitize_dates(self) -> None:
         pattern = r'(?:0[1-9]|1[0-2]|[1-9])\/(?:0[1-9]|[12][0-9]|3[01]|[1-9])\/\d{4}'
-        self.split_text = [re.sub(pattern, '**/**/****', text) for text in self.split_text]
+        self.split_text = self.__sub_split_text(pattern, '**/**/****')
 
     def get_report_text(self) -> str:
         return '\n'.join(self.split_text)
@@ -26,6 +30,10 @@ class ReportWriter:
     def write_report_to_file(self, filename: Path | str) -> None:
         with open(filename, 'w') as f:
             f.write(self.get_report_text())
+ 
+    def sanitize_keywords(self, keywords: List[str], replace: str) -> None:
+        pattern = r'(?i)^.*\b(?:' + '|'.join(map(re.escape, keywords)) + r')'
+        self.split_text = self.__sub_split_text(pattern, replace)
 
     def print_line_with_keywords(self, keywords: List[str]) -> None:
         pattern = r'(?i)^.*\b(?:' + '|'.join(map(re.escape, keywords)) + r')'
@@ -39,8 +47,8 @@ class ReportWriter:
 class CustomWriter(ReportWriter):
     def __init__(self, text: str) -> None:
         super().__init__(text)
-        self.__sanitize_doctor_name()
+        self._sanitize_doctor_name()
 
-    def __sanitize_doctor_name(self):
+    def _sanitize_doctor_name(self) -> None:
         pattern = r'(Electronically Signed By:\s*)([^,]+,\s*[^,]+, Md)'
-        self.split_text = [re.sub(pattern, '*****, ******, Md', text) for text in self.split_text]
+        self.split_text = self.__sub_split_text(pattern, '*****, ******, Md')

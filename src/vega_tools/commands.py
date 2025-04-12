@@ -11,6 +11,7 @@ def main():
         text = f.read()
 
     rw = CustomWriter(text)
+    rw.sanitize_keywords(['hydromark', 'marquee'], '********')
     rw.write_report_to_file(data_dir / 'new_report_text.txt')
 
     print(('-' * 79), '\n')
