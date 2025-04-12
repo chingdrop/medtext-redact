@@ -1,7 +1,7 @@
 import click
 from pathlib import Path
 
-from vega_tools.utils.text_utils import ReportWriter
+from vega_tools.utils.text_utils import CustomWriter
 
 
 @click.command()
@@ -10,7 +10,7 @@ def main():
     with open(data_dir / 'report_text.txt', 'r') as f:
         text = f.read()
 
-    rw = ReportWriter(text)
+    rw = CustomWriter(text)
     rw.write_report_to_file(data_dir / 'new_report_text.txt')
 
     print(('-' * 79), '\n')
