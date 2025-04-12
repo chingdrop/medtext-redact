@@ -11,8 +11,7 @@ def main():
         text = f.read()
 
     rw = ReportWriter(text)
-    with open(data_dir / 'new_report_text.txt', 'w') as f:
-        f.write(rw.text)
+    rw.write_report_to_file(data_dir / 'new_report_text.txt')
 
     print(('-' * 79), '\n')
     rw.print_line_with_keywords(['left'])
