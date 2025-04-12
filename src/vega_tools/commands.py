@@ -12,6 +12,9 @@ def main():
 
     rw = CustomWriter(text)
     rw.sanitize_keywords(['hydromark', 'marquee'], '********')
+    rw.sanitize_keywords(
+        ['Laboratory For Pathological Analysis'], '*********** For ************ *********'
+    )
     rw.write_report_to_file(data_dir / 'new_report_text.txt')
 
     print(('-' * 79), '\n')

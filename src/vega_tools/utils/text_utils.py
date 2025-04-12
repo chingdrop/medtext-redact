@@ -12,7 +12,7 @@ class ReportWriter:
         self._format_text(text)
         self._sanitize_dates()
 
-    def __sub_split_text(self, pattern: str, replace: str) -> List[str]:
+    def _sub_split_text(self, pattern: str, replace: str) -> List[str]:
         return [re.sub(pattern, replace, text) for text in self.split_text]
 
     def _format_text(self, text: str) -> None:
@@ -22,7 +22,7 @@ class ReportWriter:
 
     def _sanitize_dates(self) -> None:
         pattern = r'(?:0[1-9]|1[0-2]|[1-9])\/(?:0[1-9]|[12][0-9]|3[01]|[1-9])\/\d{4}'
-        self.split_text = self.__sub_split_text(pattern, '**/**/****')
+        self.split_text = self._sub_split_text(pattern, '**/**/****')
 
     def get_report_text(self) -> str:
         return '\n'.join(self.split_text)
@@ -32,8 +32,8 @@ class ReportWriter:
             f.write(self.get_report_text())
  
     def sanitize_keywords(self, keywords: List[str], replace: str) -> None:
-        pattern = r'(?i)^.*\b(?:' + '|'.join(map(re.escape, keywords)) + r')'
-        self.split_text = self.__sub_split_text(pattern, replace)
+        pattern = r'(?i)\b(?:' + '|'.join(map(re.escape, keywords)) + r')'
+        self.split_text = self._sub_split_text(pattern, replace)
 
     def print_line_with_keywords(self, keywords: List[str]) -> None:
         pattern = r'(?i)^.*\b(?:' + '|'.join(map(re.escape, keywords)) + r')'
@@ -51,4 +51,4 @@ class CustomWriter(ReportWriter):
 
     def _sanitize_doctor_name(self) -> None:
         pattern = r'(Electronically Signed By:\s*)([^,]+,\s*[^,]+, Md)'
-        self.split_text = self.__sub_split_text(pattern, '*****, ******, Md')
+        self.split_text = self._sub_split_text(pattern, '*****, ******, Md')
