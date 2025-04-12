@@ -1,7 +1,7 @@
 import click
 from pathlib import Path
 
-from vega_tools.utils.text_utils import CustomWriter
+from vega_tools.utils.text_utils import ReportWriter
 
 
 @click.command()
@@ -10,11 +10,13 @@ def main():
     with open(data_dir / 'report_text.txt', 'r') as f:
         text = f.read()
 
-    rw = CustomWriter(text)
+    rw = ReportWriter(text)
     rw.sanitize_keywords(['hydromark', 'marquee'], '********')
     rw.sanitize_keywords(
         ['Laboratory For Pathological Analysis'], '*********** For ************ *********'
     )
+    rw.sanitize_keywords(['Michael', 'Wayne', 'Michell', 'Mailan', 'Melissa', 'Cao'], '********')
+    rw.sanitize_keywords(['Mc/Penrad'], '**/******')
     rw.write_report_to_file(data_dir / 'new_report_text.txt')
 
     print(('-' * 79), '\n')

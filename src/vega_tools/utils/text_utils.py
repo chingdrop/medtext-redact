@@ -42,13 +42,3 @@ class ReportWriter:
                 text_obj = Text(line.title())
                 text_obj.highlight_words(keywords, style="bold yellow", case_sensitive=False)
                 self.console.print(f"[bold green]{', '.join(set(keywords))}[/bold green] -", text_obj)
-
-
-class CustomWriter(ReportWriter):
-    def __init__(self, text: str) -> None:
-        super().__init__(text)
-        self._sanitize_doctor_name()
-
-    def _sanitize_doctor_name(self) -> None:
-        pattern = r'(Electronically Signed By:\s*)([^,]+,\s*[^,]+, Md)'
-        self.split_text = self._sub_split_text(pattern, '*****, ******, Md')
