@@ -15,6 +15,13 @@ def main():
     rw.sanitize_keywords(
         ['Laboratory For Pathological Analysis'], '*********** For ************ *********'
     )
+    rw.sanitize_keywords(
+        [
+            'Southside Imaging Center - Radiology Associates',
+            'Portland Imaging Center - Radiology Associates'
+        ],
+        '********* ******* ****** - ********* *********'
+    )
     rw.sanitize_keywords(['Michael', 'Wayne', 'Michell', 'Mailan', 'Melissa', 'Cao'], '********')
     rw.sanitize_keywords(['Mc/Penrad'], '**/******')
     rw.write_report_to_file(data_dir / 'new_report_text.txt')

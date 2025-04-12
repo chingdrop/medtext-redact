@@ -16,9 +16,11 @@ class ReportWriter:
         return [re.sub(pattern, replace, text) for text in self.split_text]
 
     def _format_text(self, text: str) -> None:
+        text = text.strip().title()
+        text = text.replace(',', ', ')
+        text = re.sub(r'\s+', ' ', text)
         text = text.replace('M.D.', 'MD')
-        text = re.sub(r'\s+', ' ', text).strip()
-        self.split_text = re.split(r'(?<=\.)\s+(?=\D)', text.title())
+        self.split_text = re.split(r'(?<=\.)\s+(?=\D)', text)
 
     def _sanitize_dates(self) -> None:
         pattern = r'(?:0[1-9]|1[0-2]|[1-9])\/(?:0[1-9]|[12][0-9]|3[01]|[1-9])\/\d{4}'
