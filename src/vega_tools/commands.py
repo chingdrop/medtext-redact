@@ -11,19 +11,22 @@ def main():
         text = f.read()
 
     rw = ReportWriter(text)
-    rw.sanitize_keywords(['hydromark', 'marquee'], '********')
+    rw.sanitize_keywords(['hydromark', 'marquee', 'suros celeros'], '********')
     rw.sanitize_keywords(
         ['Laboratory For Pathological Analysis'], '*********** For ************ *********'
     )
     rw.sanitize_keywords(
         [
             'Southside Imaging Center - Radiology Associates',
-            'Portland Imaging Center - Radiology Associates'
+            'Portland Imaging Center - Radiology Associates',
+            'Six Points Office - Radiology Associates'
         ],
         '********* ******* ****** - ********* *********'
     )
-    rw.sanitize_keywords(['Michael', 'Wayne', 'Michell', 'Mailan', 'Melissa', 'Cao'], '********')
-    rw.sanitize_keywords(['Mc/Penrad'], '**/******')
+    rw.sanitize_keywords(
+        ['Michael', 'Wayne', 'Michell', 'Mailan', 'Melissa', 'Cao', 'Kenneth', 'Cook'], '********'
+    )
+    rw.sanitize_keywords(['Mc/Penrad', 'Krc/Penrad'], '***/******')
     rw.write_report_to_file(data_dir / 'new_report_text.txt')
 
     print(('-' * 79), '\n')
