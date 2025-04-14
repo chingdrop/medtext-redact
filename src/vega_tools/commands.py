@@ -11,7 +11,8 @@ def main():
         text = f.read()
 
     rw = ReportWriter(text)
-    rw.sanitize_keywords(['hydromark', 'marquee', 'suros celeros'], '********')
+    rw.sanitize_keywords(['female', 'male'], '******')
+    rw.sanitize_keywords(['hydromark', 'marquee', 'suros celeros', 'suros eviva'], '********')
     rw.sanitize_keywords(
         ['Laboratory For Pathological Analysis'], '*********** For ************ *********'
     )
@@ -24,9 +25,23 @@ def main():
         '********* ******* ****** - ********* *********'
     )
     rw.sanitize_keywords(
-        ['Michael', 'Wayne', 'Michell', 'Mailan', 'Melissa', 'Cao', 'Kenneth', 'Cook'], '********'
+        [
+            'Michael',
+            'Wayne',
+            'Michell',
+            'Mailan',
+            'Melissa',
+            'Cao',
+            'Kenneth',
+            'Cook',
+            'Turner',
+            'Jennifer',
+            'Christopher',
+            'Thomas',
+            'Bruce'
+        ], '********'
     )
-    rw.sanitize_keywords(['Mc/Penrad', 'Krc/Penrad'], '***/******')
+    rw.sanitize_keywords(['Mc/Penrad', 'Krc/Penrad', 'Mwm/Penrad'], '***/******')
     rw.write_report_to_file(data_dir / 'new_report_text.txt')
 
     print(('-' * 79), '\n')
