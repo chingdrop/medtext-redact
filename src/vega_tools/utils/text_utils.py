@@ -6,6 +6,8 @@ from typing import List
 
 
 class ReportWriter:
+    # ToDo: Split the methods in this class to either handle censoring or highlighting text.
+
     def __init__(self, text: str) -> None:
         self.split_text = None
         self.console = Console()
@@ -19,6 +21,8 @@ class ReportWriter:
         text = text.strip().title()
         text = text.replace(',', ', ')
         text = re.sub(r'\s+', ' ', text)
+        # ToDo - Find a way to reliably standardize middle names and name pre-fixes/suffixes with periods,
+        #  ex: Dr. John R. Smith Jr.
         text = text.replace('M.D.', 'MD')
         self.split_text = re.split(r'(?<=\.)\s+(?=\D)', text)
 

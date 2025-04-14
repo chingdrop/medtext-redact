@@ -24,6 +24,7 @@ def main():
         ],
         '********* ******* ****** - ********* *********'
     )
+    # ToDo - Find a way to reference a database of common names, instead of manually filling what you find.
     rw.sanitize_keywords(
         [
             'Michael',
@@ -41,6 +42,7 @@ def main():
             'Bruce'
         ], '********'
     )
+    # ToDo - Determine if there is a better regex pattern to abstract this method more.
     rw.sanitize_keywords(['Mc/Penrad', 'Krc/Penrad', 'Mwm/Penrad'], '***/******')
     rw.write_report_to_file(data_dir / 'new_report_text.txt')
 
