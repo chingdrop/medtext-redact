@@ -38,7 +38,7 @@ class ReportWriter:
         pattern = create_keywords_pattern(keywords)
         split_text = re.split(r'(?<=[.!])\s+(?=\D)', self.text)
         for line in split_text:
-            if re.match(pattern, line, flags=re.IGNORECASE):
+            if re.match(pattern, line):
                 text_obj = Text(line.title())
                 text_obj.highlight_words(keywords, style="bold yellow", case_sensitive=False)
                 self.console.print(f"[bold green]{', '.join(set(keywords))}[/bold green] -", text_obj)
