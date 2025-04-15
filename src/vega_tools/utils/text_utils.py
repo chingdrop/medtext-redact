@@ -1,4 +1,5 @@
 import re
+from re import Pattern
 from rich.console import Console
 from rich.text import Text
 from pathlib import Path
@@ -11,14 +12,12 @@ class ReportWriter:
     def __init__(self, text: str) -> None:
         self.split_text = None
         self.console = Console()
-        self._format_text(text)
-        self._sanitize_dates()
-        self._sanitize_age()
+        self.__format_text(text)
 
-    def _sub_split_text(self, pattern: str, replace: str) -> List[str]:
+    def __sub_split_text(self, pattern: str | Pattern, replace: str) -> List[str]:
         return [re.sub(pattern, replace, text) for text in self.split_text]
 
-    def _format_text(self, text: str) -> None:
+    def __format_text(self, text: str) -> None:
         text = text.strip().title()
         text = text.replace(',', ', ')
         text = re.sub(r'\s+', ' ', text)
@@ -27,25 +26,18 @@ class ReportWriter:
         text = text.replace('M.D.', 'MD')
         self.split_text = re.split(r'(?<=[.!])\s+(?=\D)', text)
 
-    def _sanitize_dates(self) -> None:
-        pattern = r'(?:0[1-9]|1[0-2]|[1-9])\/(?:0[1-9]|[12][0-9]|3[01]|[1-9])\/\d{4}'
-        self.split_text = self._sub_split_text(pattern, '**/**/****')
-
-    def _sanitize_age(self):
-        pattern = re.compile(
-            r'\b\d{1,3}'  # Match 1 to 3 digits (e.g. 8, 45, 103)
-            r'[\s\-]?'  # Optional space or dash
-            r'years[\s\-]?old\b',  # Match "years-old", "years old", etc.
-            flags=re.IGNORECASE
-        )
-        self.split_text = self._sub_split_text(pattern, '** *****-***')
+    def sanitize_text(self):
+        date_pattern = r'(?:0[1-9]|1[0-2]|[1-9])\/(?:0[1-9]|[12][0-9]|3[01]|[1-9])\/\d{4}'
+        self.split_text = self.__sub_split_text(date_pattern, '**/**/****')
+        age_pattern = re.compile(r'\b\d{1,3}[-\s]?years?[-\s]?old\b', flags=re.IGNORECASE)
+        self.split_text = self.__sub_split_text(age_pattern, '** *****-***')
 
     def get_report_text(self) -> str:
         return '\n'.join(self.split_text)
  
     def sanitize_keywords(self, keywords: List[str], replace: str) -> None:
         pattern = r'(?i)\b(?:' + '|'.join(map(re.escape, keywords)) + r')'
-        self.split_text = self._sub_split_text(pattern, replace)
+        self.split_text = self.__sub_split_text(pattern, replace)
 
     def print_line_with_keywords(self, keywords: List[str]) -> None:
         pattern = r'(?i)^.*\b(?:' + '|'.join(map(re.escape, keywords)) + r')'

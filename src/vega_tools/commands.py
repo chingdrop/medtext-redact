@@ -2,6 +2,7 @@ import click
 from pathlib import Path
 
 from vega_tools.utils.text_utils import ReportWriter
+from vega_tools.utils.files_and_storage import write_text_to_file
 
 
 @click.command()
@@ -11,6 +12,7 @@ def main():
         text = f.read()
 
     rw = ReportWriter(text)
+    rw.sanitize_text()
     rw.sanitize_keywords(['female', 'male'], '******')
     rw.sanitize_keywords(['hydromark', 'marquee', 'suros celeros', 'suros eviva'], '********')
     rw.sanitize_keywords(
@@ -44,7 +46,8 @@ def main():
     )
     # ToDo - Determine if there is a better regex pattern to abstract this method more.
     rw.sanitize_keywords(['Mc/Penrad', 'Krc/Penrad', 'Mwm/Penrad'], '***/******')
-    rw.write_report_to_file(data_dir / 'new_report_text.txt')
+    final_text = rw.get_report_text()
+    write_text_to_file(final_text, data_dir / 'new_report_text.txt')
 
     print(('-' * 79), '\n')
     rw.print_line_with_keywords(['left'])
