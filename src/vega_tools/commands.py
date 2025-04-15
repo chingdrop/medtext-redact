@@ -12,7 +12,8 @@ def main():
         text = f.read()
 
     rw = ReportWriter(text)
-    rw.sanitize_text()
+    rw.sanitize_dates()
+    rw.sanitize_age()
     rw.sanitize_keywords(['female', 'male'], '******')
     rw.sanitize_keywords(['hydromark', 'marquee', 'suros celeros', 'suros eviva'], '********')
     rw.sanitize_keywords(
