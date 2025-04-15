@@ -13,6 +13,7 @@ class ReportWriter:
         self.console = Console()
         self._format_text(text)
         self._sanitize_dates()
+        self._sanitize_age()
 
     def _sub_split_text(self, pattern: str, replace: str) -> List[str]:
         return [re.sub(pattern, replace, text) for text in self.split_text]
@@ -24,11 +25,20 @@ class ReportWriter:
         # ToDo - Find a way to reliably standardize middle names and name pre-fixes/suffixes with periods,
         #  ex: Dr. John R. Smith Jr.
         text = text.replace('M.D.', 'MD')
-        self.split_text = re.split(r'(?<=\.)\s+(?=\D)', text)
+        self.split_text = re.split(r'(?<=[.!])\s+(?=\D)', text)
 
     def _sanitize_dates(self) -> None:
         pattern = r'(?:0[1-9]|1[0-2]|[1-9])\/(?:0[1-9]|[12][0-9]|3[01]|[1-9])\/\d{4}'
         self.split_text = self._sub_split_text(pattern, '**/**/****')
+
+    def _sanitize_age(self):
+        pattern = re.compile(
+            r'\b\d{1,3}'  # Match 1 to 3 digits (e.g. 8, 45, 103)
+            r'[\s\-]?'  # Optional space or dash
+            r'years[\s\-]?old\b',  # Match "years-old", "years old", etc.
+            flags=re.IGNORECASE
+        )
+        self.split_text = self._sub_split_text(pattern, '** *****-***')
 
     def get_report_text(self) -> str:
         return '\n'.join(self.split_text)
