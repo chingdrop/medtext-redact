@@ -10,11 +10,11 @@ def read_excel_file(file_path: str | Path, sheet_name: str | int=0):
     Reads an Excel file into a pandas DataFrame.
 
     Parameters:
-    - file_path (str or Path): Path to the Excel file.
-    - sheet_name (str or int, default=0): Name or index of the sheet to read.
+      file_path (str or Path): Path to the Excel file.
+      sheet_name (str or int, default=0): Name or index of the sheet to read.
 
     Returns:
-    - pd.DataFrame: The data from the Excel sheet as a DataFrame.
+      pd.DataFrame: The data from the Excel sheet as a DataFrame.
     """
     try:
         return pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl')
@@ -23,6 +23,7 @@ def read_excel_file(file_path: str | Path, sheet_name: str | int=0):
         return None
 
 
+# ---- Client Specific Functions ---- #
 def white_rabbit_parse_report(text: str) -> str:
     rw = ReportWriter(text)
     rw.sanitize_dates()
