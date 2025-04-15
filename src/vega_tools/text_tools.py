@@ -1,4 +1,5 @@
 import re
+import numpy as np
 from typing import List
 
 from vega_tools.utils.regex_patterns import create_keywords_pattern
@@ -8,6 +9,8 @@ class ReportWriter:
 
     def __init__(self, text: str) -> None:
         self.text = None
+        if text is np.nan:
+            text = ''
         self.__format_text(text)
 
     def __format_text(self, text: str) -> None:

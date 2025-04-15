@@ -8,8 +8,8 @@ from vega_tools.utils.files_and_storage import read_text_from_file, write_text_t
 
 @click.command()
 def console():
-    data_dir = Path.cwd() / 'data'
-    text = read_text_from_file(Path.cwd() / 'data' / 'text.txt')
+    data_dir = Path.cwd().parent / 'data'
+    text = read_text_from_file(data_dir / 'text.txt')
 
     result_text = white_rabbit_parse_report(text)
     write_text_to_file(result_text, data_dir / 'new_report_text.txt')
@@ -28,7 +28,8 @@ def console():
 
 @click.command()
 def main():
-    df = read_excel_file(Path.cwd() / 'data' / "PRJ116405_ClientFacing_Reference_SpreadsheetvB.xlsx")
+    data_dir = Path.cwd().parent / 'data'
+    df = read_excel_file(data_dir / "PRJ116405_ClientFacing_Reference_SpreadsheetvB.xlsx")
     result_df = df[(df['StudyDescription'] == 'BIOPSY') & (df['ExamCategory'] == 'Biopsy')]
     result_df = result_df[[
         'Accession',
@@ -40,5 +41,5 @@ def main():
         'BiopsyResult',
         'PathologyType'
     ]]
-    result_df = result_df['ReportText'].apply(white_rabbit_parse_report)
-    result_df.to_excel(Path.cwd() / 'data' / 'result_reports.xlsx')
+    result_df['ReportText'] = result_df['ReportText'].apply(white_rabbit_parse_report)
+    result_df.to_excel(data_dir / 'result_reports.xlsx', index=False)
