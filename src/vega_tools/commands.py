@@ -3,14 +3,13 @@ import re
 from pathlib import Path
 
 from vega_tools.text_parser import ReportWriter
-from vega_tools.utils.files_and_storage import write_text_to_file
+from vega_tools.utils.files_and_storage import read_text_from_file, write_text_to_file
 
 
 @click.command()
 def main():
     data_dir = Path.cwd() / 'data'
-    with open(data_dir / 'report_text.txt', 'r') as f:
-        text = f.read()
+    text = read_text_from_file(data_dir / 'text.txt')
 
     rw = ReportWriter(text)
     rw.sanitize_dates()
