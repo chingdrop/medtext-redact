@@ -47,8 +47,7 @@ def main():
     )
     # ToDo - Determine if there is a better regex pattern to abstract this method more.
     rw.sanitize_keywords(['Mc/Penrad', 'Krc/Penrad', 'Mwm/Penrad'], '***/******')
-    final_text = rw.get_report_text()
-    write_text_to_file(final_text, data_dir / 'new_report_text.txt')
+    write_text_to_file(rw.text, data_dir / 'new_report_text.txt')
 
     print(('-' * 79), '\n')
     rw.print_line_with_keywords(['left'])

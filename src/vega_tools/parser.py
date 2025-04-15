@@ -1,5 +1,4 @@
 import re
-from re import Pattern
 from rich.console import Console
 from rich.text import Text
 from typing import List
@@ -34,9 +33,6 @@ class ReportWriter:
     def sanitize_age(self) -> None:
         age_pattern = re.compile(r'\b\d{1,3}[-\s]?years?[-\s]?old\b', flags=re.IGNORECASE)
         self.text = re.sub(age_pattern, '** *****-***', self.text)
-
-    def get_report_text(self) -> str:
-        return self.text
 
     def print_line_with_keywords(self, keywords: List[str]) -> None:
         pattern = create_keywords_pattern(keywords)
