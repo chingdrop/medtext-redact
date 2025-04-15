@@ -2,7 +2,6 @@ import re
 from re import Pattern
 from rich.console import Console
 from rich.text import Text
-from pathlib import Path
 from typing import List
 
 
@@ -26,7 +25,7 @@ class ReportWriter:
         text = text.replace('M.D.', 'MD')
         self.split_text = re.split(r'(?<=[.!])\s+(?=\D)', text)
 
-    def sanitize_text(self):
+    def sanitize_text(self) -> None:
         date_pattern = r'(?:0[1-9]|1[0-2]|[1-9])\/(?:0[1-9]|[12][0-9]|3[01]|[1-9])\/\d{4}'
         self.split_text = self.__sub_split_text(date_pattern, '**/**/****')
         age_pattern = re.compile(r'\b\d{1,3}[-\s]?years?[-\s]?old\b', flags=re.IGNORECASE)
