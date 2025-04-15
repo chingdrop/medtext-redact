@@ -1,7 +1,7 @@
 import click
 from pathlib import Path
 
-from vega_tools.utils.text_utils import ReportWriter
+from vega_tools.parser import ReportWriter
 from vega_tools.utils.files_and_storage import write_text_to_file
 
 
