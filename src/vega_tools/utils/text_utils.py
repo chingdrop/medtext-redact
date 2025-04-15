@@ -42,10 +42,6 @@ class ReportWriter:
 
     def get_report_text(self) -> str:
         return '\n'.join(self.split_text)
-
-    def write_report_to_file(self, filename: Path | str) -> None:
-        with open(filename, 'w') as f:
-            f.write(self.get_report_text())
  
     def sanitize_keywords(self, keywords: List[str], replace: str) -> None:
         pattern = r'(?i)\b(?:' + '|'.join(map(re.escape, keywords)) + r')'
