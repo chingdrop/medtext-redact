@@ -2,7 +2,7 @@ import click
 import re
 from pathlib import Path
 
-from vega_tools.text_parser import ReportWriter
+from vega_tools.text_tools import ReportWriter
 from vega_tools.utils.files_and_storage import read_text_from_file, write_text_to_file
 
 
