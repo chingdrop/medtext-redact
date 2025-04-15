@@ -1,4 +1,5 @@
 import click
+import re
 from pathlib import Path
 
 from vega_tools.text_parser import ReportWriter
@@ -15,7 +16,11 @@ def main():
     rw.sanitize_dates()
     rw.sanitize_age()
     rw.sanitize_keywords(['female', 'male'], '******')
+    # Medical supplies names
     rw.sanitize_keywords(['hydromark', 'marquee', 'suros celeros', 'suros eviva'], '********')
+    penrad_pattern = re.compile(r'[a-zA-Z]{2,3}/Penrad', flags=re.IGNORECASE)
+    rw.text = penrad_pattern.sub('***/******', rw.text)
+    # Medical location names
     rw.sanitize_keywords(
         ['Laboratory For Pathological Analysis'], '*********** For ************ *********'
     )
@@ -45,11 +50,11 @@ def main():
             'Bruce'
         ], '********'
     )
-    # ToDo - Determine if there is a better regex pattern to abstract this method more.
-    rw.sanitize_keywords(['Mc/Penrad', 'Krc/Penrad', 'Mwm/Penrad'], '***/******')
+
     write_text_to_file(rw.text, data_dir / 'new_report_text.txt')
 
     print(('-' * 79), '\n')
+    # Keywords were found from initially skimming the report
     rw.print_line_with_keywords(['left'])
     rw.print_line_with_keywords(['right'])
     rw.print_line_with_keywords(['wire', 'localization'])

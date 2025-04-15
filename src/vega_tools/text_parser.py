@@ -7,7 +7,6 @@ from vega_tools.utils.regex_patterns import create_keywords_pattern
 
 
 class ReportWriter:
-    # ToDo: Split the methods in this class to either handle censoring or highlighting text.
 
     def __init__(self, text: str) -> None:
         self.text = None
@@ -24,15 +23,15 @@ class ReportWriter:
 
     def sanitize_keywords(self, keywords: List[str], replace: str) -> None:
         pattern = create_keywords_pattern(keywords)
-        self.text = re.sub(pattern, replace, self.text)
+        self.text = pattern.sub(replace, self.text)
 
     def sanitize_dates(self) -> None:
         date_pattern = r'(?:0[1-9]|1[0-2]|[1-9])\/(?:0[1-9]|[12][0-9]|3[01]|[1-9])\/\d{4}'
         self.text = re.sub(date_pattern, '**/**/****', self.text)
 
     def sanitize_age(self) -> None:
-        age_pattern = re.compile(r'\b\d{1,3}[-\s]?years?[-\s]?old\b', flags=re.IGNORECASE)
-        self.text = re.sub(age_pattern, '** *****-***', self.text)
+        age_pattern = re.compile(r'\d{1,3}[-\s]?(?:years|yrs)?[-\s]?old', flags=re.IGNORECASE)
+        self.text = age_pattern.sub('** *****-***', self.text)
 
     def print_line_with_keywords(self, keywords: List[str]) -> None:
         pattern = create_keywords_pattern(keywords)
