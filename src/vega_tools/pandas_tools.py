@@ -2,6 +2,8 @@ import re
 import pandas as pd
 from pathlib import Path
 
+from vega_tools.text_tools import ReportWriter
+
 
 def read_excel_file(file_path: str | Path, sheet_name: str | int=0):
     """
@@ -20,10 +22,49 @@ def read_excel_file(file_path: str | Path, sheet_name: str | int=0):
         print(f'Error reading Excel file: {e}')
         return None
 
-if __name__ == '__main__':
-    data_path = Path.cwd() / 'data'
-    df = pd.read_excel(data_path / "PRJ116405_ClientFacing_Reference_SpreadsheetvB.xlsx")
-    df['BiopsySide'] = df['ReportText'].apply(lambda x: search_single_word(x, 'left'))
-    df['BiopsySide'] = df['ReportText'].apply(lambda x: search_single_word(x, 'right'))
-    df['BiopsyResult'] = df['ReportText'].apply(lambda x: search_single_word(x, 'benign'))
-    df['BiopsyResult'] = df['ReportText'].apply(lambda x: search_single_word(x, 'malignant'))
+
+def white_rabbit_parse_report(text: str) -> str:
+    rw = ReportWriter(text)
+    rw.sanitize_dates()
+    rw.sanitize_age()
+    rw.sanitize_keywords(['female', 'male'], '******')
+
+    # ToDo - Develop a mechanism for dynamically running the report-specific sanitization functions;
+    #  given a JSON configuration file.
+    # Medical supplies names
+    rw.sanitize_keywords(['hydromark', 'marquee', 'suros celeros', 'suros eviva'], '********')
+    penrad_pattern = re.compile(r'[a-zA-Z]{2,3}/Penrad', flags=re.IGNORECASE)
+    rw.text = penrad_pattern.sub('***/******', rw.text)
+
+    # Medical location names
+    rw.sanitize_keywords(
+        ['Laboratory For Pathological Analysis'], '*********** For ************ *********'
+    )
+    rw.sanitize_keywords(
+        [
+            'Southside Imaging Center - Radiology Associates',
+            'Portland Imaging Center - Radiology Associates',
+            'Six Points Office - Radiology Associates'
+        ],
+        '********* ******* ****** - ********* *********'
+    )
+
+    # ToDo - Find a way to reference a database of common names, instead of manually filling what you find.
+    rw.sanitize_keywords(
+        [
+            'Michael',
+            'Wayne',
+            'Michell',
+            'Mailan',
+            'Melissa',
+            'Cao',
+            'Kenneth',
+            'Cook',
+            'Turner',
+            'Jennifer',
+            'Christopher',
+            'Thomas',
+            'Bruce'
+        ], '********'
+    )
+    return rw.text

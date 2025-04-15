@@ -1,6 +1,4 @@
 import re
-from rich.console import Console
-from rich.text import Text
 from typing import List
 
 from vega_tools.utils.regex_patterns import create_keywords_pattern
@@ -10,7 +8,6 @@ class ReportWriter:
 
     def __init__(self, text: str) -> None:
         self.text = None
-        self.console = Console()
         self.__format_text(text)
 
     def __format_text(self, text: str) -> None:
@@ -33,11 +30,16 @@ class ReportWriter:
         age_pattern = re.compile(r'\d{1,3}[-\s]?(?:years|yrs)?[-\s]?old', flags=re.IGNORECASE)
         self.text = age_pattern.sub('** *****-***', self.text)
 
-    def print_line_with_keywords(self, keywords: List[str]) -> None:
-        pattern = create_keywords_pattern(keywords)
-        split_text = re.split(r'(?<=[.!])\s+(?=\D)', self.text)
-        for line in split_text:
-            if re.match(pattern, line):
-                text_obj = Text(line.title())
-                text_obj.highlight_words(keywords, style="bold yellow", case_sensitive=False)
-                self.console.print(f"[bold green]{', '.join(set(keywords))}[/bold green] -", text_obj)
+
+def print_line_with_keywords(keywords: List[str], text: str) -> None:
+    from rich.console import Console
+    from rich.text import Text
+
+    console = Console()
+    pattern = create_keywords_pattern(keywords)
+    split_text = re.split(r'(?<=[.!])\s+(?=\D)', text)
+    for line in split_text:
+        if re.match(pattern, line):
+            text_obj = Text(line.title())
+            text_obj.highlight_words(keywords, style="bold yellow", case_sensitive=False)
+            console.print(f"[bold green]{', '.join(set(keywords))}[/bold green] -", text_obj)
