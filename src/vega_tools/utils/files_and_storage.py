@@ -1,7 +1,6 @@
 from pathlib import Path
 
 
-# ToDo - Add Error handling for both of these functions.
 def write_text_to_file(text: str, path: Path | str) -> None:
     """
     Writes a string to a file.
