@@ -18,13 +18,10 @@ dependencies = [
 Repository = "https://github.com/churley-vega/vega-tools"
 
 [project.scripts]
-vega-tools = "main:cli"
+vega-tools = "vega_tools.cli:main"
 
 [tool.setuptools]
 include-package-data = true
 
-[tool.setuptools.packages]
-find = { where = ["src"] }
-
-[tool.setuptools.package-dir]
-"" = "src"
+[tool.setuptools.packages.find]
+where = ["src"]

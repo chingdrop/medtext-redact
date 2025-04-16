@@ -6,8 +6,19 @@ from vega_tools.pandas_tools import read_excel_file, search_column_for_keywords,
 from vega_tools.utils.files_and_storage import read_text_from_file, write_text_to_file
 
 
-@click.command()
-def console():
+@click.group()
+def cli():
+    pass
+
+
+@cli.group()
+def parse_report():
+    """Parse medical reports."""
+    pass
+
+
+@parse_report.command()
+def single():
     data_dir = Path.cwd().parent / 'data'
     text = read_text_from_file(data_dir / 'text.txt')
 
@@ -26,8 +37,8 @@ def console():
     print_line_with_keywords(['pathology'], result_text)
 
 
-@click.command()
-def main():
+@parse_report.command()
+def spreadsheet():
     data_dir = Path.cwd().parent / 'data'
     df = read_excel_file(data_dir / "PRJ116405_ClientFacing_Reference_SpreadsheetvB.xlsx")
     result_df = df[(df['StudyDescription'] == 'BIOPSY') & (df['ExamCategory'] == 'Biopsy')]
