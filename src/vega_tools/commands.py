@@ -2,7 +2,7 @@ import click
 from pathlib import Path
 
 from vega_tools.text_tools import print_line_with_keywords
-from vega_tools.pandas_tools import read_excel_file, white_rabbit_parse_report
+from vega_tools.pandas_tools import read_excel_file, search_column_for_keywords, white_rabbit_parse_report
 from vega_tools.utils.files_and_storage import read_text_from_file, write_text_to_file
 
 
@@ -33,13 +33,35 @@ def main():
     result_df = df[(df['StudyDescription'] == 'BIOPSY') & (df['ExamCategory'] == 'Biopsy')]
     result_df = result_df[[
         'Accession',
-        'Original PID',
-        'Orig BX Date',
+        # 'Original PID',
+        # 'Orig BX Date',
         'ReportText',
-        'BiopsyDate',
-        'BiopsySide',
-        'BiopsyResult',
-        'PathologyType'
+        # 'BiopsyDate',
+        # 'BiopsySide',
+        # 'BiopsyResult',
+        # 'PathologyType'
     ]]
     result_df['ReportText'] = result_df['ReportText'].apply(white_rabbit_parse_report)
+    result_df['FoundBiopsySide'] = search_column_for_keywords(
+        result_df['ReportText'], ['left breast', 'right breast']
+    )
+    result_df['FoundBiopsyResult'] = search_column_for_keywords(
+        result_df['ReportText'], ['benign', 'malignant']
+    )
+    result_df['FoundPathologyType'] = search_column_for_keywords(
+        result_df['ReportText'],
+        [
+            'Carcinoma',
+            'Fibroadenoma',
+            'Hyperplasia',
+            'Lymphoma',
+            'Benign Cyst',
+            'Fibrocystic Changes',
+            'Papilloma',
+            'Stromal Fibrosis',
+            'Spindle Cell',
+            'Metastatic',
+            'Radial Scar'
+        ]
+    )
     result_df.to_excel(data_dir / 'result_reports.xlsx', index=False)

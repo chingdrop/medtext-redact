@@ -1,8 +1,12 @@
 import re
+from typing import List
+
 import pandas as pd
+from pandas import Series
 from pathlib import Path
 
 from vega_tools.text_tools import ReportWriter
+from vega_tools.utils.regex_patterns import create_keywords_pattern
 
 
 def read_excel_file(file_path: str | Path, sheet_name: str | int=0):
@@ -22,6 +26,10 @@ def read_excel_file(file_path: str | Path, sheet_name: str | int=0):
         print(f'Error reading Excel file: {e}')
         return None
 
+
+def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
+    pattern = create_keywords_pattern(keywords)
+    return series.str.extract(pattern)
 
 # ---- Client Specific Functions ---- #
 def white_rabbit_parse_report(text: str) -> str:
