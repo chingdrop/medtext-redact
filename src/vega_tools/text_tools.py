@@ -34,6 +34,7 @@ class ReportWriter:
         self.text = age_pattern.sub('** *****-***', self.text)
 
 
+# ToDo - Add docstring for function.
 def print_line_with_keywords(keywords: List[str], text: str) -> None:
     from rich.console import Console
     from rich.text import Text

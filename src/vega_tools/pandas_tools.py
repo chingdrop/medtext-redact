@@ -27,6 +27,7 @@ def read_excel_file(file_path: str | Path, sheet_name: str | int = 0):
         return None
 
 
+# ToDo - Add docstring for function.
 def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
     pattern = create_keywords_pattern(keywords)
     return series.str.extract(pattern)
