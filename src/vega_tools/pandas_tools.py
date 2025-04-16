@@ -38,8 +38,6 @@ def white_rabbit_parse_report(text: str) -> str:
     rw.sanitize_age()
     rw.sanitize_keywords(['female', 'male'], '******')
 
-    # ToDo - Develop a mechanism for dynamically running the report-specific sanitization functions;
-    #  given a JSON configuration file.
     # Medical supplies names
     rw.sanitize_keywords(['hydromark', 'marquee', 'suros celeros', 'suros eviva'], '********')
     penrad_pattern = re.compile(r'[a-zA-Z]{2,3}/Penrad', flags=re.IGNORECASE)

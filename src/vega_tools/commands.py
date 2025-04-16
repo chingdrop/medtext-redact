@@ -8,22 +8,23 @@ from vega_tools.utils.files_and_storage import read_text_from_file, write_text_t
 
 @click.group()
 def cli():
+    """Command Line Interface for custom use cases in data analysis."""
     pass
 
 
 @cli.group()
 def parse_report():
     """Parse medical reports."""
+    # ToDo - Develop a mechanism for storing a Client's custom parsing needs in a config file, i.e., JSON.
     pass
 
 
 @parse_report.command()
-def single():
-    data_dir = Path.cwd().parent / 'data'
-    text = read_text_from_file(data_dir / 'text.txt')
-
+@click.argument('text')
+def single(text):
     result_text = white_rabbit_parse_report(text)
-    write_text_to_file(result_text, data_dir / 'new_report_text.txt')
+    # ToDo - Find a way to best display the entire report instead of saving the result to a file.
+    write_text_to_file(result_text, Path.cwd().parent / 'data' / 'new_report_text.txt')
 
     print(('-' * 104), '\n')
     # Keywords were found from initially skimming the report
@@ -38,9 +39,9 @@ def single():
 
 
 @parse_report.command()
-def spreadsheet():
-    data_dir = Path.cwd().parent / 'data'
-    df = read_excel_file(data_dir / "PRJ116405_ClientFacing_Reference_SpreadsheetvB.xlsx")
+@click.argument('path')
+def spreadsheet(path):
+    df = read_excel_file(path)
     result_df = df[(df['StudyDescription'] == 'BIOPSY') & (df['ExamCategory'] == 'Biopsy')]
     result_df = result_df[[
         'Accession',
@@ -75,4 +76,4 @@ def spreadsheet():
             'Radial Scar'
         ]
     )
-    result_df.to_excel(data_dir / 'result_reports.xlsx', index=False)
+    result_df.to_excel(Path.cwd().parent / 'data' / 'result_reports.xlsx', index=False)
