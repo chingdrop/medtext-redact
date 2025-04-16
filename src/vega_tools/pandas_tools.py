@@ -9,16 +9,16 @@ from vega_tools.text_tools import ReportWriter
 from vega_tools.utils.regex_patterns import create_keywords_pattern
 
 
-def read_excel_file(file_path: str | Path, sheet_name: str | int=0):
+def read_excel_file(file_path: str | Path, sheet_name: str | int = 0):
     """
     Reads an Excel file into a pandas DataFrame.
 
-    Parameters:
-      file_path (str or Path): Path to the Excel file.
-      sheet_name (str or int, default=0): Name or index of the sheet to read.
+    Args:
+        file_path (str | Path): Path to the Excel file.
+        sheet_name (str | int, default = 0): Name or index of the sheet to read.
 
     Returns:
-      pd.DataFrame: The data from the Excel sheet as a DataFrame.
+        pd.DataFrame: The data from the Excel sheet as a DataFrame.
     """
     try:
         return pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl')
