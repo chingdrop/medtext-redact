@@ -2,29 +2,42 @@ import re
 from typing import List
 
 import pandas as pd
-from pandas import Series
+from pandas import Series, DataFrame
 from pathlib import Path
 
 from vega_tools.text_tools import ReportWriter
 from vega_tools.utils.regex_patterns import create_keywords_pattern
 
 
-def read_excel_file(file_path: str | Path, sheet_name: str | int = 0):
+def read_excel_file(file_path: str | Path) -> DataFrame | None:
     """
     Reads an Excel file into a pandas DataFrame.
 
     Args:
         file_path (str | Path): Path to the Excel file.
-        sheet_name (str | int, default = 0): Name or index of the sheet to read.
 
     Returns:
-        pd.DataFrame: The data from the Excel sheet as a DataFrame.
+        DataFrame | None: The data from the Excel sheet as a DataFrame.
     """
     try:
-        return pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl')
+        return pd.read_excel(file_path, engine='openpyxl')
     except Exception as e:
         print(f'Error reading Excel file: {e}')
         return None
+
+
+def write_excel_file(df: DataFrame, file_path: str | Path):
+    """
+    Writes a Pandas DataFrame to an Excel file.
+
+    Args:
+        df (DataFrame): The DataFrame to write.
+        file_path (str | Path): Path to the Excel file.
+    """
+    try:
+        df.to_excel(file_path, index=False, engine='openpyxl')
+    except Exception as e:
+        print(f'Error writing Excel file: {e}')
 
 
 # ToDo - Add docstring for function.

@@ -1,8 +1,10 @@
 import click
+import pandas as pd
 from pathlib import Path
 
 from vega_tools.text_tools import print_line_with_keywords
-from vega_tools.pandas_tools import read_excel_file, search_column_for_keywords, white_rabbit_parse_report
+from vega_tools.pandas_tools import read_excel_file, write_excel_file, search_column_for_keywords, \
+    white_rabbit_parse_report
 from vega_tools.utils.files_and_storage import read_text_from_file, write_text_to_file
 
 
@@ -17,6 +19,21 @@ def parse_report():
     """Parse medical reports."""
     # ToDo - Develop a mechanism for storing a Client's custom parsing needs in a config file, i.e., JSON.
     pass
+
+
+@cli.command()
+def confirm_dicom_tags():
+    data_path = Path.cwd().parent / 'data'
+    key_df = pd.read_csv(data_path / 'missing_accession_numbers.csv')
+    key_df['Missing Views'] = key_df['Missing Views'].str.split(',')
+    key_df = key_df.explode('Missing Views').reset_index(drop=True)
+    key_df.rename(columns={'Missing Views': 'Missing View'}, inplace=True)
+    data_df = read_excel_file(data_path / 'Batch_Spreadsheet.xlsx')
+    data_df = data_df[~data_df['Image Type'].str.contains('2D', na=False)]
+    merge_df = pd.merge(key_df, data_df, how='inner', on='Accession')
+    merge_df = merge_df[merge_df.apply(lambda x: x['Missing View'] in x['Series Description'], axis=1)]
+    merge_df = merge_df[merge_df['View Code'] == 1]
+    write_excel_file(merge_df, data_path / 'Merge_Spreadsheet.xlsx')
 
 
 @parse_report.command()
