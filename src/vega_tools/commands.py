@@ -21,6 +21,9 @@ def parse_report():
     pass
 
 
+# ToDo - Update the DICOM tag parser to version 2
+#  1. Remove the use of the key DataFrame
+#  2. Confirm there are LCC, RCC, RMLO, LMLO views and both 2D and 3D images for each accession.
 @cli.command()
 def confirm_dicom_tags():
     data_path = Path.cwd().parent / 'data'
