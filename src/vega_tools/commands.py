@@ -20,10 +20,8 @@ def parse_report():
     # ToDo - Develop a mechanism for storing a Client's custom parsing needs in a config file, i.e., JSON.
     pass
 
-
-# ToDo - Update the DICOM tag parser to version 2
-#  1. Remove the use of the key DataFrame
-#  2. Confirm there are LCC, RCC, RMLO, LMLO views and both 2D and 3D images for each accession.
+# ToDo - Refactor code to pandas_tools.py when done
+# ToDo - Rename to appropriate use case
 @cli.command()
 def confirm_dicom_tags():
     data_path = Path.cwd().parent / 'data'

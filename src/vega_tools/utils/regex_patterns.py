@@ -3,6 +3,7 @@ from re import Pattern
 from typing import List
 
 
+# ToDo - Add parameter to select whether to add word boundaries
 def create_keywords_pattern(keywords: List[str]) -> Pattern:
     """
     Create a compiled regular expression pattern to match any of the given keywords.
