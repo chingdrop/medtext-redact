@@ -1,5 +1,9 @@
 import re
+import pydoc
 import numpy as np
+from io import StringIO
+from rich.console import Console
+from rich.text import Text
 from typing import List
 
 from vega_tools.utils.regex_patterns import create_keywords_pattern
@@ -36,9 +40,6 @@ class ReportWriter:
 
 # ToDo - Add docstring for function.
 def print_line_with_keywords(keywords: List[str], text: str) -> None:
-    from rich.console import Console
-    from rich.text import Text
-
     console = Console()
     pattern = create_keywords_pattern(keywords)
     split_text = re.split(r'(?<=[.!])\s+(?=\D)', text)
@@ -47,3 +48,12 @@ def print_line_with_keywords(keywords: List[str], text: str) -> None:
             text_obj = Text(line.title())
             text_obj.highlight_words(keywords, style="bold yellow", case_sensitive=False)
             console.print(f"[bold green]{', '.join(set(keywords))}[/bold green] -", text_obj)
+
+
+def print_text_with_keywords(keywords: List[str], text: str) -> None:
+    buffer = StringIO()
+    console = Console(file=buffer, force_terminal=True)
+    text_obj = Text(text.title())
+    text_obj.highlight_words(keywords, style="bold yellow", case_sensitive=False)
+    console.print(text_obj)
+    pydoc.pager(buffer.getvalue())

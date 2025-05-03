@@ -1,7 +1,8 @@
+import sys
 import click
 from pathlib import Path
 
-from vega_tools.text_tools import print_line_with_keywords
+from vega_tools.text_tools import print_line_with_keywords, print_text_with_keywords
 from vega_tools.pandas_tools import read_excel_file, search_column_for_keywords, white_rabbit_parse_report
 from vega_tools.utils.files_and_storage import read_text_from_file, write_text_to_file
 
@@ -20,22 +21,32 @@ def parse_report():
 
 
 @parse_report.command()
-@click.argument('text')
-def single(text):
-    result_text = white_rabbit_parse_report(text)
-    # ToDo - Find a way to best display the entire report instead of saving the result to a file.
-    write_text_to_file(result_text, Path.cwd().parent / 'data' / 'new_report_text.txt')
+@click.option('--text', '-t', help='Input text directly (use instead of stdin).')
+@click.option('--verbose', is_flag=True, help='Enable verbose output.')
+def single(text, verbose):
+    if not sys.stdin.isatty():
+        input_text = sys.stdin.read()
+    elif text:
+        input_text = text
+    else:
+        click.echo("No input provided. Use --text or pipe data via stdin.")
+        sys.exit(1)
 
-    print(('-' * 104), '\n')
-    # Keywords were found from initially skimming the report
-    print_line_with_keywords(['left'], result_text)
-    print_line_with_keywords(['right'], result_text)
-    print_line_with_keywords(['wire', 'localization'], result_text)
-    print_line_with_keywords(['benign'], result_text)
-    print_line_with_keywords(['malignant'], result_text)
-    print_line_with_keywords(['results'], result_text)
-    print_line_with_keywords(['impression'], result_text)
-    print_line_with_keywords(['pathology'], result_text)
+    result_text = white_rabbit_parse_report(input_text)
+    click.echo(('-' * 104) + '\n')
+    if verbose:
+        click.echo("Verbose mode is on.")
+        print_text_with_keywords(result_text)
+    else:
+        # Keywords were found from initially skimming the report
+        print_line_with_keywords(['left'], result_text)
+        print_line_with_keywords(['right'], result_text)
+        print_line_with_keywords(['wire', 'localization'], result_text)
+        print_line_with_keywords(['benign'], result_text)
+        print_line_with_keywords(['malignant'], result_text)
+        print_line_with_keywords(['results'], result_text)
+        print_line_with_keywords(['impression'], result_text)
+        print_line_with_keywords(['pathology'], result_text)
 
 
 @parse_report.command()
