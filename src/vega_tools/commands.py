@@ -3,8 +3,8 @@ import pandas as pd
 from pathlib import Path
 
 from vega_tools.text_tools import print_line_with_keywords
-from vega_tools.pandas_tools import read_excel_file, search_column_for_keywords, white_rabbit_parse_report, \
-    check_series_by_study, audit_images
+from vega_tools.pandas_tools import read_excel_file, write_excel_file, search_column_for_keywords, \
+    white_rabbit_parse_report, audit_images
 from vega_tools.utils.files_and_storage import read_text_from_file, write_text_to_file
 from vega_tools.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
 
@@ -56,9 +56,10 @@ def single(text):
 
 
 @parse_report.command()
-@click.argument('path')
-def spreadsheet(path):
-    df = read_excel_file(path)
+@click.argument('sample')
+@click.argument('result')
+def spreadsheet(sample, result):
+    df = read_excel_file(sample)
     result_df = df[(df['StudyDescription'] == 'BIOPSY') & (df['ExamCategory'] == 'Biopsy')]
     result_df = result_df[[
         'Accession',
@@ -93,4 +94,4 @@ def spreadsheet(path):
             'Radial Scar'
         ]
     )
-    result_df.to_excel(Path.cwd().parent / 'data' / 'result_reports.xlsx', index=False)
+    write_excel_file(result_df, result)
