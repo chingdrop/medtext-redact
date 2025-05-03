@@ -7,7 +7,7 @@ from pathlib import Path
 
 from vega_tools.text_tools import print_line_with_keywords
 from vega_tools.pandas_tools import read_excel_file, search_column_for_keywords, white_rabbit_parse_report, \
-    check_series_by_study
+    check_series_by_study, audit_2d_images, audit_3d_images
 from vega_tools.utils.files_and_storage import read_text_from_file, write_text_to_file
 
 
@@ -30,23 +30,11 @@ def parse_report():
 @click.argument('result')
 def audit_series_by_study(sample, result):
     data_df = read_excel_file(sample)
-
-    img_2d_df = data_df[data_df['Number of Frames'] == 1]
     descriptions_2d = {'V-Preview RCC', 'V-Preview LCC', 'V-Preview LMLO', 'V-Preview RMLO'}
-    img_2d_df = img_2d_df[img_2d_df['Series Description'].isin(descriptions_2d)]
-    missing_2d_df = check_series_by_study(
-        img_2d_df, 'Accession', 'Series Description', descriptions_2d
-    )
-    missing_2d_df.insert(1, 'Image Type', '2D')
+    missing_2d_df = audit_2d_images(data_df, descriptions_2d)
 
-    img_3d_df = data_df[data_df['Number of Frames'] > 1]
-    img_3d_df = img_3d_df[img_3d_df['Slice Thickness'] == 1]
     descriptions_3d = {'ROUTINE3D_VOL_RCC', 'ROUTINE3D_VOL_LCC', 'ROUTINE3D_VOL_LMLO', 'ROUTINE3D_VOL_RMLO'}
-    img_3d_df = img_3d_df[img_3d_df['Series Description'].isin(descriptions_3d)]
-    missing_3d_df = check_series_by_study(
-        img_3d_df, 'Accession', 'Series Description', descriptions_3d
-    )
-    missing_3d_df.insert(1, 'Image Type', '3D')
+    missing_3d_df = audit_3d_images(data_df, 1, descriptions_3d)
 
     missing_df = pd.concat([missing_2d_df, missing_3d_df])
     missing_df.sort_values(['Accession'], inplace=True)
