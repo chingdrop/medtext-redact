@@ -24,12 +24,12 @@ def parse_report():
     pass
 
 
-# ToDo - Refactor this function to accept the sample CSV path and the output CSV path as parameters.
 # ToDo - Abstract the repeated code further and refactor to pandas_tools.py
 @cli.command()
-def audit_series_by_study():
-    data_path = Path.cwd().parent / 'data'
-    data_df = read_excel_file(data_path / 'Batch_Spreadsheet.xlsx')
+@click.argument('sample')
+@click.argument('result')
+def audit_series_by_study(sample, result):
+    data_df = read_excel_file(sample)
 
     img_2d_df = data_df[data_df['Number of Frames'] == 1]
     descriptions_2d = {'V-Preview RCC', 'V-Preview LCC', 'V-Preview LMLO', 'V-Preview RMLO'}
@@ -50,7 +50,7 @@ def audit_series_by_study():
 
     missing_df = pd.concat([missing_2d_df, missing_3d_df])
     missing_df.sort_values(['Accession'], inplace=True)
-    with open(data_path / 'missing_series.csv', 'w', newline='') as csvfile:
+    with open(result, 'w', newline='') as csvfile:
         csvfile.write("Series Audit for 2D and 3D 1mm images by Study\n")
         missing_df.to_csv(csvfile, index=False)
 
