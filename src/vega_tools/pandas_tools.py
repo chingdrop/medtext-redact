@@ -78,26 +78,22 @@ def check_series_by_study(df: DataFrame, accession_col: str, series_col: str, de
     return missing_df
 
 
-# ToDo - Combine these two functions to reduce repeat code.
-def audit_2d_images(df: DataFrame, descriptions: Set[str]) -> DataFrame:
-    img_2d_df = df[df['Number of Frames'] == 1]
-    img_2d_df = img_2d_df[img_2d_df['Series Description'].isin(descriptions)]
-    missing_2d_df = check_series_by_study(
-        img_2d_df, 'Accession', 'Series Description', descriptions
-    )
-    missing_2d_df.insert(1, 'Image Type', '2D')
-    return missing_2d_df
+# ToDo - Add docstring for function.
+def audit_images(df: DataFrame, img_type: str, descriptions: Set[str], slice_thickness: int = 1) -> DataFrame:
+    if img_type == '2D':
+        img_df = df[df['Number of Frames'] == 1]
+    elif img_type == '3D':
+        img_df = df[df['Number of Frames'] > 1]
+        img_df = img_df[img_df['Slice Thickness'] == slice_thickness]
+    else:
+        raise ValueError(f"Invalid img_type, must be '2D' or '3D': {img_type}")
 
-
-def audit_3d_images(df: DataFrame, slice_thickness: int,descriptions: Set[str]) -> DataFrame:
-    img_3d_df = df[df['Number of Frames'] > 1]
-    img_3d_df = img_3d_df[img_3d_df['Slice Thickness'] == slice_thickness]
-    img_3d_df = img_3d_df[img_3d_df['Series Description'].isin(descriptions)]
-    missing_3d_df = check_series_by_study(
-        img_3d_df, 'Accession', 'Series Description', descriptions
+    img_df = img_df[img_df['Series Description'].isin(descriptions)]
+    missing_df = check_series_by_study(
+        img_df, 'Accession', 'Series Description', descriptions
     )
-    missing_3d_df.insert(1, 'Image Type', '3D')
-    return missing_3d_df
+    missing_df.insert(1, 'Image Type', img_type)
+    return missing_df
 
 
 # ---- Client Specific Functions ---- #

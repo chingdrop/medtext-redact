@@ -7,7 +7,7 @@ from pathlib import Path
 
 from vega_tools.text_tools import print_line_with_keywords
 from vega_tools.pandas_tools import read_excel_file, search_column_for_keywords, white_rabbit_parse_report, \
-    check_series_by_study, audit_2d_images, audit_3d_images
+    check_series_by_study, audit_images
 from vega_tools.utils.files_and_storage import read_text_from_file, write_text_to_file
 
 
@@ -24,18 +24,15 @@ def parse_report():
     pass
 
 
-# ToDo - Abstract the repeated code further and refactor to pandas_tools.py
 @cli.command()
 @click.argument('sample')
 @click.argument('result')
 def audit_series_by_study(sample, result):
     data_df = read_excel_file(sample)
     descriptions_2d = {'V-Preview RCC', 'V-Preview LCC', 'V-Preview LMLO', 'V-Preview RMLO'}
-    missing_2d_df = audit_2d_images(data_df, descriptions_2d)
-
+    missing_2d_df = audit_images(data_df, '2D', descriptions_2d)
     descriptions_3d = {'ROUTINE3D_VOL_RCC', 'ROUTINE3D_VOL_LCC', 'ROUTINE3D_VOL_LMLO', 'ROUTINE3D_VOL_RMLO'}
-    missing_3d_df = audit_3d_images(data_df, 1, descriptions_3d)
-
+    missing_3d_df = audit_images(data_df, '3D', descriptions_3d, 1)
     missing_df = pd.concat([missing_2d_df, missing_3d_df])
     missing_df.sort_values(['Accession'], inplace=True)
     with open(result, 'w', newline='') as csvfile:
