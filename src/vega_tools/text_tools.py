@@ -1,7 +1,5 @@
 import re
-import pydoc
 import numpy as np
-from io import StringIO
 from rich.console import Console
 from rich.text import Text
 from typing import List
@@ -51,6 +49,9 @@ def print_line_with_keywords(keywords: List[str], text: str) -> None:
 
 
 def print_text_with_keywords(keywords: List[str], text: str) -> None:
+    import pydoc
+    from io import StringIO
+
     buffer = StringIO()
     console = Console(file=buffer, force_terminal=True)
     text_obj = Text(text.title())
