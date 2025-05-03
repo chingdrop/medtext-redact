@@ -25,6 +25,7 @@ def parse_report():
 
 
 # ToDo - Refactor this function to accept the sample CSV path and the output CSV path as parameters.
+# ToDo - Abstract the repeated code further and refactor to pandas_tools.py
 @cli.command()
 def audit_series_by_study():
     data_path = Path.cwd().parent / 'data'

@@ -41,7 +41,6 @@ def write_excel_file(df: DataFrame, file_path: str | Path):
         print(f'Error writing Excel file: {e}')
 
 
-# ToDo - Add docstring for function.
 def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
     """
     Search a Pandas Series for keywords and extracts the keywords from the value.
@@ -57,7 +56,6 @@ def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
     return series.str.extract(pattern)
 
 
-# ToDo - Add docstring for function.
 def check_series_by_study(df: DataFrame, accession_col: str, series_col: str, descriptions: Set[str]) -> DataFrame:
     """
     Groups series descriptions by accession number.
@@ -81,6 +79,7 @@ def check_series_by_study(df: DataFrame, accession_col: str, series_col: str, de
 
 
 # ---- Client Specific Functions ---- #
+# ToDo - Add docstring for function.
 def white_rabbit_parse_report(text: str) -> str:
     rw = ReportWriter(text)
     rw.sanitize_dates()
