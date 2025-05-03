@@ -19,5 +19,5 @@ rich==14.0.0
 setuptools==78.1.0
 six==1.17.0
 tzdata==2025.2
-vega-tools==1.4.0
+vega-tools==2.0.0
 wheel==0.45.1
