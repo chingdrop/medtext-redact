@@ -43,12 +43,35 @@ def write_excel_file(df: DataFrame, file_path: str | Path):
 
 # ToDo - Add docstring for function.
 def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
+    """
+    Search a Pandas Series for keywords and extracts the keywords from the value.
+
+    Args:
+        series (Series): The series to search for keywords.
+        keywords (List[str]): The keywords to search for.
+
+    Returns:
+        Series: The series containing the keywords.
+    """
     pattern = create_keywords_pattern(keywords)
     return series.str.extract(pattern)
 
 
 # ToDo - Add docstring for function.
 def check_series_by_study(df: DataFrame, accession_col: str, series_col: str, descriptions: Set[str]) -> DataFrame:
+    """
+    Groups series descriptions by accession number.
+    Uses a sample Set of strings to compare the constituency of Series Description.
+
+    Args:
+        df (DataFrame): The DataFrame to write.
+        accession_col (str): The column name of the accession ID.
+        series_col (str): The column name of the series description.
+        descriptions (Set[str]): The set of descriptions of series of images.
+
+    Returns:
+        DataFrame: The resulting DataFrame containing the found and missing series.
+    """
     study = df.groupby(accession_col)[series_col].apply(set)
     missing = study[study.apply(lambda x: x != descriptions)]
     missing_df = missing.reset_index()
