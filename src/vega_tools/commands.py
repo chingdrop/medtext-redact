@@ -1,6 +1,3 @@
-import csv
-import re
-
 import click
 import pandas as pd
 from pathlib import Path
@@ -9,6 +6,7 @@ from vega_tools.text_tools import print_line_with_keywords
 from vega_tools.pandas_tools import read_excel_file, search_column_for_keywords, white_rabbit_parse_report, \
     check_series_by_study, audit_images
 from vega_tools.utils.files_and_storage import read_text_from_file, write_text_to_file
+from vega_tools.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
 
 
 @click.group()
@@ -29,10 +27,8 @@ def parse_report():
 @click.argument('result')
 def audit_series_by_study(sample, result):
     data_df = read_excel_file(sample)
-    descriptions_2d = {'V-Preview RCC', 'V-Preview LCC', 'V-Preview LMLO', 'V-Preview RMLO'}
-    missing_2d_df = audit_images(data_df, '2D', descriptions_2d)
-    descriptions_3d = {'ROUTINE3D_VOL_RCC', 'ROUTINE3D_VOL_LCC', 'ROUTINE3D_VOL_LMLO', 'ROUTINE3D_VOL_RMLO'}
-    missing_3d_df = audit_images(data_df, '3D', descriptions_3d, 1)
+    missing_2d_df = audit_images(data_df, '2D', DICOM_2D_SERIES_DESCRIPTIONS)
+    missing_3d_df = audit_images(data_df, '3D', DICOM_3D_SERIES_DESCRIPTIONS, 1)
     missing_df = pd.concat([missing_2d_df, missing_3d_df])
     missing_df.sort_values(['Accession'], inplace=True)
     with open(result, 'w', newline='') as csvfile:

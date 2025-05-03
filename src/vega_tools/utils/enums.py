@@ -1,0 +1,12 @@
+DICOM_2D_SERIES_DESCRIPTIONS = {
+    'V-Preview RCC',
+    'V-Preview LCC',
+    'V-Preview LMLO',
+    'V-Preview RMLO'
+}
+DICOM_3D_SERIES_DESCRIPTIONS = {
+    'ROUTINE3D_VOL_RCC',
+    'ROUTINE3D_VOL_LCC',
+    'ROUTINE3D_VOL_LMLO',
+    'ROUTINE3D_VOL_RMLO'
+}
