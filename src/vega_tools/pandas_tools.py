@@ -4,6 +4,7 @@ from typing import List
 import pandas as pd
 from pandas import Series, DataFrame
 from pathlib import Path
+from typing import Set
 
 from vega_tools.text_tools import ReportWriter
 from vega_tools.utils.regex_patterns import create_keywords_pattern
@@ -44,6 +45,17 @@ def write_excel_file(df: DataFrame, file_path: str | Path):
 def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
     pattern = create_keywords_pattern(keywords)
     return series.str.extract(pattern)
+
+
+# ToDo - Add docstring for function.
+def check_series_by_study(df: DataFrame, accession_col: str, series_col: str, descriptions: Set[str]) -> DataFrame:
+    study = df.groupby(accession_col)[series_col].apply(set)
+    missing = study[study.apply(lambda x: x != descriptions)]
+    missing_df = missing.reset_index()
+    missing_df.columns = [accession_col, 'Found Set']
+    missing_df['Missing Set'] = missing_df['Found Set'].apply(lambda x: descriptions.difference(x))
+    return missing_df
+
 
 # ---- Client Specific Functions ---- #
 def white_rabbit_parse_report(text: str) -> str:

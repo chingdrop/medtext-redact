@@ -6,8 +6,8 @@ import pandas as pd
 from pathlib import Path
 
 from vega_tools.text_tools import print_line_with_keywords
-from vega_tools.pandas_tools import read_excel_file, search_column_for_keywords, \
-    white_rabbit_parse_report
+from vega_tools.pandas_tools import read_excel_file, search_column_for_keywords, white_rabbit_parse_report, \
+    check_series_by_study
 from vega_tools.utils.files_and_storage import read_text_from_file, write_text_to_file
 
 
@@ -23,7 +23,8 @@ def parse_report():
     # ToDo - Develop a mechanism for storing a Client's custom parsing needs in a config file, i.e., JSON.
     pass
 
-# ToDo - Refactor code to pandas_tools.py when done
+
+# ToDo - Refactor this function to accept the sample CSV path and the output CSV path as parameters.
 @cli.command()
 def audit_series_by_study():
     data_path = Path.cwd().parent / 'data'
@@ -32,23 +33,19 @@ def audit_series_by_study():
     img_2d_df = data_df[data_df['Number of Frames'] == 1]
     descriptions_2d = {'V-Preview RCC', 'V-Preview LCC', 'V-Preview LMLO', 'V-Preview RMLO'}
     img_2d_df = img_2d_df[img_2d_df['Series Description'].isin(descriptions_2d)]
-    study_2d = img_2d_df.groupby('Accession')['Series Description'].apply(set)
-    missing_2d = study_2d[study_2d.apply(lambda x: x != descriptions_2d)]
-    missing_2d_df = missing_2d.reset_index()
-    missing_2d_df.columns = ['Accession', 'Found Series']
+    missing_2d_df = check_series_by_study(
+        img_2d_df, 'Accession', 'Series Description', descriptions_2d
+    )
     missing_2d_df.insert(1, 'Image Type', '2D')
-    missing_2d_df['Missing Series'] = missing_2d_df['Found Series'].apply(lambda x: descriptions_2d.difference(x))
 
     img_3d_df = data_df[data_df['Number of Frames'] > 1]
     img_3d_df = img_3d_df[img_3d_df['Slice Thickness'] == 1]
     descriptions_3d = {'ROUTINE3D_VOL_RCC', 'ROUTINE3D_VOL_LCC', 'ROUTINE3D_VOL_LMLO', 'ROUTINE3D_VOL_RMLO'}
     img_3d_df = img_3d_df[img_3d_df['Series Description'].isin(descriptions_3d)]
-    study_3d = img_3d_df.groupby('Accession')['Series Description'].apply(set)
-    missing_3d = study_3d[study_3d.apply(lambda x: x != descriptions_3d)]
-    missing_3d_df = missing_3d.reset_index()
-    missing_3d_df.columns = ['Accession', 'Found Series']
+    missing_3d_df = check_series_by_study(
+        img_3d_df, 'Accession', 'Series Description', descriptions_3d
+    )
     missing_3d_df.insert(1, 'Image Type', '3D')
-    missing_3d_df['Missing Series'] = missing_3d_df['Found Series'].apply(lambda x: descriptions_3d.difference(x))
 
     missing_df = pd.concat([missing_2d_df, missing_3d_df])
     missing_df.sort_values(['Accession'], inplace=True)
