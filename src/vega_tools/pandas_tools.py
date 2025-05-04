@@ -31,30 +31,3 @@ def read_excel_file(file_path: str | Path, sheet_name: str | int = 0):
 def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
     pattern = create_keywords_pattern(keywords)
     return series.str.extract(pattern)
-
-# ---- Client Specific Functions ---- #
-def white_rabbit_parse_report(text: str) -> str:
-    rw = ReportWriter(text)
-    rw.sanitize_dates()
-    rw.sanitize_age()
-    rw.sanitize_names()
-    rw.sanitize_keywords(['female', 'male'], '******')
-
-    # Medical supplies names
-    rw.sanitize_keywords(['hydromark', 'marquee', 'suros celeros', 'suros eviva'], '********')
-    penrad_pattern = re.compile(r'[a-zA-Z]{2,3}/Penrad', flags=re.IGNORECASE)
-    rw.text = penrad_pattern.sub('***/******', rw.text)
-
-    # Medical location names
-    rw.sanitize_keywords(
-        ['Laboratory For Pathological Analysis'], '*********** For ************ *********'
-    )
-    rw.sanitize_keywords(
-        [
-            'Southside Imaging Center - Radiology Associates',
-            'Portland Imaging Center - Radiology Associates',
-            'Six Points Office - Radiology Associates'
-        ],
-        '********* ******* ****** - ********* *********'
-    )
-    return rw.text

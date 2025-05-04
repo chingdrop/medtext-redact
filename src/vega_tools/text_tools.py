@@ -67,3 +67,31 @@ def print_text_with_keywords(keywords: List[str], text: str) -> None:
     text_obj.highlight_words(keywords, style="bold yellow", case_sensitive=False)
     console.print(text_obj)
     pydoc.pager(buffer.getvalue())
+
+
+# ---- Client Specific Functions ---- #
+def white_rabbit_parse_report(text: str) -> str:
+    rw = ReportWriter(text)
+    rw.sanitize_dates()
+    rw.sanitize_age()
+    rw.sanitize_names()
+    rw.sanitize_keywords(['female', 'male'], '******')
+
+    # Medical supplies names
+    rw.sanitize_keywords(['hydromark', 'marquee', 'suros celeros', 'suros eviva'], '********')
+    penrad_pattern = re.compile(r'[a-zA-Z]{2,3}/Penrad', flags=re.IGNORECASE)
+    rw.text = penrad_pattern.sub('***/******', rw.text)
+
+    # Medical location names
+    rw.sanitize_keywords(
+        ['Laboratory For Pathological Analysis'], '*********** For ************ *********'
+    )
+    rw.sanitize_keywords(
+        [
+            'Southside Imaging Center - Radiology Associates',
+            'Portland Imaging Center - Radiology Associates',
+            'Six Points Office - Radiology Associates'
+        ],
+        '********* ******* ****** - ********* *********'
+    )
+    return rw.text
