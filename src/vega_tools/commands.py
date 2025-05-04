@@ -34,9 +34,10 @@ def audit_series_by_study(sample, result):
         missing_df.to_csv(csvfile, index=False)
 
 
+# ToDo - Refactor click command to use proper file path options for parameters.
 @parse_report.command()
 @click.option('--text', '-t', help='Input text directly (use instead of stdin).')
-@click.option('--kwywords', '-k', multiple=True, help='List of keywords provided.')
+@click.option('--keywords', '-k', multiple=True, help='List of keywords provided.')
 @click.option(
     '--keywords-file',
     '-f',
@@ -76,16 +77,7 @@ def single(text, keywords, keywords_file, verbose):
 def spreadsheet(sample, result):
     df = read_excel_file(sample)
     result_df = df[(df['StudyDescription'] == 'BIOPSY') & (df['ExamCategory'] == 'Biopsy')]
-    result_df = result_df[[
-        'Accession',
-        # 'Original PID',
-        # 'Orig BX Date',
-        'ReportText',
-        # 'BiopsyDate',
-        # 'BiopsySide',
-        # 'BiopsyResult',
-        # 'PathologyType'
-    ]]
+    result_df = result_df[['Accession', 'ReportText']]
     result_df['ReportText'] = result_df['ReportText'].apply(white_rabbit_parse_report)
     result_df['FoundBiopsySide'] = search_column_for_keywords(
         result_df['ReportText'], ['left breast', 'right breast']
