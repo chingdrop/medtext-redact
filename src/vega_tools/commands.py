@@ -5,6 +5,7 @@ import pandas as pd
 from vega_tools.text_tools import print_line_with_keywords, print_text_with_keywords, white_rabbit_parse_report
 from vega_tools.pandas_tools import read_excel_file, write_excel_file, search_column_for_keywords, audit_images
 from vega_tools.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
+from vega_tools.utils.files_and_storage import read_text_from_file
 
 
 @click.group()
@@ -16,7 +17,6 @@ def cli():
 @cli.group()
 def parse_report():
     """Parse medical reports."""
-    # ToDo - Develop a mechanism for storing a Client's custom parsing needs in a config file, i.e., JSON.
     pass
 
 
@@ -36,8 +36,15 @@ def audit_series_by_study(sample, result):
 
 @parse_report.command()
 @click.option('--text', '-t', help='Input text directly (use instead of stdin).')
-@click.option('--verbose', is_flag=True, help='Enable verbose output.')
-def single(text, verbose):
+@click.option('--kwywords', '-k', multiple=True, help='List of keywords provided.')
+@click.option(
+    '--keywords-file',
+    '-f',
+    type=click.Path(exists=True),
+    help='Path to a file containing keywords (one per line)'
+)
+@click.option('--verbose', '-v', is_flag=True, help='Enable verbose output.')
+def single(text, keywords, keywords_file, verbose):
     if not sys.stdin.isatty():
         input_text = sys.stdin.read()
     elif text:
@@ -46,24 +53,23 @@ def single(text, verbose):
         click.echo("No input provided. Use --text or pipe data via stdin.")
         sys.exit(1)
 
+    if keywords_file and not keywords:
+        keywords = read_text_from_file(keywords_file)
+        keywords = keywords.splitlines()
+
     result_text = white_rabbit_parse_report(input_text)
     click.echo(('-' * 104) + '\n')
     if verbose:
         click.echo("Verbose mode is on.")
-        print_text_with_keywords(result_text)
+        print_text_with_keywords(keywords, result_text)
     else:
         # Keywords were found from initially skimming the report
-        print_line_with_keywords(['left'], result_text)
-        print_line_with_keywords(['right'], result_text)
-        print_line_with_keywords(['wire', 'localization'], result_text)
-        print_line_with_keywords(['benign'], result_text)
-        print_line_with_keywords(['malignant'], result_text)
-        print_line_with_keywords(['results'], result_text)
-        print_line_with_keywords(['impression'], result_text)
-        print_line_with_keywords(['pathology'], result_text)
+        for keyword in keywords:
+            print_line_with_keywords([keyword], result_text)
 
 
 # ToDo - Refactor click command to use proper file path options for parameters.
+# ToDo - Develop a mechanism for storing a Client's custom parsing needs in a config file, i.e., JSON.
 @parse_report.command()
 @click.argument('sample')
 @click.argument('result')
