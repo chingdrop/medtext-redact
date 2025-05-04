@@ -32,3 +32,10 @@ def read_text_from_file(path: Path | str) -> str | None:
     except (OSError, IOError) as e:
         print(f"Error reading file '{path}': {e}")
         return None
+
+
+# ToDo - Add docstring for function.
+def create_directory(path: Path | str) -> None:
+    if isinstance(path, str):
+        path = Path(path)
+    path.mkdir(parents=True, exist_ok=True)
