@@ -16,7 +16,7 @@ class RestAdapter:
 
     def __init__(
         self,
-        base_url: str = "",
+        base_url: str = '',
         headers: dict = None,
         auth=None,
         proxies: dict = None,
@@ -51,14 +51,13 @@ class RestAdapter:
             params (dict): URL parameters (optional)
             data (dict): Data to send in the request body (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
-            verify (bool | str): Boolean whether to enforce SSL authentication, or supply a certificate to use (optional)
             timeout (int): Number of seconds to wait for a response (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
             dict: JSON serialized response body or None if an error occurs.
         """
-        self.logger.debug(f"Request [{method}] - {self.base_url} {endpoint}")
+        self.logger.debug(f'Request [{method}] - {self.base_url} {endpoint}')
         url = self.base_url + endpoint
         req = requests.Request(
             method,
@@ -76,27 +75,27 @@ class RestAdapter:
                 allow_redirects=allow_redirects,
             )
             response.raise_for_status()
-            self.logger.debug(f"Status [{response.status_code}] - {response.reason}")
+            self.logger.debug(f'Status [{response.status_code}] - {response.reason}')
             if response:
-                content_type = response.headers.get("Content-Type", "").lower()
-                if "application/json" in content_type:
+                content_type = response.headers.get('Content-Type', '').lower()
+                if 'application/json' in content_type:
                     return response.json()
-                elif "text/html" in content_type:
+                elif 'text/html' in content_type:
                     return response.text
                 else:
                     return response.content
             return None
         except requests.exceptions.HTTPError as errh:
-            self.logger.error(f"HTTP Error: {errh}")
+            self.logger.error(f'HTTP Error: {errh}')
             return None
         except requests.exceptions.ConnectionError as errc:
-            self.logger.error(f"Error Connecting: {errc}")
+            self.logger.error(f'Error Connecting: {errc}')
             return None
         except requests.exceptions.Timeout as errt:
-            self.logger.error(f"Timeout Error: {errt}")
+            self.logger.error(f'Timeout Error: {errt}')
             return None
         except requests.exceptions.RequestException as err:
-            self.logger.error(f"An Unexpected Error: {err}")
+            self.logger.error(f'An Unexpected Error: {err}')
             return None
 
     def get(
@@ -113,7 +112,6 @@ class RestAdapter:
             endpoint (str): API endpoint
             params (dict): URL parameters (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
-            verify (bool | str): Boolean whether to enforce SSL authentication, or supply a certificate to use (optional)
             timeout (int): Number of seconds to wait for a response (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
@@ -121,7 +119,7 @@ class RestAdapter:
             dict: JSON serialized response body or None if an error occurs.
         """
         return self._send_request(
-            "GET",
+            'GET',
             endpoint,
             params=params,
             cookies=cookies,
@@ -145,7 +143,6 @@ class RestAdapter:
             data (dict): Data to send in the request body
             params (dict): URL parameters (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
-            verify (bool | str): Boolean whether to enforce SSL authentication, or supply a certificate to use (optional)
             timeout (int): Number of seconds to wait for a response (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
@@ -153,7 +150,7 @@ class RestAdapter:
             dict: JSON serialized response body or None if an error occurs.
         """
         return self._send_request(
-            "POST",
+            'POST',
             endpoint,
             data=data,
             params=params,
@@ -178,7 +175,6 @@ class RestAdapter:
             data (dict): Data to send in the request body
             params (dict): URL parameters (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
-            verify (bool | str): Boolean whether to enforce SSL authentication, or supply a certificate to use (optional)
             timeout (int): Number of seconds to wait for a response (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
@@ -186,7 +182,7 @@ class RestAdapter:
             dict: JSON serialized response body or None if an error occurs.
         """
         return self._send_request(
-            "PUT",
+            'PUT',
             endpoint,
             data=data,
             params=params,
@@ -209,7 +205,6 @@ class RestAdapter:
             endpoint (str): API endpoint
             params (dict): URL parameters (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
-            verify (bool | str): Boolean whether to enforce SSL authentication, or supply a certificate to use (optional)
             timeout (int): Number of seconds to wait for a response (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
@@ -217,7 +212,7 @@ class RestAdapter:
             dict: JSON serialized response body or None if an error occurs.
         """
         return self._send_request(
-            "DELETE",
+            'DELETE',
             endpoint,
             params=params,
             cookies=cookies,

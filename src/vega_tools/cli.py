@@ -12,5 +12,6 @@ def main():
     create_directory(DATA_DIRECTORY)
     cli()
 
+
 if __name__ == '__main__':
     main()
