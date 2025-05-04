@@ -37,6 +37,7 @@ def white_rabbit_parse_report(text: str) -> str:
     rw = ReportWriter(text)
     rw.sanitize_dates()
     rw.sanitize_age()
+    rw.sanitize_names()
     rw.sanitize_keywords(['female', 'male'], '******')
 
     # Medical supplies names
@@ -55,24 +56,5 @@ def white_rabbit_parse_report(text: str) -> str:
             'Six Points Office - Radiology Associates'
         ],
         '********* ******* ****** - ********* *********'
-    )
-
-    # ToDo - Find a way to reference a database of common names, instead of manually filling what you find.
-    rw.sanitize_keywords(
-        [
-            'Michael',
-            'Wayne',
-            'Michell',
-            'Mailan',
-            'Melissa',
-            'Cao',
-            'Kenneth',
-            'Cook',
-            'Turner',
-            'Jennifer',
-            'Christopher',
-            'Thomas',
-            'Bruce'
-        ], '********'
     )
     return rw.text
