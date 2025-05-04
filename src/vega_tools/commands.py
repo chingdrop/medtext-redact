@@ -63,6 +63,7 @@ def single(text, verbose):
         print_line_with_keywords(['pathology'], result_text)
 
 
+# ToDo - Refactor click command to use proper file path options for parameters.
 @parse_report.command()
 @click.argument('sample')
 @click.argument('result')

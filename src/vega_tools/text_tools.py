@@ -7,6 +7,7 @@ from typing import List
 from vega_tools.utils.regex_patterns import create_keywords_pattern
 
 
+# ToDo - Add docstrings for class.
 class ReportWriter:
 
     def __init__(self, text: str) -> None:
@@ -54,6 +55,7 @@ def print_line_with_keywords(keywords: List[str], text: str) -> None:
             console.print(f"[bold green]{', '.join(set(keywords))}[/bold green] -", text_obj)
 
 
+# ToDo - Add docstring for function.
 def print_text_with_keywords(keywords: List[str], text: str) -> None:
     import pydoc
     from io import StringIO
@@ -67,6 +69,7 @@ def print_text_with_keywords(keywords: List[str], text: str) -> None:
 
 
 # ---- Client Specific Functions ---- #
+# ToDo - Add docstring for function.
 def white_rabbit_parse_report(text: str) -> str:
     rw = ReportWriter(text)
     rw.sanitize_dates()

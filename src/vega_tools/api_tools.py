@@ -6,6 +6,7 @@ from vega_tools.utils.rest import RestAdapter
 from vega_tools.cli import DATA_DIRECTORY
 
 
+# ToDo - Add docstrings for class.
 class CensusApi:
     def __init__(self):
         self.rest = RestAdapter(base_url='https://www2.census.gov/topics/genealogy/2010surnames')
