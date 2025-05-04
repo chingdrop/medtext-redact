@@ -1,12 +1,8 @@
-import re
-from typing import List
-
 import pandas as pd
 from pandas import Series, DataFrame
 from pathlib import Path
-from typing import Set
+from typing import Set, List
 
-from vega_tools.text_tools import ReportWriter
 from vega_tools.utils.regex_patterns import create_keywords_pattern
 
 
