@@ -4,7 +4,7 @@ from rich.console import Console
 from rich.text import Text
 from typing import List
 
-from vega_tools.utils.regex_utils import create_keywords_pattern
+from vega_tools.utils.regex_utils import create_keywords_pattern, mask_keywords
 
 
 # ToDo - Add docstrings for class.
@@ -21,9 +21,8 @@ class ReportWriter:
         text = text.replace(',', ', ')
         self.text = re.sub(r'\s+', ' ', text)
 
-    def sanitize_keywords(self, keywords: List[str], replace: str) -> None:
-        pattern = create_keywords_pattern(keywords)
-        self.text = pattern.sub(replace, self.text)
+    def sanitize_keywords(self, keywords: List[str]) -> None:
+        self.text = mask_keywords(self.text, keywords)
 
     def sanitize_dates(self) -> None:
         date_pattern = r'(?:0[1-9]|1[0-2]|[1-9])\/(?:0[1-9]|[12][0-9]|3[01]|[1-9])\/\d{4}'
@@ -75,23 +74,20 @@ def white_rabbit_parse_report(text: str) -> str:
     rw.sanitize_dates()
     rw.sanitize_age()
     rw.sanitize_names()
-    rw.sanitize_keywords(['female', 'male'], '******')
+    rw.sanitize_keywords(['female', 'male'])
 
     # Medical supplies names
-    rw.sanitize_keywords(['hydromark', 'marquee', 'suros celeros', 'suros eviva'], '********')
+    rw.sanitize_keywords(['hydromark', 'marquee', 'suros celeros', 'suros eviva'])
     penrad_pattern = re.compile(r'[a-zA-Z]{2,3}/Penrad', flags=re.IGNORECASE)
     rw.text = penrad_pattern.sub('***/******', rw.text)
 
     # Medical location names
-    rw.sanitize_keywords(
-        ['Laboratory For Pathological Analysis'], '*********** For ************ *********'
-    )
+    rw.sanitize_keywords(['Laboratory For Pathological Analysis'])
     rw.sanitize_keywords(
         [
             'Southside Imaging Center - Radiology Associates',
             'Portland Imaging Center - Radiology Associates',
             'Six Points Office - Radiology Associates'
-        ],
-        '********* ******* ****** - ********* *********'
+        ]
     )
     return rw.text
