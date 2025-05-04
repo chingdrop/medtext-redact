@@ -19,9 +19,6 @@ class ReportWriter:
         text = text.strip().title()
         text = text.replace(',', ', ')
         self.text = re.sub(r'\s+', ' ', text)
-        # ToDo - Find a way to reliably standardize middle names and name pre-fixes/suffixes with periods,
-        #  ex: Dr. John R. Smith Jr.
-        # text = text.replace('M.D.', 'MD')
 
     def sanitize_keywords(self, keywords: List[str], replace: str) -> None:
         pattern = create_keywords_pattern(keywords)
