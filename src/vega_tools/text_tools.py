@@ -35,6 +35,15 @@ class ReportWriter:
         age_pattern = re.compile(r'\d{1,3}[-\s]?(?:years|yrs)?[-\s]?old', flags=re.IGNORECASE)
         self.text = age_pattern.sub('** *****-***', self.text)
 
+    def sanitize_names(self) -> None:
+        from vega_tools.utils.enums import generate_common_names
+
+        names = generate_common_names()
+        for name in list(names):
+            name_pattern = fr"\b({re.escape(name)})"
+            repl = '*' * len(name)
+            self.text = re.sub(name_pattern, repl, self.text)
+
 
 # ToDo - Add docstring for function.
 def print_line_with_keywords(keywords: List[str], text: str) -> None:
