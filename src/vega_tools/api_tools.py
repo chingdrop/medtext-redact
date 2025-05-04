@@ -2,7 +2,7 @@ import io
 import zipfile
 import pandas as pd
 
-from vega_tools.utils.rest import RestAdapter
+from vega_tools.utils.rest_utils import RestAdapter
 from vega_tools.cli import DATA_DIRECTORY
 
 

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Set, List
 
 from vega_tools.text_tools import ReportWriter
-from vega_tools.utils.regex_patterns import create_keywords_pattern
+from vega_tools.utils.regex_utils import create_keywords_pattern
 
 
 def read_excel_file(file_path: str | Path) -> DataFrame | None:

@@ -4,7 +4,7 @@ from rich.console import Console
 from rich.text import Text
 from typing import List
 
-from vega_tools.utils.regex_patterns import create_keywords_pattern
+from vega_tools.utils.regex_utils import create_keywords_pattern
 
 
 # ToDo - Add docstrings for class.
