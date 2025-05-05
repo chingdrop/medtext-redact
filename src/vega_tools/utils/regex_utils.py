@@ -1,5 +1,4 @@
 import re
-from _ast import pattern
 from re import Pattern, Match
 from typing import List
 
