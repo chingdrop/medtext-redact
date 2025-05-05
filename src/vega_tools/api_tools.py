@@ -3,7 +3,7 @@ import zipfile
 import pandas as pd
 
 from vega_tools.utils.rest_utils import RestAdapter
-from vega_tools.cli import DATA_DIRECTORY
+from vega_tools.settings import DATA_DIRECTORY
 
 
 # ToDo - Add docstrings for class.

@@ -1,6 +1,6 @@
 from vega_tools.utils.file_utils import read_text_from_file
 from vega_tools.api_tools import CensusApi
-from vega_tools.cli import DATA_DIRECTORY
+from vega_tools.settings import DATA_DIRECTORY
 
 
 def generate_common_names():
