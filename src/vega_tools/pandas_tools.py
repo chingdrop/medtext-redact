@@ -6,7 +6,7 @@ from typing import Set, List
 from vega_tools.utils.regex_utils import create_keywords_pattern
 
 
-def read_excel_file(file_path: str | Path) -> DataFrame | None:
+def read_excel_file(file_path: Path | str) -> DataFrame | None:
     """
     Reads an Excel file into a pandas DataFrame.
 
@@ -23,7 +23,7 @@ def read_excel_file(file_path: str | Path) -> DataFrame | None:
         return None
 
 
-def write_excel_file(df: DataFrame, file_path: str | Path):
+def write_excel_file(df: DataFrame, file_path: Path | str):
     """
     Writes a Pandas DataFrame to an Excel file.
 
