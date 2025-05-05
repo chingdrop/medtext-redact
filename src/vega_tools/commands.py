@@ -1,9 +1,11 @@
 import sys
 import click
 import pandas as pd
+from click import Context
 
 from vega_tools.text_tools import print_line_with_keywords, print_text_with_keywords, white_rabbit_parse_report
 from vega_tools.pandas_tools import read_excel_file, write_excel_file, search_column_for_keywords, audit_images
+from vega_tools.utils.config_loader import ConfigLoader
 from vega_tools.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
 from vega_tools.utils.file_utils import read_text_from_file
 
@@ -15,9 +17,15 @@ def cli():
 
 
 @cli.group()
-def parse_report():
+@click.option(
+    '--config', '-c', type=click.Path(exists=True), required=True,
+    help='Path to JSON config file.'
+)
+@click.pass_context
+def parse_report(ctx, config):
     """Parse medical reports."""
-    pass
+    loader = ConfigLoader(config)
+    ctx.obj = loader.as_kwargs()
 
 
 @cli.command()
@@ -34,18 +42,18 @@ def audit_series_by_study(sample, result):
         missing_df.to_csv(csvfile, index=False)
 
 
-# ToDo - Refactor click command to use proper file path options for parameters.
+# ToDo - Refactor click command to use proper file filepath options for parameters.
 @parse_report.command()
 @click.option('--text', '-t', help='Input text directly (use instead of stdin).')
 @click.option('--keywords', '-k', multiple=True, help='List of keywords provided.')
 @click.option(
-    '--keywords-file',
-    '-f',
-    type=click.Path(exists=True),
+    '--keywords-file', '-f', type=click.Path(exists=True),
     help='Path to a file containing keywords (one per line)'
 )
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output.')
-def single(text, keywords, keywords_file, verbose):
+@click.pass_context
+def single(ctx: Context, text, keywords, keywords_file, verbose):
+    config = ctx.obj.copy()
     if not sys.stdin.isatty():
         input_text = sys.stdin.read()
     elif text:
@@ -69,12 +77,13 @@ def single(text, keywords, keywords_file, verbose):
             print_line_with_keywords([keyword], result_text)
 
 
-# ToDo - Refactor click command to use proper file path options for parameters.
-# ToDo - Develop a mechanism for storing a Client's custom parsing needs in a config file, i.e., JSON.
+# ToDo - Refactor click command to use proper filepath options for parameters.
 @parse_report.command()
 @click.argument('sample')
 @click.argument('result')
-def spreadsheet(sample, result):
+@click.pass_context
+def spreadsheet(ctx: Context, sample, result):
+    config = ctx.obj.copy()
     df = read_excel_file(sample)
     result_df = df[(df['StudyDescription'] == 'BIOPSY') & (df['ExamCategory'] == 'Biopsy')]
     result_df = result_df[['Accession', 'ReportText']]
