@@ -19,7 +19,7 @@ def read_excel_file(file_path: Path | str) -> DataFrame | None:
     try:
         return pd.read_excel(file_path, engine='openpyxl')
     except Exception as e:
-        print(f'Error reading Excel file: {e}')
+        print(f"Error reading Excel file: {e}")
         return None
 
 
@@ -34,7 +34,7 @@ def write_excel_file(df: DataFrame, file_path: Path | str):
     try:
         df.to_excel(file_path, index=False, engine='openpyxl')
     except Exception as e:
-        print(f'Error writing Excel file: {e}')
+        print(f"Error writing Excel file: {e}")
 
 
 def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:

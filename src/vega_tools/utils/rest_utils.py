@@ -57,7 +57,7 @@ class RestAdapter:
         Returns:
             dict: JSON serialized response body or None if an error occurs.
         """
-        self.logger.debug(f'Request [{method}] - {self.base_url} {endpoint}')
+        self.logger.debug(f"Request [{method}] - {self.base_url} {endpoint}")
         url = self.base_url + endpoint
         req = requests.Request(
             method,
@@ -75,7 +75,7 @@ class RestAdapter:
                 allow_redirects=allow_redirects,
             )
             response.raise_for_status()
-            self.logger.debug(f'Status [{response.status_code}] - {response.reason}')
+            self.logger.debug(f"Status [{response.status_code}] - {response.reason}")
             if response:
                 content_type = response.headers.get('Content-Type', '').lower()
                 if 'application/json' in content_type:
@@ -86,16 +86,16 @@ class RestAdapter:
                     return response.content
             return None
         except requests.exceptions.HTTPError as errh:
-            self.logger.error(f'HTTP Error: {errh}')
+            self.logger.error(f"HTTP Error: {errh}")
             return None
         except requests.exceptions.ConnectionError as errc:
-            self.logger.error(f'Error Connecting: {errc}')
+            self.logger.error(f"Error Connecting: {errc}")
             return None
         except requests.exceptions.Timeout as errt:
-            self.logger.error(f'Timeout Error: {errt}')
+            self.logger.error(f"Timeout Error: {errt}")
             return None
         except requests.exceptions.RequestException as err:
-            self.logger.error(f'An Unexpected Error: {err}')
+            self.logger.error(f"An Unexpected Error: {err}")
             return None
 
     def get(
