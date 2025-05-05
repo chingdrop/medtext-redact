@@ -1,6 +1,7 @@
 import sys
 import click
 import pandas as pd
+import numpy as np
 from click import Context
 
 from vega_tools.text_tools import print_line_with_keywords, print_text_with_keywords, white_rabbit_parse_report
@@ -13,7 +14,7 @@ from vega_tools.utils.file_utils import read_text_from_file
 @click.group()
 def cli():
     """Command Line Interface for custom use cases in data analysis."""
-    pass
+    pd.set_option('future.no_silent_downcasting', True)
 
 
 @cli.group()
@@ -29,16 +30,15 @@ def parse_report(ctx, config):
 
 
 @cli.command()
-@click.argument('sample')
-@click.argument('result')
+@click.option('--sample', '-s', type=click.Path(exists=True), help='File path to Sample Spreadsheet')
+@click.option('--result', '-r', type=click.Path(), help='File path to Result Spreadsheet')
 def audit_series_by_study(sample, result):
     data_df = read_excel_file(sample)
+    data_df.replace('<NONE>', np.nan, inplace=True)
     missing_2d_df = audit_images(data_df, '2D', DICOM_2D_SERIES_DESCRIPTIONS)
     missing_3d_df = audit_images(data_df, '3D', DICOM_3D_SERIES_DESCRIPTIONS, 1)
     missing_df = pd.concat([missing_2d_df, missing_3d_df])
     missing_df.sort_values(['Accession'], inplace=True)
-    view_code_df = data_df[data_df['Accession', 'View Code', 'View Modifier Code']]
-    missing_df = pd.merge(missing_df, view_code_df, on='Accession')
     with open(result, 'w', newline='') as csvfile:
         csvfile.write("Series Audit for 2D and 3D 1mm images by Study\n")
         missing_df.to_csv(csvfile, index=False)
