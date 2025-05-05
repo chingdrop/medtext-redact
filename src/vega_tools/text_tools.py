@@ -24,6 +24,9 @@ class ReportWriter:
     def sanitize_keywords(self, keywords: List[str]) -> None:
         self.text = mask_keywords(self.text, keywords)
 
+    def sanitize_gender(self):
+        self.sanitize_keywords(['male', 'female'])
+
     def sanitize_dates(self) -> None:
         date_pattern = r'(?:0[1-9]|1[0-2]|[1-9])\/(?:0[1-9]|[12][0-9]|3[01]|[1-9])\/\d{4}'
         self.text = mask_regex_pattern(date_pattern, self.text)
@@ -73,7 +76,7 @@ def white_rabbit_parse_report(text: str) -> str:
     rw.sanitize_dates()
     rw.sanitize_age()
     rw.sanitize_names()
-    rw.sanitize_keywords(['female', 'male'])
+    rw.sanitize_gender()
 
     # Medical supplies names
     rw.sanitize_keywords(['hydromark', 'marquee', 'suros celeros', 'suros eviva'])
