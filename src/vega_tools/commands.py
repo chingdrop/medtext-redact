@@ -37,6 +37,8 @@ def audit_series_by_study(sample, result):
     missing_3d_df = audit_images(data_df, '3D', DICOM_3D_SERIES_DESCRIPTIONS, 1)
     missing_df = pd.concat([missing_2d_df, missing_3d_df])
     missing_df.sort_values(['Accession'], inplace=True)
+    view_code_df = data_df[data_df['Accession', 'View Code', 'View Modifier Code']]
+    missing_df = pd.merge(missing_df, view_code_df, on='Accession')
     with open(result, 'w', newline='') as csvfile:
         csvfile.write("Series Audit for 2D and 3D 1mm images by Study\n")
         missing_df.to_csv(csvfile, index=False)
