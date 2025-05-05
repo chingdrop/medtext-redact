@@ -7,7 +7,7 @@ def generate_common_names():
     census_api = CensusApi()
     census_api.download_name_list()
 
-    names = read_text_from_file(DATA_DIRECTORY + 'census_names.txt')
+    names = read_text_from_file(DATA_DIRECTORY / 'census_names.txt')
     for name in names:
         yield name.title()
 
