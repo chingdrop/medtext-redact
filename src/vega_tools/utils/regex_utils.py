@@ -1,4 +1,5 @@
 import re
+from _ast import pattern
 from re import Pattern, Match
 from typing import List
 
@@ -24,11 +25,16 @@ def create_keywords_pattern(keywords: List[str]) -> Pattern[str]:
 
 
 # ToDo - Add docstring for function.
-def mask_re_match(match: Match) -> str:
-    return re.sub(r'[A-Za-z0-9]', '*', match.group())
+def mask_regex_pattern(match: Pattern | str, text: str) -> str:
+    if isinstance(match, str):
+        match = re.compile(match, flags=re.IGNORECASE)
+
+    def custom_repl(value: Match) -> str:
+        return re.sub(r'[A-Za-z0-9]', '*', value.group())
+    return re.sub(match, custom_repl, text)
 
 
 # ToDo - Add docstring for function.
 def mask_keywords(text: str, keywords: List[str]) -> str:
-    pattern = create_keywords_pattern(keywords)
-    return pattern.sub(mask_re_match, text)
+    keywords_pattern = create_keywords_pattern(keywords)
+    return mask_regex_pattern(keywords_pattern, text)

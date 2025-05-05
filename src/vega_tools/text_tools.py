@@ -4,7 +4,7 @@ from rich.console import Console
 from rich.text import Text
 from typing import List
 
-from vega_tools.utils.regex_utils import create_keywords_pattern, mask_keywords
+from vega_tools.utils.regex_utils import create_keywords_pattern, mask_regex_pattern, mask_keywords
 
 
 # ToDo - Add docstrings for class.
@@ -26,11 +26,11 @@ class ReportWriter:
 
     def sanitize_dates(self) -> None:
         date_pattern = r'(?:0[1-9]|1[0-2]|[1-9])\/(?:0[1-9]|[12][0-9]|3[01]|[1-9])\/\d{4}'
-        self.text = re.sub(date_pattern, '**/**/****', self.text)
+        self.text = mask_regex_pattern(date_pattern, self.text)
 
     def sanitize_age(self) -> None:
-        age_pattern = re.compile(r'\d{1,3}[-\s]?(?:years|yrs)?[-\s]?old', flags=re.IGNORECASE)
-        self.text = age_pattern.sub('** *****-***', self.text)
+        age_pattern = r'\d{1,3}[-\s]?(?:years|yrs)?[-\s]?old'
+        self.text = mask_regex_pattern(age_pattern, self.text)
 
     def sanitize_names(self) -> None:
         from vega_tools.utils.enums import generate_common_names
@@ -38,8 +38,7 @@ class ReportWriter:
         names = generate_common_names()
         for name in list(names):
             name_pattern = fr"\b({re.escape(name)})"
-            repl = '*' * len(name)
-            self.text = re.sub(name_pattern, repl, self.text)
+            self.text = mask_regex_pattern(name_pattern, self.text)
 
 
 # ToDo - Add docstring for function.
