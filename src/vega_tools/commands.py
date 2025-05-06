@@ -16,19 +16,6 @@ def cli():
     """Command Line Interface for custom use cases in data analysis."""
     pd.set_option('future.no_silent_downcasting', True)
 
-
-@cli.group()
-@click.option(
-    '--config', '-c', type=click.Path(exists=True), required=True,
-    help='Path to JSON config file.'
-)
-@click.pass_context
-def parse_report(ctx, config):
-    """Parse medical reports."""
-    loader = ConfigLoader(config)
-    ctx.obj = loader.as_kwargs()
-
-
 @cli.command()
 @click.option('--sample', '-s', type=click.Path(exists=True), help='File path to Sample Spreadsheet')
 @click.option('--result', '-r', type=click.Path(), help='File path to Result Spreadsheet')
@@ -42,6 +29,18 @@ def audit_series_by_study(sample, result):
     with open(result, 'w', newline='') as csvfile:
         csvfile.write("Series Audit for 2D and 3D 1mm images by Study\n")
         missing_df.to_csv(csvfile, index=False)
+
+
+@cli.group()
+@click.option(
+    '--config', '-c', type=click.Path(exists=True), required=True,
+    help='Path to JSON config file.'
+)
+@click.pass_context
+def parse_report(ctx, config):
+    """Parse medical reports."""
+    loader = ConfigLoader(config)
+    ctx.obj = loader.as_kwargs()
 
 
 # ToDo - Refactor click command to use proper file filepath options for parameters.
