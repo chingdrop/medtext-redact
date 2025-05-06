@@ -21,6 +21,9 @@ class ReportWriter:
         text = text.replace(',', ', ')
         self.text = re.sub(r'\s+', ' ', text)
 
+    def get_text(self):
+        return self.text
+
     def sanitize_keywords(self, keywords: List[str]) -> None:
         self.text = mask_keywords(self.text, keywords)
 
@@ -56,7 +59,7 @@ def sanitize_report_text(text: str, config: Dict[str, Any], full: bool=False) ->
     masking = config['Masking']
     rw.sanitize_keywords(masking['Manufacturers'])
     rw.sanitize_keywords(masking['Locations'])
-    return rw.text
+    return rw.get_text()
 
 
 # ToDo - Add docstring for function.
