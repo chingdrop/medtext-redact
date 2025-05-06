@@ -32,6 +32,7 @@ def audit_series_by_study(sample, result):
         missing_df.to_csv(csvfile, index=False)
 
 
+# ToDo - Optimize the commands in parse_report, it is too slow.
 @cli.group()
 @click.option(
     '--config', '-c', type=click.Path(exists=True), required=True,
@@ -44,7 +45,6 @@ def parse_report(ctx: Context, config):
     ctx.obj = loader.as_kwargs()
 
 
-# ToDo - Refactor click command to use proper file filepath options for parameters.
 @parse_report.command()
 @click.option('--text', '-t', help='Input text directly (use instead of stdin).')
 @click.option('--keywords', '-k', multiple=True, help='List of keywords provided.')
@@ -56,9 +56,6 @@ def parse_report(ctx: Context, config):
 @click.pass_context
 def single(ctx: Context, text, keywords, keywords_file, verbose):
     config = ctx.obj.copy()
-    masking = config['Masking']
-    manufacturers = masking['Manufacturers']
-    locations = masking['Locations']
     if not sys.stdin.isatty():
         input_text = sys.stdin.read()
     elif text:
@@ -83,10 +80,9 @@ def single(ctx: Context, text, keywords, keywords_file, verbose):
             print_line_with_keywords([keyword], result_text)
 
 
-# ToDo - Refactor click command to use proper filepath options for parameters.
 @parse_report.command()
-@click.argument('sample')
-@click.argument('result')
+@click.option('--sample', '-s', type=click.Path(exists=True), help='File path to Sample Spreadsheet')
+@click.option('--result', '-r', type=click.Path(), help='File path to Result Spreadsheet')
 @click.pass_context
 def spreadsheet(ctx: Context, sample, result):
     config = ctx.obj.copy()
