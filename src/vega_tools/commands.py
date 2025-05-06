@@ -4,8 +4,8 @@ import pandas as pd
 import numpy as np
 from click import Context
 
-from vega_tools.text_tools import ReportWriter, print_line_with_keywords, print_text_with_keywords, \
-    white_rabbit_parse_report
+from vega_tools.text_tools import print_line_with_keywords, print_text_with_keywords, white_rabbit_parse_report, \
+    sanitize_report_text
 from vega_tools.pandas_tools import read_excel_file, write_excel_file, search_column_for_keywords, audit_images
 from vega_tools.utils.config_loader import ConfigLoader
 from vega_tools.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
@@ -71,14 +71,8 @@ def single(ctx: Context, text, keywords, keywords_file, verbose):
         keywords = read_text_from_file(keywords_file)
         keywords = keywords.splitlines()
 
-    rw = ReportWriter(input_text)
-    rw.sanitize_names()
-    rw.sanitize_gender()
-    rw.sanitize_age()
-    rw.sanitize_dates()
-    rw.sanitize_keywords(manufacturers)
-    rw.sanitize_keywords(locations)
-    result_text = white_rabbit_parse_report(rw.text)
+    result_text = sanitize_report_text(input_text, config=config)
+    result_text = white_rabbit_parse_report(result_text)
     click.echo(('-' * 104) + '\n')
     if verbose:
         click.echo("Verbose mode is on.")
@@ -97,8 +91,8 @@ def single(ctx: Context, text, keywords, keywords_file, verbose):
 def spreadsheet(ctx: Context, sample, result):
     config = ctx.obj.copy()
     df = read_excel_file(sample)
-    result_df = df[(df['StudyDescription'] == 'BIOPSY') & (df['ExamCategory'] == 'Biopsy')]
-    result_df = result_df[['Accession', 'ReportText']]
+    result_df = df[['Accession', 'ReportText']]
+
     result_df['ReportText'] = result_df['ReportText'].apply(white_rabbit_parse_report)
     result_df['FoundBiopsySide'] = search_column_for_keywords(
         result_df['ReportText'], ['left breast', 'right breast']

@@ -2,7 +2,7 @@ import re
 import numpy as np
 from rich.console import Console
 from rich.text import Text
-from typing import List
+from typing import List, Dict, Any
 
 from vega_tools.utils.regex_utils import create_keywords_pattern, mask_regex_pattern, mask_keywords
 
@@ -42,6 +42,21 @@ class ReportWriter:
         for name in list(names):
             name_pattern = fr"\b({re.escape(name)})"
             self.text = mask_regex_pattern(name_pattern, self.text)
+
+
+# ToDo - Add docstring for function.
+def sanitize_report_text(text: str, config: Dict[str, Any], full: bool=False) -> str:
+    rw = ReportWriter(text)
+    rw.sanitize_names()
+    rw.sanitize_dates()
+    if full:
+        rw.sanitize_gender()
+        rw.sanitize_age()
+
+    masking = config['Masking']
+    rw.sanitize_keywords(masking['Manufacturers'])
+    rw.sanitize_keywords(masking['Locations'])
+    return rw.text
 
 
 # ToDo - Add docstring for function.
