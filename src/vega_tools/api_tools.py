@@ -1,6 +1,7 @@
 import io
 import zipfile
 import pandas as pd
+from pathlib import Path
 
 from vega_tools.utils.rest_utils import RestAdapter
 from vega_tools.settings import DATA_DIRECTORY
@@ -10,6 +11,10 @@ from vega_tools.settings import DATA_DIRECTORY
 class CensusApi:
     def __init__(self):
         self.rest = RestAdapter(base_url='https://www2.census.gov/topics/genealogy/2010surnames')
+        self.save_file = DATA_DIRECTORY / 'census_names.txt'
+
+    def get_save_file(self) -> Path:
+        return self.save_file
 
     def download_name_list(self):
         data = self.rest.get('/names.zip')
@@ -17,4 +22,4 @@ class CensusApi:
             with z.open('Names_2010Census.csv') as csvfile:
                 df = pd.read_csv(csvfile)
                 names = df['name']
-                names.to_csv(DATA_DIRECTORY / 'census_names.txt', index=False, header=False)
+                names.to_csv(self.save_file, index=False, header=False)

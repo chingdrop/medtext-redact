@@ -5,7 +5,9 @@ from vega_tools.settings import DATA_DIRECTORY
 
 def generate_common_names():
     census_api = CensusApi()
-    census_api.download_name_list()
+    save_file = census_api.get_save_file()
+    if not save_file.exists():
+        census_api.download_name_list()
 
     names = read_text_from_file(DATA_DIRECTORY / 'census_names.txt')
     for name in names:
