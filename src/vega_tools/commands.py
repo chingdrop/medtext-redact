@@ -56,6 +56,9 @@ def parse_report(ctx: Context, config):
 @click.pass_context
 def single(ctx: Context, text, keywords, keywords_file, verbose):
     config = ctx.obj.copy()
+    masking = config['Masking']
+    manufacturers = masking['Manufacturers']
+    locations = masking['Locations']
     if not sys.stdin.isatty():
         input_text = sys.stdin.read()
     elif text:
@@ -73,9 +76,8 @@ def single(ctx: Context, text, keywords, keywords_file, verbose):
     rw.sanitize_gender()
     rw.sanitize_age()
     rw.sanitize_dates()
-    masking = config['Masking']
-    rw.sanitize_keywords(masking['Manufacturers'])
-    rw.sanitize_keywords(masking['Locations'])
+    rw.sanitize_keywords(manufacturers)
+    rw.sanitize_keywords(locations)
     result_text = white_rabbit_parse_report(rw.text)
     click.echo(('-' * 104) + '\n')
     if verbose:
