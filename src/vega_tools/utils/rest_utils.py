@@ -1,4 +1,5 @@
 import requests
+import certifi
 import logging
 from typing import Any
 
@@ -41,7 +42,8 @@ class RestAdapter:
         params: dict=None,
         cookies: dict=None,
         timeout: int=None,
-        allow_redirects: bool=True,
+        ssl_verify: bool=True,
+        allow_redirects: bool=True
     ) -> None | bytes | str | Any:
         """Prepare the request to be sent. Send the prepared request and return the response.
 
@@ -65,14 +67,20 @@ class RestAdapter:
             headers=self.session.headers,
             params=params,
             data=data,
-            cookies=cookies,
+            cookies=cookies
         )
         prep_req = self.session.prepare_request(req)
+        if ssl_verify:
+            ca_bundle = certifi.where()
+        else:
+            ca_bundle = False
+
         try:
             response = self.session.send(
                 prep_req,
+                verify=ca_bundle,
                 timeout=timeout,
-                allow_redirects=allow_redirects,
+                allow_redirects=allow_redirects
             )
             response.raise_for_status()
             self.logger.debug(f"Status [{response.status_code}] - {response.reason}")
@@ -104,7 +112,8 @@ class RestAdapter:
         params: dict=None,
         cookies: dict=None,
         timeout: int=None,
-        allow_redirects: bool=True,
+        ssl_verify: bool=True,
+        allow_redirects: bool=True
     ) -> None | bytes | str | Any:
         """Make a GET request.
 
@@ -113,6 +122,7 @@ class RestAdapter:
             params (dict): URL parameters (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
             timeout (int): Number of seconds to wait for a response (optional)
+            ssl_verify (bool): Enable SSL verification (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
@@ -124,6 +134,7 @@ class RestAdapter:
             params=params,
             cookies=cookies,
             timeout=timeout,
+            ssl_verify=ssl_verify,
             allow_redirects=allow_redirects
         )
 
@@ -134,7 +145,8 @@ class RestAdapter:
         params: dict=None,
         cookies: dict=None,
         timeout: int=None,
-        allow_redirects: bool=True,
+        ssl_verify: bool = True,
+        allow_redirects: bool=True
     ) -> None | bytes | str | Any:
         """Make a POST request.
 
@@ -144,6 +156,7 @@ class RestAdapter:
             params (dict): URL parameters (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
             timeout (int): Number of seconds to wait for a response (optional)
+            ssl_verify (bool): Enable SSL verification (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
@@ -156,6 +169,7 @@ class RestAdapter:
             params=params,
             cookies=cookies,
             timeout=timeout,
+            ssl_verify=ssl_verify,
             allow_redirects=allow_redirects
         )
 
@@ -166,7 +180,8 @@ class RestAdapter:
         params: dict=None,
         cookies: dict=None,
         timeout: int=None,
-        allow_redirects: bool=True,
+        ssl_verify: bool=True,
+        allow_redirects: bool=True
     ) -> None | bytes | str | Any:
         """Make a PUT request.
 
@@ -176,6 +191,7 @@ class RestAdapter:
             params (dict): URL parameters (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
             timeout (int): Number of seconds to wait for a response (optional)
+            ssl_verify (bool): Enable SSL verification (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
@@ -188,6 +204,7 @@ class RestAdapter:
             params=params,
             cookies=cookies,
             timeout=timeout,
+            ssl_verify=ssl_verify,
             allow_redirects=allow_redirects
         )
 
@@ -197,7 +214,8 @@ class RestAdapter:
         params: dict=None,
         cookies: dict=None,
         timeout: int=None,
-        allow_redirects: bool=True,
+        ssl_verify: bool = True,
+        allow_redirects: bool=True
     ) -> None | bytes | str | Any:
         """Make a DELETE request.
 
@@ -206,6 +224,7 @@ class RestAdapter:
             params (dict): URL parameters (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
             timeout (int): Number of seconds to wait for a response (optional)
+            ssl_verify (bool): Enable SSL verification (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
@@ -217,5 +236,6 @@ class RestAdapter:
             params=params,
             cookies=cookies,
             timeout=timeout,
+            ssl_verify=ssl_verify,
             allow_redirects=allow_redirects
         )
