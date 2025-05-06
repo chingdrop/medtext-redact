@@ -6,7 +6,7 @@ from click import Context
 
 from vega_tools.text_tools import print_line_with_keywords, print_text_with_keywords, white_rabbit_parse_report, \
     sanitize_report_text
-from vega_tools.pandas_tools import read_excel_file, write_excel_file, search_column_for_keywords, audit_images
+from vega_tools.pandas_tools import read_excel_file, write_excel_file, audit_images, search_report_text
 from vega_tools.utils.config_loader import ConfigLoader
 from vega_tools.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
 from vega_tools.utils.file_utils import read_text_from_file
@@ -92,28 +92,8 @@ def spreadsheet(ctx: Context, sample, result):
     config = ctx.obj.copy()
     df = read_excel_file(sample)
     result_df = df[['Accession', 'ReportText']]
-
+    result_df.replace('<NONE>', np.nan, inplace=True)
+    result_df['ReportText'] = result_df['ReportText'].apply(lambda x: sanitize_report_text(x, config=config))
     result_df['ReportText'] = result_df['ReportText'].apply(white_rabbit_parse_report)
-    result_df['FoundBiopsySide'] = search_column_for_keywords(
-        result_df['ReportText'], ['left breast', 'right breast']
-    )
-    result_df['FoundBiopsyResult'] = search_column_for_keywords(
-        result_df['ReportText'], ['benign', 'malignant']
-    )
-    result_df['FoundPathologyType'] = search_column_for_keywords(
-        result_df['ReportText'],
-        [
-            'Carcinoma',
-            'Fibroadenoma',
-            'Hyperplasia',
-            'Lymphoma',
-            'Benign Cyst',
-            'Fibrocystic Changes',
-            'Papilloma',
-            'Stromal Fibrosis',
-            'Spindle Cell',
-            'Metastatic',
-            'Radial Scar'
-        ]
-    )
+    result_df = search_report_text(df, config=config)
     write_excel_file(result_df, result)

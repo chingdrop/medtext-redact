@@ -1,7 +1,7 @@
 import pandas as pd
 from pandas import Series, DataFrame
 from pathlib import Path
-from typing import Set, List
+from typing import Set, List, Dict, Any
 
 from vega_tools.utils.regex_utils import create_keywords_pattern
 
@@ -50,6 +50,15 @@ def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
     """
     pattern = create_keywords_pattern(keywords)
     return series.str.extract(pattern)
+
+
+# ToDo - Add docstring for function.
+def search_report_text(df: DataFrame, config: Dict[str, Any]) -> DataFrame:
+    searching = config['Searching']
+    df['FoundBiopsySide'] = search_column_for_keywords(df['ReportText'], searching['AnatomicalTags'])
+    df['FoundBiopsyResult'] = search_column_for_keywords(df['ReportText'], ['benign', 'malignant'])
+    df['FoundPathologyType'] = search_column_for_keywords(df['ReportText'], searching['PathologyKeywords'])
+    return df
 
 
 def check_series_by_study(df: DataFrame, accession_col: str, series_col: str, descriptions: Set[str]) -> DataFrame:
