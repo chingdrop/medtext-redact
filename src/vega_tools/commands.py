@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 from click import Context
 
-from vega_tools.text_tools import print_line_with_keywords, print_text_with_keywords, white_rabbit_parse_report
+from vega_tools.text_tools import ReportWriter, print_line_with_keywords, print_text_with_keywords, \
+    white_rabbit_parse_report
 from vega_tools.pandas_tools import read_excel_file, write_excel_file, search_column_for_keywords, audit_images
 from vega_tools.utils.config_loader import ConfigLoader
 from vega_tools.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
@@ -37,7 +38,7 @@ def audit_series_by_study(sample, result):
     help='Path to JSON config file.'
 )
 @click.pass_context
-def parse_report(ctx, config):
+def parse_report(ctx: Context, config):
     """Parse medical reports."""
     loader = ConfigLoader(config)
     ctx.obj = loader.as_kwargs()
@@ -67,7 +68,15 @@ def single(ctx: Context, text, keywords, keywords_file, verbose):
         keywords = read_text_from_file(keywords_file)
         keywords = keywords.splitlines()
 
-    result_text = white_rabbit_parse_report(input_text)
+    rw = ReportWriter(input_text)
+    rw.sanitize_names()
+    rw.sanitize_gender()
+    rw.sanitize_age()
+    rw.sanitize_dates()
+    masking = config['Masking']
+    rw.sanitize_keywords(masking['Manufacturers'])
+    rw.sanitize_keywords(masking['Locations'])
+    result_text = white_rabbit_parse_report(rw.text)
     click.echo(('-' * 104) + '\n')
     if verbose:
         click.echo("Verbose mode is on.")
