@@ -1,4 +1,5 @@
 import requests
+import certifi
 import logging
 from typing import Any
 
@@ -16,10 +17,10 @@ class RestAdapter:
 
     def __init__(
         self,
-        base_url: str = "",
-        headers: dict = None,
+        base_url: str='',
+        headers: dict=None,
         auth=None,
-        proxies: dict = None,
+        proxies: dict=None,
         logger=None,
     ):
         self.base_url = base_url
@@ -37,11 +38,12 @@ class RestAdapter:
         self,
         method: str,
         endpoint: str,
-        data: dict = None,
-        params: dict = None,
-        cookies: dict = None,
-        timeout: int = None,
-        allow_redirects: bool = True,
+        data: dict=None,
+        params: dict=None,
+        cookies: dict=None,
+        timeout: int=None,
+        ssl_verify: bool=True,
+        allow_redirects: bool=True
     ) -> None | bytes | str | Any:
         """Prepare the request to be sent. Send the prepared request and return the response.
 
@@ -51,7 +53,6 @@ class RestAdapter:
             params (dict): URL parameters (optional)
             data (dict): Data to send in the request body (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
-            verify (bool | str): Boolean whether to enforce SSL authentication, or supply a certificate to use (optional)
             timeout (int): Number of seconds to wait for a response (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
@@ -66,22 +67,28 @@ class RestAdapter:
             headers=self.session.headers,
             params=params,
             data=data,
-            cookies=cookies,
+            cookies=cookies
         )
         prep_req = self.session.prepare_request(req)
+        if ssl_verify:
+            ca_bundle = certifi.where()
+        else:
+            ca_bundle = False
+
         try:
             response = self.session.send(
                 prep_req,
+                verify=ca_bundle,
                 timeout=timeout,
-                allow_redirects=allow_redirects,
+                allow_redirects=allow_redirects
             )
             response.raise_for_status()
             self.logger.debug(f"Status [{response.status_code}] - {response.reason}")
             if response:
-                content_type = response.headers.get("Content-Type", "").lower()
-                if "application/json" in content_type:
+                content_type = response.headers.get('Content-Type', '').lower()
+                if 'application/json' in content_type:
                     return response.json()
-                elif "text/html" in content_type:
+                elif 'text/html' in content_type:
                     return response.text
                 else:
                     return response.content
@@ -102,10 +109,11 @@ class RestAdapter:
     def get(
         self,
         endpoint: str,
-        params: dict = None,
-        cookies: dict = None,
-        timeout: int = None,
-        allow_redirects: bool = True,
+        params: dict=None,
+        cookies: dict=None,
+        timeout: int=None,
+        ssl_verify: bool=True,
+        allow_redirects: bool=True
     ) -> None | bytes | str | Any:
         """Make a GET request.
 
@@ -113,30 +121,32 @@ class RestAdapter:
             endpoint (str): API endpoint
             params (dict): URL parameters (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
-            verify (bool | str): Boolean whether to enforce SSL authentication, or supply a certificate to use (optional)
             timeout (int): Number of seconds to wait for a response (optional)
+            ssl_verify (bool): Enable SSL verification (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
             dict: JSON serialized response body or None if an error occurs.
         """
         return self._send_request(
-            "GET",
+            'GET',
             endpoint,
             params=params,
             cookies=cookies,
             timeout=timeout,
+            ssl_verify=ssl_verify,
             allow_redirects=allow_redirects
         )
 
     def post(
         self,
         endpoint: str,
-        data: dict = None,
-        params: dict = None,
-        cookies: dict = None,
-        timeout: int = None,
-        allow_redirects: bool = True,
+        data: dict=None,
+        params: dict=None,
+        cookies: dict=None,
+        timeout: int=None,
+        ssl_verify: bool = True,
+        allow_redirects: bool=True
     ) -> None | bytes | str | Any:
         """Make a POST request.
 
@@ -145,31 +155,33 @@ class RestAdapter:
             data (dict): Data to send in the request body
             params (dict): URL parameters (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
-            verify (bool | str): Boolean whether to enforce SSL authentication, or supply a certificate to use (optional)
             timeout (int): Number of seconds to wait for a response (optional)
+            ssl_verify (bool): Enable SSL verification (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
             dict: JSON serialized response body or None if an error occurs.
         """
         return self._send_request(
-            "POST",
+            'POST',
             endpoint,
             data=data,
             params=params,
             cookies=cookies,
             timeout=timeout,
+            ssl_verify=ssl_verify,
             allow_redirects=allow_redirects
         )
 
     def put(
         self,
         endpoint: str,
-        data: dict = None,
-        params: dict = None,
-        cookies: dict = None,
-        timeout: int = None,
-        allow_redirects: bool = True,
+        data: dict=None,
+        params: dict=None,
+        cookies: dict=None,
+        timeout: int=None,
+        ssl_verify: bool=True,
+        allow_redirects: bool=True
     ) -> None | bytes | str | Any:
         """Make a PUT request.
 
@@ -178,30 +190,32 @@ class RestAdapter:
             data (dict): Data to send in the request body
             params (dict): URL parameters (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
-            verify (bool | str): Boolean whether to enforce SSL authentication, or supply a certificate to use (optional)
             timeout (int): Number of seconds to wait for a response (optional)
+            ssl_verify (bool): Enable SSL verification (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
             dict: JSON serialized response body or None if an error occurs.
         """
         return self._send_request(
-            "PUT",
+            'PUT',
             endpoint,
             data=data,
             params=params,
             cookies=cookies,
             timeout=timeout,
+            ssl_verify=ssl_verify,
             allow_redirects=allow_redirects
         )
 
     def delete(
         self,
         endpoint: str,
-        params: dict = None,
-        cookies: dict = None,
-        timeout: int = None,
-        allow_redirects: bool = True,
+        params: dict=None,
+        cookies: dict=None,
+        timeout: int=None,
+        ssl_verify: bool = True,
+        allow_redirects: bool=True
     ) -> None | bytes | str | Any:
         """Make a DELETE request.
 
@@ -209,18 +223,19 @@ class RestAdapter:
             endpoint (str): API endpoint
             params (dict): URL parameters (optional)
             cookies (dict): Data to be used as the cookie in the request (optional)
-            verify (bool | str): Boolean whether to enforce SSL authentication, or supply a certificate to use (optional)
             timeout (int): Number of seconds to wait for a response (optional)
+            ssl_verify (bool): Enable SSL verification (optional)
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
             dict: JSON serialized response body or None if an error occurs.
         """
         return self._send_request(
-            "DELETE",
+            'DELETE',
             endpoint,
             params=params,
             cookies=cookies,
             timeout=timeout,
+            ssl_verify=ssl_verify,
             allow_redirects=allow_redirects
         )
