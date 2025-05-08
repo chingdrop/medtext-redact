@@ -40,6 +40,7 @@ def mask_regex_pattern(match: Pattern | str, text: str) -> str:
 
     def custom_repl(value: Match) -> str:
         return re.sub(r'[A-Za-z0-9]', '*', value.group())
+
     return re.sub(match, custom_repl, text)
 
 

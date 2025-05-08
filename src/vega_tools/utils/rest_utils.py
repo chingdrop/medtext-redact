@@ -1,7 +1,8 @@
-import requests
-import certifi
 import logging
 from typing import Any
+
+import certifi
+import requests
 
 
 class RestAdapter:
@@ -15,14 +16,7 @@ class RestAdapter:
         logger (Logger): Custom logger object (optional)
     """
 
-    def __init__(
-        self,
-        base_url: str='',
-        headers: dict=None,
-        auth=None,
-        proxies: dict=None,
-        logger=None,
-    ):
+    def __init__(self, base_url: str = '', headers: dict = None, auth=None, proxies: dict = None, logger=None):
         self.base_url = base_url
         self.logger = logger or logging.getLogger(__name__)
 
@@ -35,15 +29,15 @@ class RestAdapter:
             self.session.proxies.update(proxies)
 
     def _send_request(
-        self,
-        method: str,
-        endpoint: str,
-        data: dict=None,
-        params: dict=None,
-        cookies: dict=None,
-        timeout: int=None,
-        ssl_verify: bool=True,
-        allow_redirects: bool=True
+            self,
+            method: str,
+            endpoint: str,
+            data: dict = None,
+            params: dict = None,
+            cookies: dict = None,
+            timeout: int = None,
+            ssl_verify: bool = True,
+            allow_redirects: bool = True
     ) -> None | bytes | str | Any:
         """Prepare the request to be sent. Send the prepared request and return the response.
 
@@ -107,13 +101,13 @@ class RestAdapter:
             return None
 
     def get(
-        self,
-        endpoint: str,
-        params: dict=None,
-        cookies: dict=None,
-        timeout: int=None,
-        ssl_verify: bool=True,
-        allow_redirects: bool=True
+            self,
+            endpoint: str,
+            params: dict = None,
+            cookies: dict = None,
+            timeout: int = None,
+            ssl_verify: bool = True,
+            allow_redirects: bool = True
     ) -> None | bytes | str | Any:
         """Make a GET request.
 
@@ -139,14 +133,14 @@ class RestAdapter:
         )
 
     def post(
-        self,
-        endpoint: str,
-        data: dict=None,
-        params: dict=None,
-        cookies: dict=None,
-        timeout: int=None,
-        ssl_verify: bool = True,
-        allow_redirects: bool=True
+            self,
+            endpoint: str,
+            data: dict = None,
+            params: dict = None,
+            cookies: dict = None,
+            timeout: int = None,
+            ssl_verify: bool = True,
+            allow_redirects: bool = True
     ) -> None | bytes | str | Any:
         """Make a POST request.
 
@@ -174,14 +168,14 @@ class RestAdapter:
         )
 
     def put(
-        self,
-        endpoint: str,
-        data: dict=None,
-        params: dict=None,
-        cookies: dict=None,
-        timeout: int=None,
-        ssl_verify: bool=True,
-        allow_redirects: bool=True
+            self,
+            endpoint: str,
+            data: dict = None,
+            params: dict = None,
+            cookies: dict = None,
+            timeout: int = None,
+            ssl_verify: bool = True,
+            allow_redirects: bool = True
     ) -> None | bytes | str | Any:
         """Make a PUT request.
 
@@ -209,13 +203,13 @@ class RestAdapter:
         )
 
     def delete(
-        self,
-        endpoint: str,
-        params: dict=None,
-        cookies: dict=None,
-        timeout: int=None,
-        ssl_verify: bool = True,
-        allow_redirects: bool=True
+            self,
+            endpoint: str,
+            params: dict = None,
+            cookies: dict = None,
+            timeout: int = None,
+            ssl_verify: bool = True,
+            allow_redirects: bool = True
     ) -> None | bytes | str | Any:
         """Make a DELETE request.
 
