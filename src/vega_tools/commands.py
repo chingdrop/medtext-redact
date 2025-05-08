@@ -31,7 +31,9 @@ def audit_series_by_study(sample, result):
     audit_df = pd.concat([audit_2d_df, audit_3d_df])
     audit_df.sort_values(['Accession'], inplace=True)
     with open(result, 'w', newline='') as csvfile:
-        csvfile.write("Series Audit for 2D and 3D 1mm images by Study\n")
+        # ToDo - Find a way to dynamically generate the title of the spreadsheet.
+        csvfile.write("Series Audit of 2D and 3D 1mm images by Accession\n")
+        # ToDo - Find a way to save the file to an Excel spreadsheet instead.
         audit_df.to_csv(csvfile, index=False)
 
 
