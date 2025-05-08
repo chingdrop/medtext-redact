@@ -12,7 +12,7 @@ def generate_common_names() -> Iterator[str]:
     Returns:
         Iterator[str]: The generator of common names.
     """
-    census_api = CensusNamesApi()
+    census_api = CensusNamesApi(year='2010')
     save_file = census_api.get_save_file()
     if not save_file.exists():
         census_api.download_name_list()

@@ -15,9 +15,9 @@ class CensusNamesApi:
             year: str,
             save_file: Path | str = None
     ):
-        if year is '2010':
+        if year == '2010':
             base_url = 'https://www2.census.gov/topics/genealogy/2010surnames'
-        elif year is '2000':
+        elif year == '2000':
             base_url = 'https://www2.census.gov/topics/genealogy/2000surnames/'
         else:
             raise ValueError("Year must be '2010' or '2000'")
