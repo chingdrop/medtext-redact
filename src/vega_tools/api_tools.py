@@ -8,16 +8,20 @@ from vega_tools.settings import DATA_DIRECTORY
 
 
 # ToDo - Add docstrings for class.
-class CensusApi:
-    def __init__(self):
-        self.rest = RestAdapter(base_url='https://www2.census.gov/topics/genealogy/2010surnames')
-        self.save_file = DATA_DIRECTORY / 'census_names.txt'
+class CensusNamesApi:
+    def __init__(
+            self,
+            base_url: str='https://www2.census.gov/topics/genealogy/2010surnames',
+            save_file: Path | str=DATA_DIRECTORY / 'census_names.txt'
+    ):
+        self.save_file = save_file
+        self._rest = RestAdapter(base_url=base_url)
 
     def get_save_file(self) -> Path:
         return self.save_file
 
     def download_name_list(self):
-        data = self.rest.get('/names.zip')
+        data = self._rest.get('/names.zip')
         with zipfile.ZipFile(io.BytesIO(data)) as z:
             with z.open('Names_2010Census.csv') as csvfile:
                 df = pd.read_csv(csvfile)
