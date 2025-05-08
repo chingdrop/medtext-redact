@@ -8,9 +8,9 @@ from rich.text import Text
 from vega_tools.utils.regex_utils import create_keywords_pattern, mask_regex_pattern, mask_keywords
 
 
-class ReportWriter:
+class PhiSanitizer:
     """
-    Custom Medical Report Writer that de-identifies sensitive information using regex patterns.
+    Phi Sanitizer de-identifies sensitive information using regex patterns and a custom regex replacer.
 
     Args:
         text (str): The report text.
@@ -73,17 +73,17 @@ def sanitize_report_text(text: str, config: Dict[str, Any], full: bool = False) 
     Returns:
         str: The sanitized report text.
     """
-    rw = ReportWriter(text)
-    rw.sanitize_names()
-    rw.sanitize_dates()
+    ps = PhiSanitizer(text)
+    ps.sanitize_names()
+    ps.sanitize_dates()
     if full:
-        rw.sanitize_gender()
-        rw.sanitize_age()
+        ps.sanitize_gender()
+        ps.sanitize_age()
 
     masking = config['Masking']
-    rw.sanitize_keywords(masking['Manufacturers'])
-    rw.sanitize_keywords(masking['Locations'])
-    return rw.get_text()
+    ps.sanitize_keywords(masking['Manufacturers'])
+    ps.sanitize_keywords(masking['Locations'])
+    return ps.get_text()
 
 
 def print_line_with_keywords(keywords: List[str], text: str) -> None:
