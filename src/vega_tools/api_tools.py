@@ -8,8 +8,18 @@ from vega_tools.settings import DATA_DIRECTORY
 from vega_tools.utils.rest_utils import RestAdapter
 
 
-# ToDo - Add docstrings for class.
 class CensusNamesApi:
+    """
+    Uses the US Census' data to generate a text file full of both first and last names.
+
+    Args:
+        year (str): The year of common names to pull from the Census API.
+        save_file (Path | str): The file path to the resulting name text file.
+
+    Raises:
+        ValueError: If year is not in the Census API.
+    """
+
     def __init__(
             self,
             year: str,
@@ -30,7 +40,8 @@ class CensusNamesApi:
     def get_save_file(self) -> Path:
         return self.save_file
 
-    def download_name_list(self):
+    def download_name_list(self) -> None:
+        """Downloads the common name list from the US Census website."""
         data = self._rest.get('/names.zip')
         with zipfile.ZipFile(io.BytesIO(data)) as z:
             with z.open('Names_2010Census.csv') as csvfile:

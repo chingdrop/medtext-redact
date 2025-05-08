@@ -53,8 +53,17 @@ def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
     return series.str.extract(pattern)
 
 
-# ToDo - Add docstring for function.
 def search_report_text(df: DataFrame, config: Dict[str, Any]) -> DataFrame:
+    """
+    Use client configuration file to search report text and create subsequent columns.
+
+    Args:
+        df (DataFrame): The DataFrame to analyze.
+        config (Dict[str, Any]): The configuration to use.
+
+    Returns:
+        DataFrame: The Final DataFrame with new columns.
+    """
     searching = config['Searching']
     df['FoundBiopsySide'] = search_column_for_keywords(df['ReportText'], searching['AnatomicalTags'])
     df['FoundBiopsyResult'] = search_column_for_keywords(df['ReportText'], ['benign', 'malignant'])
@@ -68,7 +77,7 @@ def check_series_by_study(df: DataFrame, accession_col: str, series_col: str, de
     Uses a sample Set of strings to compare the constituency of Series Description.
 
     Args:
-        df (DataFrame): The DataFrame to write.
+        df (DataFrame): The DataFrame to analyze.
         accession_col (str): The column name of the accession ID.
         series_col (str): The column name of the series description.
         descriptions (Set[str]): The set of descriptions of series of images.
@@ -84,8 +93,20 @@ def check_series_by_study(df: DataFrame, accession_col: str, series_col: str, de
     return missing_df
 
 
-# ToDo - Add docstring for function.
 def audit_images(df: DataFrame, img_type: str, descriptions: Set[str], slice_thickness: int = 1) -> DataFrame:
+    """
+    Audit Series by Study using Exodus Indexer text export.
+    Specify image type to handle both 2D and 3D images. Filter export to only the specified series descriptions.
+
+    Args:
+        df (DataFrame): The DataFrame to analyze.
+        img_type (str): The type of image to analyze.
+        descriptions: Set of series descriptions to audit.
+        slice_thickness (int): The number of frames to filter from the DataFrame.
+
+    Returns:
+        DataFrame: The resulting DataFrame containing the audit sets.
+    """
     if img_type == '2D':
         img_df = df[df['Number of Frames'] == 1]
     elif img_type == '3D':

@@ -8,11 +8,16 @@ from rich.text import Text
 from vega_tools.utils.regex_utils import create_keywords_pattern, mask_regex_pattern, mask_keywords
 
 
-# ToDo - Add docstrings for class.
 class ReportWriter:
+    """
+    Custom Medical Report Writer that de-identifies sensitive information using regex patterns.
+
+    Args:
+        text (str): The report text.
+    """
 
     def __init__(self, text: str) -> None:
-        self.text = None
+        self.text = ''
         if text is np.nan:
             text = ''
         self.__format_text(text)
@@ -26,6 +31,12 @@ class ReportWriter:
         return self.text
 
     def sanitize_keywords(self, keywords: List[str]) -> None:
+        """
+        Sanitizes keywords from the report text.
+
+        Args:
+            keywords (List[str]): The keywords to sanitize.
+        """
         self.text = mask_keywords(self.text, keywords)
 
     def sanitize_gender(self):
@@ -40,6 +51,7 @@ class ReportWriter:
         self.text = mask_regex_pattern(age_pattern, self.text)
 
     def sanitize_names(self) -> None:
+        """Use custom name generator to iterate through the names and mask the report text."""
         from vega_tools.utils.enums import generate_common_names
 
         names = generate_common_names()
@@ -48,8 +60,19 @@ class ReportWriter:
             self.text = mask_regex_pattern(name_pattern, self.text)
 
 
-# ToDo - Add docstring for function.
 def sanitize_report_text(text: str, config: Dict[str, Any], full: bool = False) -> str:
+    """
+    Remove Personalized Health Information from the report text.
+    Name and Dates are by default but full will mask gender and age as well.
+
+    Args:
+        text: Report text to sanitize.
+        config: Client configuration dictionary.
+        full (bool): Sanitization level to be used.
+
+    Returns:
+        str: The sanitized report text.
+    """
     rw = ReportWriter(text)
     rw.sanitize_names()
     rw.sanitize_dates()
@@ -63,8 +86,15 @@ def sanitize_report_text(text: str, config: Dict[str, Any], full: bool = False) 
     return rw.get_text()
 
 
-# ToDo - Add docstring for function.
 def print_line_with_keywords(keywords: List[str], text: str) -> None:
+    """
+    Split the report text into lines with by periods.
+    Iterate through the lines of the report text and highlight the keywords in each line.
+
+    Args:
+        keywords (List[str]): The keywords to sanitize.
+        text (str): The report text.
+    """
     console = Console()
     pattern = create_keywords_pattern(keywords)
     split_text = re.split(r'(?<=[.!])\s+(?=\D)', text)
@@ -75,8 +105,14 @@ def print_line_with_keywords(keywords: List[str], text: str) -> None:
             console.print(f"[bold green]{', '.join(set(keywords))}[/bold green] -", text_obj)
 
 
-# ToDo - Add docstring for function.
 def print_text_with_keywords(keywords: List[str], text: str) -> None:
+    """
+    Highlight the keywords in the report text. Send highlighted text to PyDoc pager view.
+
+    Args:
+        keywords (List[str]): The keywords to sanitize.
+        text (str): The report text.
+    """
     import pydoc
     from io import StringIO
 
@@ -89,7 +125,15 @@ def print_text_with_keywords(keywords: List[str], text: str) -> None:
 
 
 # ---- Client Specific Functions ---- #
-# ToDo - Add docstring for function.
 def white_rabbit_parse_report(text: str) -> str:
+    """
+    Sanitize Penrad Doctor signature with custom masking.
+
+    Args:
+        text (str): The report text.
+
+    Returns:
+        str: The report text with Penrad masked.
+    """
     penrad_pattern = r'[a-zA-Z]{2,3}/Penrad'
     return mask_regex_pattern(penrad_pattern, text)

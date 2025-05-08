@@ -19,7 +19,8 @@ def cli():
     pd.set_option('future.no_silent_downcasting', True)
 
 
-# ToDo: Automate the conversion of a text file to an Excel spreadsheet.
+# ToDo - Automate the conversion of a text file to an Excel spreadsheet.
+# ToDo - Create a DataFrame representing the studies with no missing series, write the result to a spreadsheet.
 @cli.command()
 @click.option('--sample', '-s', type=click.Path(exists=True), help='File path to Sample Spreadsheet')
 @click.option('--result', '-r', type=click.Path(), help='File path to Result Spreadsheet')
