@@ -1,7 +1,8 @@
-import pandas as pd
-from pandas import Series, DataFrame
 from pathlib import Path
 from typing import Set, List, Dict, Any
+
+import pandas as pd
+from pandas import Series, DataFrame
 
 from vega_tools.utils.regex_utils import create_keywords_pattern
 

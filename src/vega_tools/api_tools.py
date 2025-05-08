@@ -1,10 +1,11 @@
 import io
 import zipfile
-import pandas as pd
 from pathlib import Path
 
-from vega_tools.utils.rest_utils import RestAdapter
+import pandas as pd
+
 from vega_tools.settings import DATA_DIRECTORY
+from vega_tools.utils.rest_utils import RestAdapter
 
 
 # ToDo - Add docstrings for class.
@@ -12,7 +13,7 @@ class CensusNamesApi:
     def __init__(
             self,
             year: str,
-            save_file: Path | str=None
+            save_file: Path | str = None
     ):
         if year is '2010':
             base_url = 'https://www2.census.gov/topics/genealogy/2010surnames'

@@ -1,8 +1,9 @@
 import re
+from typing import List, Dict, Any
+
 import numpy as np
 from rich.console import Console
 from rich.text import Text
-from typing import List, Dict, Any
 
 from vega_tools.utils.regex_utils import create_keywords_pattern, mask_regex_pattern, mask_keywords
 
@@ -48,7 +49,7 @@ class ReportWriter:
 
 
 # ToDo - Add docstring for function.
-def sanitize_report_text(text: str, config: Dict[str, Any], full: bool=False) -> str:
+def sanitize_report_text(text: str, config: Dict[str, Any], full: bool = False) -> str:
     rw = ReportWriter(text)
     rw.sanitize_names()
     rw.sanitize_dates()
