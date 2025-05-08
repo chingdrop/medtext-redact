@@ -9,7 +9,7 @@ from vega_tools.text_tools import print_line_with_keywords, print_text_with_keyw
 from vega_tools.pandas_tools import read_excel_file, write_excel_file, audit_images, search_report_text
 from vega_tools.utils.config_loader import ConfigLoader
 from vega_tools.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
-from vega_tools.utils.file_utils import read_text_from_file
+from vega_tools.utils.files_and_storage import read_text_from_file
 
 
 @click.group()
