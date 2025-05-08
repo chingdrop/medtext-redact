@@ -17,7 +17,7 @@ class PhiSanitizer:
     """
 
     def __init__(self, text: str) -> None:
-        self.text = ''
+        self._text = ''
         if text is np.nan:
             text = ''
         self.__format_text(text)
@@ -25,10 +25,10 @@ class PhiSanitizer:
     def __format_text(self, text: str) -> None:
         text = text.strip().title()
         text = text.replace(',', ', ')
-        self.text = re.sub(r'\s+', ' ', text)
+        self._text = re.sub(r'\s+', ' ', text)
 
     def get_text(self):
-        return self.text
+        return self._text
 
     def sanitize_keywords(self, keywords: List[str]) -> None:
         """
@@ -37,18 +37,18 @@ class PhiSanitizer:
         Args:
             keywords (List[str]): The keywords to sanitize.
         """
-        self.text = mask_keywords(self.text, keywords)
+        self._text = mask_keywords(self._text, keywords)
 
     def sanitize_gender(self):
         self.sanitize_keywords(['male', 'female'])
 
     def sanitize_dates(self) -> None:
         date_pattern = r'(?:0[1-9]|1[0-2]|[1-9])\/(?:0[1-9]|[12][0-9]|3[01]|[1-9])\/\d{4}'
-        self.text = mask_regex_pattern(date_pattern, self.text)
+        self._text = mask_regex_pattern(date_pattern, self._text)
 
     def sanitize_age(self) -> None:
         age_pattern = r'\d{1,3}[-\s]?(?:years|yrs)?[-\s]?old'
-        self.text = mask_regex_pattern(age_pattern, self.text)
+        self._text = mask_regex_pattern(age_pattern, self._text)
 
     def sanitize_names(self) -> None:
         """Use custom name generator to iterate through the names and mask the report text."""
@@ -57,7 +57,7 @@ class PhiSanitizer:
         names = generate_common_names()
         for name in list(names):
             name_pattern = fr"\b({re.escape(name)})"
-            self.text = mask_regex_pattern(name_pattern, self.text)
+            self._text = mask_regex_pattern(name_pattern, self._text)
 
 
 def sanitize_report_text(text: str, config: Dict[str, Any], full: bool = False) -> str:
