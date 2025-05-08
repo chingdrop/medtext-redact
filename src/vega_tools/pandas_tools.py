@@ -7,6 +7,7 @@ from pandas import Series, DataFrame
 from vega_tools.utils.regex_utils import create_keywords_pattern
 
 
+# ToDo - Abstract this function to handle all types of structured data files.
 def read_excel_file(file_path: Path | str) -> DataFrame | None:
     """
     Reads an Excel file into a pandas DataFrame.
@@ -24,6 +25,7 @@ def read_excel_file(file_path: Path | str) -> DataFrame | None:
         return None
 
 
+# ToDo - Abstract this function to handle all types of structured data files.
 def write_excel_file(df: DataFrame, file_path: Path | str):
     """
     Writes a Pandas DataFrame to an Excel file.
@@ -86,11 +88,19 @@ def check_series_by_study(df: DataFrame, accession_col: str, series_col: str, de
         DataFrame: The resulting DataFrame containing the found and missing series.
     """
     study = df.groupby(accession_col)[series_col].apply(set)
-    missing = study[study.apply(lambda x: x != descriptions)]
+
+    found = study[study == descriptions]
+    found_df = found.reset_index()
+    found_df.columns = [accession_col, 'Found Set']
+    found_df.insert(1, 'Status', 'Found')
+
+    missing = study[study != descriptions]
     missing_df = missing.reset_index()
     missing_df.columns = [accession_col, 'Found Set']
-    missing_df['Missing Set'] = missing_df['Found Set'].apply(lambda x: descriptions.difference(x))
-    return missing_df
+    missing_df.insert(1, 'Status', 'Missing')
+    missing_df['Missing Set'] = missing_df['Found Set'].apply(lambda x: descriptions - x)
+
+    return pd.concat([found_df, missing_df], ignore_index=True)
 
 
 def audit_images(df: DataFrame, img_type: str, descriptions: Set[str], slice_thickness: int = 1) -> DataFrame:
@@ -116,8 +126,8 @@ def audit_images(df: DataFrame, img_type: str, descriptions: Set[str], slice_thi
         raise ValueError(f"Invalid img_type, must be '2D' or '3D': {img_type}")
 
     img_df = img_df[img_df['Series Description'].isin(descriptions)]
-    missing_df = check_series_by_study(
+    audit_df = check_series_by_study(
         img_df, 'Accession', 'Series Description', descriptions
     )
-    missing_df.insert(1, 'Image Type', img_type)
-    return missing_df
+    audit_df.insert(2, 'Image Type', img_type)
+    return audit_df

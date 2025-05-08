@@ -20,20 +20,19 @@ def cli():
 
 
 # ToDo - Automate the conversion of a text file to an Excel spreadsheet.
-# ToDo - Create a DataFrame representing the studies with no missing series, write the result to a spreadsheet.
 @cli.command()
 @click.option('--sample', '-s', type=click.Path(exists=True), help='File path to Sample Spreadsheet')
 @click.option('--result', '-r', type=click.Path(), help='File path to Result Spreadsheet')
 def audit_series_by_study(sample, result):
     data_df = read_excel_file(sample)
     data_df.replace('<NONE>', np.nan, inplace=True)
-    missing_2d_df = audit_images(data_df, '2D', DICOM_2D_SERIES_DESCRIPTIONS)
-    missing_3d_df = audit_images(data_df, '3D', DICOM_3D_SERIES_DESCRIPTIONS, 1)
-    missing_df = pd.concat([missing_2d_df, missing_3d_df])
-    missing_df.sort_values(['Accession'], inplace=True)
+    audit_2d_df = audit_images(data_df, '2D', DICOM_2D_SERIES_DESCRIPTIONS)
+    audit_3d_df = audit_images(data_df, '3D', DICOM_3D_SERIES_DESCRIPTIONS, 1)
+    audit_df = pd.concat([audit_2d_df, audit_3d_df])
+    audit_df.sort_values(['Accession'], inplace=True)
     with open(result, 'w', newline='') as csvfile:
         csvfile.write("Series Audit for 2D and 3D 1mm images by Study\n")
-        missing_df.to_csv(csvfile, index=False)
+        audit_df.to_csv(csvfile, index=False)
 
 
 # ToDo - Optimize the commands in parse_report, they are too slow.
