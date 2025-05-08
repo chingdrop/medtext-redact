@@ -57,7 +57,7 @@ class RestAdapter:
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
-            dict: JSON serialized response body or None if an error occurs.
+            None | bytes | str | Any: JSON serialized response body or None if an error occurs.
         """
         self.logger.debug(f"Request [{method}] - {self.base_url} {endpoint}")
         url = self.base_url + endpoint
@@ -126,7 +126,7 @@ class RestAdapter:
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
-            dict: JSON serialized response body or None if an error occurs.
+            None | bytes | str | Any: JSON serialized response body or None if an error occurs.
         """
         return self._send_request(
             'GET',
@@ -160,7 +160,7 @@ class RestAdapter:
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
-            dict: JSON serialized response body or None if an error occurs.
+            None | bytes | str | Any: JSON serialized response body or None if an error occurs.
         """
         return self._send_request(
             'POST',
@@ -195,7 +195,7 @@ class RestAdapter:
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
-            dict: JSON serialized response body or None if an error occurs.
+            None | bytes | str | Any: JSON serialized response body or None if an error occurs.
         """
         return self._send_request(
             'PUT',
@@ -228,7 +228,7 @@ class RestAdapter:
             allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
 
         Returns:
-            dict: JSON serialized response body or None if an error occurs.
+            None | bytes | str | Any: JSON serialized response body or None if an error occurs.
         """
         return self._send_request(
             'DELETE',
