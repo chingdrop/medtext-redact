@@ -17,6 +17,8 @@ def cli():
     """Command Line Interface for custom use cases in data analysis."""
     pd.set_option('future.no_silent_downcasting', True)
 
+
+# ToDo: Automate the conversion of a text file to an Excel spreadsheet.
 @cli.command()
 @click.option('--sample', '-s', type=click.Path(exists=True), help='File path to Sample Spreadsheet')
 @click.option('--result', '-r', type=click.Path(), help='File path to Result Spreadsheet')
@@ -32,7 +34,7 @@ def audit_series_by_study(sample, result):
         missing_df.to_csv(csvfile, index=False)
 
 
-# ToDo - Optimize the commands in parse_report, it is too slow.
+# ToDo - Optimize the commands in parse_report, they are too slow.
 @cli.group()
 @click.option(
     '--config', '-c', type=click.Path(exists=True), required=True,
