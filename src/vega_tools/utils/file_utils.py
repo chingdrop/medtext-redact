@@ -34,8 +34,13 @@ def read_text_from_file(filepath: Path | str) -> str | None:
         return None
 
 
-# ToDo - Add docstring for function.
 def create_directory(filepath: Path | str) -> None:
+    """
+    Creates a directory if it doesn't exist at the specified path.
+
+    Args:
+        filepath (Path | str): Path of the directory to be created.
+    """
     if isinstance(filepath, str):
         filepath = Path(filepath)
     filepath.mkdir(parents=True, exist_ok=True)

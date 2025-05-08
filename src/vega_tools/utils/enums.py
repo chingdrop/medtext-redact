@@ -1,9 +1,17 @@
+from typing import Iterator
+
 from vega_tools.utils.file_utils import read_text_from_file
 from vega_tools.api_tools import CensusApi
 from vega_tools.settings import DATA_DIRECTORY
 
 
-def generate_common_names():
+def generate_common_names() -> Iterator[str]:
+    """
+    Generator of common names using word list from the 2010 census.
+
+    Returns:
+        Iterator[str]: The generator of common names.
+    """
     census_api = CensusApi()
     save_file = census_api.get_save_file()
     if not save_file.exists():

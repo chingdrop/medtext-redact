@@ -23,8 +23,18 @@ def create_keywords_pattern(keywords: List[str]) -> Pattern[str]:
     return re.compile(fr'\b({"|".join(map(re.escape, keywords))})', re.IGNORECASE)
 
 
-# ToDo - Add docstring for function.
 def mask_regex_pattern(match: Pattern | str, text: str) -> str:
+    """
+    Use a regex pattern to mask matches in the given text.
+    The custom replacer function will mask letters and numbers as asterisks.
+
+    Args:
+        match (Pattern | str): A compiled regular expression pattern.
+        text (str): The text to mask.
+
+    Returns:
+        str: The masked text.
+    """
     if isinstance(match, str):
         match = re.compile(match, flags=re.IGNORECASE)
 
@@ -33,7 +43,16 @@ def mask_regex_pattern(match: Pattern | str, text: str) -> str:
     return re.sub(match, custom_repl, text)
 
 
-# ToDo - Add docstring for function.
 def mask_keywords(text: str, keywords: List[str]) -> str:
+    """
+    Given a list of keywords, create a regular expression pattern and mask the text.
+
+    Args:
+        text (str): The text to mask.
+        keywords (list[str]): List of keywords.
+
+    Returns:
+        str: The masked text.
+    """
     keywords_pattern = create_keywords_pattern(keywords)
     return mask_regex_pattern(keywords_pattern, text)
