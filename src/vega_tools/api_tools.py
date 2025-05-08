@@ -11,9 +11,18 @@ from vega_tools.settings import DATA_DIRECTORY
 class CensusNamesApi:
     def __init__(
             self,
-            base_url: str='https://www2.census.gov/topics/genealogy/2010surnames',
-            save_file: Path | str=DATA_DIRECTORY / 'census_names.txt'
+            year: str,
+            save_file: Path | str=None
     ):
+        if year is '2010':
+            base_url = 'https://www2.census.gov/topics/genealogy/2010surnames'
+        elif year is '2000':
+            base_url = 'https://www2.census.gov/topics/genealogy/2000surnames/'
+        else:
+            raise ValueError("Year must be '2010' or '2000'")
+
+        if save_file is None:
+            save_file = DATA_DIRECTORY / 'census_names.txt'
         self.save_file = save_file
         self._rest = RestAdapter(base_url=base_url)
 
