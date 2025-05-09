@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Set, List, Dict, Any
+from typing import Set, List, Any, Union, Optional, Callable, Dict
 
 import pandas as pd
 from pandas import Series, DataFrame
@@ -7,21 +7,47 @@ from pandas import Series, DataFrame
 from vega_tools.utils.regex_utils import create_keywords_pattern
 
 
-# ToDo - Abstract this function to handle all types of structured data files.
-def read_excel_file(file_path: Path | str) -> DataFrame | None:
+Reader = Callable[..., pd.DataFrame]
+READERS: Dict[str, Reader] = {
+    "csv": pd.read_csv,
+    "txt": pd.read_csv,
+    "xls": pd.read_excel,
+    "xlsx": pd.read_excel,
+    "json": pd.read_json,
+    "html": lambda path, **kw: pd.read_html(path, **kw)[0],
+    "htm": lambda path, **kw: pd.read_html(path, **kw)[0],
+}
+
+def read_structured_file(
+        file_path: Union[str, Path],
+        file_type: Optional[str] = None,
+        **kwargs
+) -> Optional[pd.DataFrame]:
     """
-    Reads an Excel file into a pandas DataFrame.
+    Reads a structured data file (CSV, Excel, JSON, Parquet, etc.) into a DataFrame.
 
     Args:
-        file_path (str | Path): Path to the Excel file.
+        file_path (Union[str, Path]): Structured data file to read.
+        file_type (Optional[str]): Override the extension detection; e.g. "csv", "json".
+        **kwargs: Passed verbatim to the underlying pandas' reader.
 
     Returns:
-        DataFrame | None: The data from the Excel sheet as a DataFrame.
+        A DataFrame, or None if the file type is unsupported or an error occurs.
     """
+    path = Path(file_path)
+    ext = (file_type or path.suffix.lstrip(".")).lower()
+
+    reader = READERS.get(ext)
+    if reader is None:
+        print(f"Unsupported file type: .{ext}")
+        return None
+
     try:
-        return pd.read_excel(file_path, engine='openpyxl')
+        if ext in ("xls", "xlsx") and "engine" not in kwargs:
+            kwargs.setdefault("engine", "openpyxl")
+        return reader(path, **kwargs)
     except Exception as e:
-        print(f"Error reading Excel file: {e}")
+        print(f"Error reading .{ext} file at {path!r}: {e}")
         return None
 
 
