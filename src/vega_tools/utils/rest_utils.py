@@ -1,235 +1,111 @@
 import logging
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional, Union
+from urllib.parse import urljoin
 
 import certifi
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+
+@dataclass
+class RestAdapterConfig:
+    base_url: str
+    headers: Dict[str, str] = field(default_factory=dict)
+    auth: Optional[Any] = None
+    proxies: Dict[str, str] = field(default_factory=dict)
+    timeout: Optional[float] = None
+    verify: Union[bool, str] = True
+    retries: int = 3
+    backoff_factor: float = 0.3
 
 
 class RestAdapter:
-    """Rest adapter class uses persistent session and sets default configuration.
-
-    Args:
-        base_url (str): The base URL for the API
-        headers (dict): Default headers (optional)
-        auth (Any): Authentication information (optional)
-        proxies (dict): Dictionary of proxy addresses for HTTP(s) (optional)
-        logger (Logger): Custom logger object (optional)
+    """
+    A thin wrapper around `requests.Session()` with:
+      - automatic retries
+      - JSON serialization
+      - unified request method
+      - optional verbose logging
     """
 
-    def __init__(self, base_url: str = '', headers: dict = None, auth=None, proxies: dict = None, logger=None):
-        self.base_url = base_url
+    def __init__(self, config: RestAdapterConfig, logger: Optional[logging.Logger] = None):
+        self.config = config
         self.logger = logger or logging.getLogger(__name__)
 
         self.session = requests.Session()
-        if headers:
-            self.session.headers.update(headers)
-        if auth:
-            self.session.auth = auth
-        if proxies:
-            self.session.proxies.update(proxies)
+        self.session.headers.update(config.headers)
+        if config.auth:
+            self.session.auth = config.auth
+        if config.proxies:
+            self.session.proxies.update(config.proxies)
 
-    def _send_request(
+        retry_strategy = Retry(
+            total=config.retries,
+            backoff_factor=config.backoff_factor,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["HEAD", "GET", "OPTIONS", "POST", "PUT", "DELETE"],
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        self.session.mount("https://", adapter)
+        self.session.mount("http://", adapter)
+
+    def request(
             self,
             method: str,
             endpoint: str,
-            data: dict = None,
-            params: dict = None,
-            cookies: dict = None,
-            timeout: int = None,
-            ssl_verify: bool = True,
-            allow_redirects: bool = True
-    ) -> None | bytes | str | Any:
-        """Prepare the request to be sent. Send the prepared request and return the response.
-
-        Args:
-            method (str): HTTP method ('GET', 'POST', etc.)
-            endpoint (str): API endpoint (e.g., '/users', '/posts')
-            params (dict): URL parameters (optional)
-            data (dict): Data to send in the request body (optional)
-            cookies (dict): Data to be used as the cookie in the request (optional)
-            timeout (int): Number of seconds to wait for a response (optional)
-            allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
-
-        Returns:
-            None | bytes | str | Any: JSON serialized response body or None if an error occurs.
+            *,
+            params: Optional[Dict[str, Any]] = None,
+            data: Optional[Dict[str, Any]] = None,
+            json: Optional[Any] = None,
+            headers: Optional[Dict[str, str]] = None,
+            cookies: Optional[Dict[str, str]] = None,
+            timeout: Optional[float] = None,
+            allow_redirects: bool = True,
+    ) -> Union[Dict[str, Any], str, bytes]:
         """
-        self.logger.debug(f"Request [{method}] - {self.base_url} {endpoint}")
-        url = self.base_url + endpoint
-        req = requests.Request(
-            method,
-            url,
-            headers=self.session.headers,
+        Make an HTTP request and return parsed JSON, text, or raw bytes.
+
+        Raises:
+            requests.HTTPError on 4xx/5xx (after retries).
+        """
+        url = urljoin(self.config.base_url, endpoint)
+        req_headers = dict(self.session.headers)
+        if headers:
+            req_headers.update(headers)
+
+        self.logger.debug(f"→ {method} {url} params={params} json={json or data}")
+        resp = self.session.request(
+            method=method,
+            url=url,
             params=params,
             data=data,
-            cookies=cookies
-        )
-        prep_req = self.session.prepare_request(req)
-        if ssl_verify:
-            ca_bundle = certifi.where()
-        else:
-            ca_bundle = False
-
-        try:
-            response = self.session.send(
-                prep_req,
-                verify=ca_bundle,
-                timeout=timeout,
-                allow_redirects=allow_redirects
-            )
-            response.raise_for_status()
-            self.logger.debug(f"Status [{response.status_code}] - {response.reason}")
-            if response:
-                content_type = response.headers.get('Content-Type', '').lower()
-                if 'application/json' in content_type:
-                    return response.json()
-                elif 'text/html' in content_type:
-                    return response.text
-                else:
-                    return response.content
-            return None
-        except requests.exceptions.HTTPError as errh:
-            self.logger.error(f"HTTP Error: {errh}")
-            return None
-        except requests.exceptions.ConnectionError as errc:
-            self.logger.error(f"Error Connecting: {errc}")
-            return None
-        except requests.exceptions.Timeout as errt:
-            self.logger.error(f"Timeout Error: {errt}")
-            return None
-        except requests.exceptions.RequestException as err:
-            self.logger.error(f"An Unexpected Error: {err}")
-            return None
-
-    def get(
-            self,
-            endpoint: str,
-            params: dict = None,
-            cookies: dict = None,
-            timeout: int = None,
-            ssl_verify: bool = True,
-            allow_redirects: bool = True
-    ) -> None | bytes | str | Any:
-        """Make a GET request.
-
-        Args:
-            endpoint (str): API endpoint
-            params (dict): URL parameters (optional)
-            cookies (dict): Data to be used as the cookie in the request (optional)
-            timeout (int): Number of seconds to wait for a response (optional)
-            ssl_verify (bool): Enable SSL verification (optional)
-            allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
-
-        Returns:
-            None | bytes | str | Any: JSON serialized response body or None if an error occurs.
-        """
-        return self._send_request(
-            'GET',
-            endpoint,
-            params=params,
+            json=json,
+            headers=req_headers,
             cookies=cookies,
-            timeout=timeout,
-            ssl_verify=ssl_verify,
-            allow_redirects=allow_redirects
+            timeout=timeout or self.config.timeout,
+            verify=self.config.verify if self.config.verify is not True else certifi.where(),
+            allow_redirects=allow_redirects,
         )
+        resp.raise_for_status()
+        self.logger.debug(f"← {resp.status_code} {resp.headers.get('Content-Type')}")
 
-    def post(
-            self,
-            endpoint: str,
-            data: dict = None,
-            params: dict = None,
-            cookies: dict = None,
-            timeout: int = None,
-            ssl_verify: bool = True,
-            allow_redirects: bool = True
-    ) -> None | bytes | str | Any:
-        """Make a POST request.
+        ctype = resp.headers.get("Content-Type", "").lower()
+        if "application/json" in ctype:
+            return resp.json()
+        if "text" in ctype or "html" in ctype:
+            return resp.text
+        return resp.content
 
-        Args:
-            endpoint (str): API endpoint
-            data (dict): Data to send in the request body
-            params (dict): URL parameters (optional)
-            cookies (dict): Data to be used as the cookie in the request (optional)
-            timeout (int): Number of seconds to wait for a response (optional)
-            ssl_verify (bool): Enable SSL verification (optional)
-            allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
+    def get(self, endpoint: str, **kwargs):
+        return self.request("GET", endpoint, **kwargs)
 
-        Returns:
-            None | bytes | str | Any: JSON serialized response body or None if an error occurs.
-        """
-        return self._send_request(
-            'POST',
-            endpoint,
-            data=data,
-            params=params,
-            cookies=cookies,
-            timeout=timeout,
-            ssl_verify=ssl_verify,
-            allow_redirects=allow_redirects
-        )
+    def post(self, endpoint: str, **kwargs):
+        return self.request("POST", endpoint, **kwargs)
 
-    def put(
-            self,
-            endpoint: str,
-            data: dict = None,
-            params: dict = None,
-            cookies: dict = None,
-            timeout: int = None,
-            ssl_verify: bool = True,
-            allow_redirects: bool = True
-    ) -> None | bytes | str | Any:
-        """Make a PUT request.
+    def put(self, endpoint: str, **kwargs):
+        return self.request("PUT", endpoint, **kwargs)
 
-        Args:
-            endpoint (str): API endpoint
-            data (dict): Data to send in the request body
-            params (dict): URL parameters (optional)
-            cookies (dict): Data to be used as the cookie in the request (optional)
-            timeout (int): Number of seconds to wait for a response (optional)
-            ssl_verify (bool): Enable SSL verification (optional)
-            allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
-
-        Returns:
-            None | bytes | str | Any: JSON serialized response body or None if an error occurs.
-        """
-        return self._send_request(
-            'PUT',
-            endpoint,
-            data=data,
-            params=params,
-            cookies=cookies,
-            timeout=timeout,
-            ssl_verify=ssl_verify,
-            allow_redirects=allow_redirects
-        )
-
-    def delete(
-            self,
-            endpoint: str,
-            params: dict = None,
-            cookies: dict = None,
-            timeout: int = None,
-            ssl_verify: bool = True,
-            allow_redirects: bool = True
-    ) -> None | bytes | str | Any:
-        """Make a DELETE request.
-
-        Args:
-            endpoint (str): API endpoint
-            params (dict): URL parameters (optional)
-            cookies (dict): Data to be used as the cookie in the request (optional)
-            timeout (int): Number of seconds to wait for a response (optional)
-            ssl_verify (bool): Enable SSL verification (optional)
-            allow_redirects (bool): Allow HTTP redirects to different URLs (optional)
-
-        Returns:
-            None | bytes | str | Any: JSON serialized response body or None if an error occurs.
-        """
-        return self._send_request(
-            'DELETE',
-            endpoint,
-            params=params,
-            cookies=cookies,
-            timeout=timeout,
-            ssl_verify=ssl_verify,
-            allow_redirects=allow_redirects
-        )
+    def delete(self, endpoint: str, **kwargs):
+        return self.request("DELETE", endpoint, **kwargs)
