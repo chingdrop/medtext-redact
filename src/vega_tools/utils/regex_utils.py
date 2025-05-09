@@ -60,7 +60,17 @@ def mask_keywords(text: str, keywords: List[str]) -> str:
 
 
 class NameMasker:
-    def __init__(self, names: list[str]):
+    """
+    Uses Aho-Corasick to create a dictionary of patterns and repls to optimize masking for large datasets.
+
+    Args:
+        names (List[str]): List of names.
+
+    Attributes:
+        automaton (Automation): Aho-Corasick automaton object.
+    """
+
+    def __init__(self, names: List[str]):
         import ahocorasick
 
         self.automaton = ahocorasick.Automaton()
@@ -70,17 +80,20 @@ class NameMasker:
 
     def mask(self, text: str) -> str:
         """
-        Walk the text once, replacing any matched key
-        with its associated mask.
+        Walk the text once, replacing any matched key with its associated mask.
+
+        Args:
+            text (str): The text to mask.
+
+        Returns:
+            str: The masked text.
         """
         result = []
         last_idx = 0
 
         for end_idx, mask in self.automaton.iter(text):
             start_idx = end_idx - len(mask) + 1
-            # append text before the match
             result.append(text[last_idx:start_idx])
-            # append the mask
             result.append(mask)
             last_idx = end_idx + 1
 
