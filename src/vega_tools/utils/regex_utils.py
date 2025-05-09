@@ -97,6 +97,5 @@ class NameMasker:
             result.append(mask)
             last_idx = end_idx + 1
 
-        # append any trailing text
         result.append(text[last_idx:])
         return ''.join(result)
