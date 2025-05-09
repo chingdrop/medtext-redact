@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from click import Context
 
-from vega_tools.pandas_tools import read_excel_file, write_excel_file, audit_images, search_report_text
+from vega_tools.pandas_tools import read_structured_file, write_structured_file, audit_images, search_report_text
 from vega_tools.text_tools import print_line_with_keywords, print_text_with_keywords, white_rabbit_parse_report, \
     sanitize_report_text
 from vega_tools.utils.config_loader import ConfigLoader
@@ -19,22 +19,17 @@ def cli():
     pd.set_option('future.no_silent_downcasting', True)
 
 
-# ToDo - Automate the conversion of a text file to an Excel spreadsheet.
 @cli.command()
 @click.option('--sample', '-s', type=click.Path(exists=True), help='File path to Sample Spreadsheet')
 @click.option('--result', '-r', type=click.Path(), help='File path to Result Spreadsheet')
 def audit_series_by_study(sample, result):
-    data_df = read_excel_file(sample)
+    data_df = read_structured_file(sample)
     data_df.replace('<NONE>', np.nan, inplace=True)
     audit_2d_df = audit_images(data_df, '2D', DICOM_2D_SERIES_DESCRIPTIONS)
     audit_3d_df = audit_images(data_df, '3D', DICOM_3D_SERIES_DESCRIPTIONS, 1)
     audit_df = pd.concat([audit_2d_df, audit_3d_df])
     audit_df.sort_values(['Accession'], inplace=True)
-    with open(result, 'w', newline='') as csvfile:
-        # ToDo - Find a way to dynamically generate the title of the spreadsheet.
-        csvfile.write("Series Audit of 2D and 3D 1mm images by Accession\n")
-        # ToDo - Find a way to save the file to an Excel spreadsheet instead.
-        audit_df.to_csv(csvfile, index=False)
+    write_structured_file(audit_df, result)
 
 
 # ToDo - Optimize the commands in parse_report, they are too slow.
@@ -91,10 +86,10 @@ def single(ctx: Context, text, keywords, keywords_file, verbose):
 @click.pass_context
 def spreadsheet(ctx: Context, sample, result):
     config = ctx.obj.copy()
-    df = read_excel_file(sample)
+    df = read_structured_file(sample)
     result_df = df[['Accession', 'ReportText']]
     result_df.replace('<NONE>', np.nan, inplace=True)
     result_df['ReportText'] = result_df['ReportText'].apply(lambda x: sanitize_report_text(x, config=config))
     result_df['ReportText'] = result_df['ReportText'].apply(white_rabbit_parse_report)
     result_df = search_report_text(df, config=config)
-    write_excel_file(result_df, result)
+    write_structured_file(result_df, result)

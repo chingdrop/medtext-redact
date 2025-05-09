@@ -51,19 +51,53 @@ def read_structured_file(
         return None
 
 
-# ToDo - Abstract this function to handle all types of structured data files.
-def write_excel_file(df: DataFrame, file_path: Path | str):
+Writer = Callable[..., None]
+WRITERS: Dict[str, Writer] = {
+    "csv": lambda df, path, **kw: df.to_csv(path, **kw),
+    "txt": lambda df, path, **kw: df.to_csv(path, **kw),
+    "xls": lambda df, path, **kw: df.to_excel(path, **kw),
+    "xlsx": lambda df, path, **kw: df.to_excel(path, **kw),
+    "json": lambda df, path, **kw: df.to_json(path, **kw),
+    "html": lambda df, path, **kw: df.to_html(path, **kw),
+    "htm": lambda df, path, **kw: df.to_html(path, **kw),
+}
+
+def write_structured_file(
+        df: pd.DataFrame,
+        file_path: Union[str, Path],
+        file_type: Optional[str] = None,
+        **kwargs
+) -> bool:
     """
-    Writes a Pandas DataFrame to an Excel file.
+    Writes a DataFrame to a structured-data file (CSV, Excel, JSON, Parquet, etc.).
 
     Args:
-        df (DataFrame): The DataFrame to write.
-        file_path (str | Path): Path to the Excel file.
+        df (DataFrame): The DataFrame you want to write.
+        file_path (Union[str, Path]): Output file path.
+        file_type (Optional[str]): Override the extension detection; e.g. "csv", "json".
+        **kwargs: Passed along to the underlying pandas writer
+            (e.g. index=False, sheet_name="Data", orient="records").
+
+    Returns:
+        True if write succeeds; False on unsupported type or error.
     """
+    path = Path(file_path)
+    ext = (file_type or path.suffix.lstrip(".")).lower()
+
+    writer = WRITERS.get(ext)
+    if writer is None:
+        print(f"Unsupported file type for writing: .{ext}")
+        return False
+
     try:
-        df.to_excel(file_path, index=False, engine='openpyxl')
+        if ext in ("xls", "xlsx") and "engine" not in kwargs:
+            kwargs.setdefault("engine", "openpyxl")
+
+        writer(df, path, **kwargs)
+        return True
     except Exception as e:
-        print(f"Error writing Excel file: {e}")
+        print(f"Error writing .{ext} file to {path!r}: {e}")
+        return False
 
 
 def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
