@@ -7,7 +7,7 @@ from click import Context
 
 from vega_tools.pandas_tools import read_structured_file, write_structured_file, audit_images, search_report_text
 from vega_tools.text_tools import print_line_with_keywords, print_text_with_keywords, white_rabbit_parse_report, \
-    sanitize_report_text
+    PhiSanitizer
 from vega_tools.utils.config_loader import ConfigLoader
 from vega_tools.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
 from vega_tools.utils.files_and_storage import read_text_from_file
@@ -68,7 +68,7 @@ def single(ctx: Context, text, keywords, keywords_file, verbose):
         keywords = read_text_from_file(keywords_file)
         keywords = keywords.splitlines()
 
-    result_text = sanitize_report_text(input_text, config=config)
+    result_text = PhiSanitizer(input_text).sanitize_all(config, full=True).text
     result_text = white_rabbit_parse_report(result_text)
     click.echo(('-' * 104) + '\n')
     if verbose:
@@ -89,7 +89,9 @@ def spreadsheet(ctx: Context, sample, result):
     df = read_structured_file(sample)
     result_df = df[['Accession', 'ReportText']]
     result_df.replace('<NONE>', np.nan, inplace=True)
-    result_df['ReportText'] = result_df['ReportText'].apply(lambda x: sanitize_report_text(x, config=config))
+    result_df['ReportText'] = result_df['ReportText'].apply(
+        lambda x: PhiSanitizer(x).sanitize_all(config, full=True).text
+    )
     result_df['ReportText'] = result_df['ReportText'].apply(white_rabbit_parse_report)
     result_df = search_report_text(df, config=config)
     write_structured_file(result_df, result)
