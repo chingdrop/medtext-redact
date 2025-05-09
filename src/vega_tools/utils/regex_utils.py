@@ -57,3 +57,33 @@ def mask_keywords(text: str, keywords: List[str]) -> str:
     """
     keywords_pattern = create_keywords_pattern(keywords)
     return mask_regex_pattern(keywords_pattern, text)
+
+
+class NameMasker:
+    def __init__(self, names: list[str]):
+        import ahocorasick
+
+        self.automaton = ahocorasick.Automaton()
+        for name in names:
+            self.automaton.add_word(name, "*" * len(name))
+        self.automaton.make_automaton()
+
+    def mask(self, text: str) -> str:
+        """
+        Walk the text once, replacing any matched key
+        with its associated mask.
+        """
+        result = []
+        last_idx = 0
+
+        for end_idx, mask in self.automaton.iter(text):
+            start_idx = end_idx - len(mask) + 1
+            # append text before the match
+            result.append(text[last_idx:start_idx])
+            # append the mask
+            result.append(mask)
+            last_idx = end_idx + 1
+
+        # append any trailing text
+        result.append(text[last_idx:])
+        return ''.join(result)

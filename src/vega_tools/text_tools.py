@@ -5,7 +5,7 @@ import numpy as np
 from rich.console import Console
 from rich.text import Text
 
-from vega_tools.utils.regex_utils import create_keywords_pattern, mask_regex_pattern, mask_keywords
+from vega_tools.utils.regex_utils import create_keywords_pattern, mask_regex_pattern, mask_keywords, NameMasker
 
 
 class PhiSanitizer:
@@ -52,12 +52,11 @@ class PhiSanitizer:
 
     def sanitize_names(self) -> None:
         """Use custom name generator to iterate through the names and mask the report text."""
-        from vega_tools.utils.enums import generate_common_names
+        from vega_tools.utils.enums import load_census_names
 
-        names = generate_common_names()
-        for name in list(names):
-            name_pattern = fr"\b({re.escape(name)})"
-            self._text = mask_regex_pattern(name_pattern, self._text)
+        names = load_census_names()
+        nm = NameMasker(names)
+        self._text = nm.mask(self._text)
 
 
 def sanitize_report_text(text: str, config: Dict[str, Any], full: bool = False) -> str:
