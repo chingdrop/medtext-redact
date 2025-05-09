@@ -1,46 +1,116 @@
 import json
+import logging
+from collections.abc import MutableMapping
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict, Iterator, Union, Optional
 
 
-class ConfigLoader:
+class ConfigError(Exception):
+    """Custom exception for configuration loading errors."""
+    pass
+
+
+class ConfigLoader(MutableMapping):
     """
-    Loads a JSON configuration file to a dictionary.
+    Loads and provides read-only access to a JSON or YAML configuration file.
 
-    Args:
-        filepath (Path | str): File path to configuration file.
-
-    Attributes:
-        config (dict): The configuration dictionary.
+    Features:
+      - Supports JSON (and optionally YAML if PyYAML installed).
+      - Mapping interface: dict-like access and iteration.
+      - Dot-separated nested key lookup via .get(key, default).
+      - Automatic reloading via .reload().
+      - Optional environment-variable expansion in string values.
     """
 
-    def __init__(self, filepath: Path | str):
-        if isinstance(filepath, str):
-            filepath = Path(filepath)
-        self.filepath = filepath
-        self.config = self._load()
+    def __init__(
+            self,
+            filepath: Union[Path, str],
+            *,
+            env_expand: bool = False,
+            logger: Optional[logging.Logger] = None,
+    ) -> None:
+        self.filepath = Path(filepath)
+        self.env_expand = env_expand
+        self.logger = logger or logging.getLogger(__name__)
+        self._data: Dict[str, Any] = {}
+        self.reload()
 
-    def _load(self) -> Dict[str, Any]:
+    def reload(self) -> None:
         """
-        Loads the configuration file into a dictionary from a JSON file.
-
-        Returns:
-            Dict[str, Any]: The configuration dictionary.
-
-        Raises:
-            FileNotFoundError: If the configuration file does not exist.
-            ValueError: If the configuration file is malformed.
+        Reload the configuration file into memory.
+        Raises ConfigError if the file is missing or malformed.
         """
         if not self.filepath.exists():
-            raise FileNotFoundError(f"Config file not found: {self.filepath}")
-        with open(self.filepath, 'r') as file:
-            try:
-                return json.load(file)
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid JSON error: {e}")
+            raise ConfigError(f"Configuration file not found: {self.filepath}")
 
-    def get(self, key, default=None):
-        return self.config.get(key, default)
+        try:
+            text = self.filepath.read_text(encoding='utf-8')
 
-    def as_kwargs(self):
-        return self.config
+            # Determine format by extension
+            if self.filepath.suffix.lower() in ['.yaml', '.yml']:
+                import yaml
+                data = yaml.safe_load(text)
+            else:
+                data = json.loads(text)
+
+            if not isinstance(data, dict):
+                raise ConfigError("Configuration root must be a JSON/YAML object")
+
+            self._data = data
+            self.logger.debug(f"Loaded config from {self.filepath}")
+        except json.JSONDecodeError as e:
+            raise ConfigError(f"JSON syntax error in {self.filepath}: {e}")
+        except Exception as e:
+            if isinstance(e, ConfigError):
+                raise
+            raise ConfigError(f"Error loading config: {e}")
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """
+        Retrieve a value by key.
+        Supports dot notation for nested dictionaries.
+        Expands environment variables if env_expand=True and value is a string.
+        """
+        parts = key.split('.')
+        current: Any = self._data
+        for part in parts:
+            if isinstance(current, dict) and part in current:
+                current = current[part]
+            else:
+                return default
+        if self.env_expand and isinstance(current, str):
+            from os import path
+            # expand ${VAR} and ~ for homedir
+            return path.expanduser(path.expandvars(current))
+        return current
+
+    # MutableMapping interface
+    def __getitem__(self, key: str) -> Any:
+        if key in self._data:
+            return self._data[key]
+        raise KeyError(key)
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._data)
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    def __contains__(self, key: object) -> bool:
+        return key in self._data
+
+    # Prevent modification
+    def __setitem__(self, key: str, value: Any) -> None:
+        raise TypeError("ConfigLoader is read-only")
+
+    def __delitem__(self, key: str) -> None:
+        raise TypeError("ConfigLoader is read-only")
+
+    def as_dict(self) -> Dict[str, Any]:
+        """
+        Return the entire configuration as a standard dict (shallow copy).
+        """
+        return dict(self._data)
+
+    def __repr__(self) -> str:
+        return f"<ConfigLoader path={self.filepath!r} keys={list(self._data.keys())!r}>"
