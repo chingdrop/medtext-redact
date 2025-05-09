@@ -7,11 +7,11 @@ from vega_tools.api_tools import CensusNamesApi
 
 def load_census_names(year: str = "2010") -> List[str]:
     api = CensusNamesApi(year=year)
-    path = api.get_save_file()
-    if not path.exists():
-        api.download_name_list()
+    file_path = api.save_file
+    if not file_path.exists():
+        api.download_and_save()
 
-    df = pd.read_csv(path, header=None, names=["name"])
+    df = pd.read_csv(file_path, header=None, names=["name"])
     return [n.title() for n in df["name"]]
 
 
