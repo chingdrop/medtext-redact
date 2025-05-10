@@ -6,7 +6,6 @@ from pandas import Series, DataFrame
 
 from vega_tools.utils.regex_utils import compile_keywords_pattern
 
-
 Reader = Callable[..., pd.DataFrame]
 READERS: Dict[str, Reader] = {
     "csv": pd.read_csv,
@@ -17,6 +16,7 @@ READERS: Dict[str, Reader] = {
     "html": lambda path, **kw: pd.read_html(path, **kw)[0],
     "htm": lambda path, **kw: pd.read_html(path, **kw)[0],
 }
+
 
 def read_structured_file(
         file_path: Union[str, Path],
@@ -61,6 +61,7 @@ WRITERS: Dict[str, Writer] = {
     "html": lambda df, path, **kw: df.to_html(path, **kw),
     "htm": lambda df, path, **kw: df.to_html(path, **kw),
 }
+
 
 def write_structured_file(
         df: pd.DataFrame,
@@ -134,10 +135,10 @@ def search_report_text(df: DataFrame, config: Dict[str, Any]) -> DataFrame:
 
 
 def check_series_by_study(
-    df: pd.DataFrame,
-    accession_col: str,
-    series_col: str,
-    descriptions: Set[str]
+        df: pd.DataFrame,
+        accession_col: str,
+        series_col: str,
+        descriptions: Set[str]
 ) -> pd.DataFrame:
     """
     Summarize which required series are present or missing per study.
@@ -174,14 +175,14 @@ def check_series_by_study(
 
 
 def audit_images(
-    df: pd.DataFrame,
-    img_type: str,
-    descriptions: Set[str],
-    slice_thickness: int = 1,
-    accession_col: str = 'Accession',
-    series_col: str = 'Series Description',
-    frames_col: str = 'Number of Frames',
-    thickness_col: str = 'Slice Thickness'
+        df: pd.DataFrame,
+        img_type: str,
+        descriptions: Set[str],
+        slice_thickness: int = 1,
+        accession_col: str = 'Accession',
+        series_col: str = 'Series Description',
+        frames_col: str = 'Number of Frames',
+        thickness_col: str = 'Slice Thickness'
 ) -> pd.DataFrame:
     """
     Audit image series by study, filtering on 2D vs 3D and summarizing completeness.
