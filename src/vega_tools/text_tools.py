@@ -56,7 +56,6 @@ class PhiSanitizer:
         self._format_text()
 
     def _format_text(self) -> None:
-        # Normalize whitespace and spacing around commas
         text = re.sub(r'\s+', ' ', self._text)
         text = re.sub(r'\s*,\s*', ', ', text)
         if self.title_case:
@@ -151,7 +150,6 @@ def print_lines_with_keywords(
     console = console or Console()
     pattern = compile_keywords_pattern(keywords, boundary=boundary)
 
-    # split into sentences on ., ?, or !, keeping the delimiter
     sentences = re.split(r'(?<=[.?!])\s+', text)
     for sentence in sentences:
         if pattern.search(sentence):
