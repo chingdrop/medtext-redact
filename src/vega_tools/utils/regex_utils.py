@@ -1,62 +1,103 @@
 import re
-from re import Pattern, Match
-from typing import List
+from typing import List, Union, Pattern, Match
 
 
-# ToDo - Add parameter to select whether to add word boundaries
-def create_keywords_pattern(keywords: List[str]) -> Pattern[str]:
+def create_keywords_pattern(
+        keywords: List[str],
+        *,
+        boundary: bool = True,
+        flags: int = re.IGNORECASE
+) -> Pattern[str]:
     """
-    Create a compiled regular expression pattern to match any of the given keywords.
+    Build a regex that matches any of the given keywords.
 
     Args:
-        keywords (list[str]): List of keywords.
+        keywords: list of literal strings to match.
+        boundary: if True, wrap each in `(?<!\w)...(?!\w)` to force whole-word matches.
+        flags: regex flags to compile with (e.g. IGNORECASE).
 
     Returns:
-        Pattern: A compiled regular expression pattern.
+        A compiled Pattern.
 
     Raises:
-        TypeError: If any of the given keywords is not a string.
+        ValueError  – if keywords is empty.
+        TypeError   – if any keyword is not a str.
     """
-    if not all(isinstance(keyword, str) for keyword in keywords):
-        raise TypeError('Keywords must be a list of strings')
-    # noinspection RegExpUnnecessaryNonCapturingGroup
-    return re.compile(fr'\b({"|".join(map(re.escape, keywords))})', re.IGNORECASE)
+    if not keywords:
+        raise ValueError("`keywords` must contain at least one entry")
+    if not all(isinstance(k, str) for k in keywords):
+        raise TypeError("All keywords must be str")
+
+    # Sort by length descending so longer ones get matched first (“Washington” before “Wash”)
+    unique = sorted(set(keywords), key=len, reverse=True)
+    escaped = [re.escape(k) for k in unique]
+    group = "|".join(escaped)
+
+    if boundary:
+        # (?<!\w) and (?!\w) are more robust than \b when keywords contain underscores, etc.
+        pattern = rf"(?<!\w)(?:{group})(?!\w)"
+    else:
+        pattern = rf"(?:{group})"
+
+    return re.compile(pattern, flags)
 
 
-def mask_regex_pattern(match: Pattern | str, text: str) -> str:
+def mask_regex_pattern(
+        pattern: Union[str, Pattern[str]],
+        text: str,
+        *,
+        mask_char: str = '*',
+        char_class: str = r'\w'
+) -> str:
     """
-    Use a regex pattern to mask matches in the given text.
-    The custom replacer function will mask letters and numbers as asterisks.
+    Mask all matches of `pattern` in `text`, replacing each alphanumeric
+    character with `mask_char` (default '*').
 
     Args:
-        match (Pattern | str): A compiled regular expression pattern.
-        text (str): The text to mask.
+        pattern: a compiled Pattern or a regex string.
+        text: the input to mask.
+        mask_char: the single-character string to replace each matched char with.
+        char_class: a character class (e.g. '\\w', '[A-Za-z0-9]')
+                    specifying which characters inside the match to mask.
 
     Returns:
-        str: The masked text.
+        The masked string.
     """
-    if isinstance(match, str):
-        match = re.compile(match, flags=re.IGNORECASE)
+    if isinstance(pattern, str):
+        pattern = re.compile(pattern, flags=re.IGNORECASE)
 
-    def custom_repl(value: Match) -> str:
-        return re.sub(r'[A-Za-z0-9]', '*', value.group())
+    def repl(m: Match[str]) -> str:
+        s = m.group(0)
+        # Only mask characters matching `char_class`; leave punctuation/spaces
+        return ''.join(
+            mask_char if re.fullmatch(char_class, c) else c
+            for c in s
+        )
 
-    return re.sub(match, custom_repl, text)
+    return pattern.sub(repl, text)
 
 
-def mask_keywords(text: str, keywords: List[str]) -> str:
+def mask_keywords(
+        text: str,
+        keywords: List[str],
+        *,
+        boundary: bool = True,
+        mask_char: str = '*'
+) -> str:
     """
-    Given a list of keywords, create a regular expression pattern and mask the text.
+    Shortcut for masking a list of keywords in `text`.
 
     Args:
-        text (str): The text to mask.
-        keywords (list[str]): List of keywords.
+        text:       the input string.
+        keywords:   list of words/phrases to mask.
+        boundary:   whether to force whole-word matches.
+        mask_char:  character to use for masking.
 
     Returns:
-        str: The masked text.
+        The masked string.
     """
-    keywords_pattern = create_keywords_pattern(keywords)
-    return mask_regex_pattern(keywords_pattern, text)
+    pat = create_keywords_pattern(keywords, boundary=boundary)
+    return mask_regex_pattern(pat, text, mask_char=mask_char)
 
 
 class NameMasker:
