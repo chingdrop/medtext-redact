@@ -133,61 +133,88 @@ def search_report_text(df: DataFrame, config: Dict[str, Any]) -> DataFrame:
     return df
 
 
-def check_series_by_study(df: DataFrame, accession_col: str, series_col: str, descriptions: Set[str]) -> DataFrame:
+def check_series_by_study(
+    df: pd.DataFrame,
+    accession_col: str,
+    series_col: str,
+    descriptions: Set[str]
+) -> pd.DataFrame:
     """
-    Groups series descriptions by accession number.
-    Uses a sample Set of strings to compare the constituency of Series Description.
+    Summarize which required series are present or missing per study.
 
     Args:
-        df (DataFrame): The DataFrame to analyze.
-        accession_col (str): The column name of the accession ID.
-        series_col (str): The column name of the series description.
-        descriptions (Set[str]): The set of descriptions of series of images.
+        df: DataFrame containing image series rows.
+        accession_col: Column name identifying each study (accession).
+        series_col: Column name for series descriptions.
+        descriptions: Set of expected series descriptions.
 
     Returns:
-        DataFrame: The resulting DataFrame containing the found and missing series.
+        DataFrame with one row per accession and columns:
+          - Found Set: actual set of descriptions found
+          - Missing Set: descriptions not found (empty if all present)
+          - Status: 'Found' if no missing, else 'Missing'
     """
-    study = df.groupby(accession_col)[series_col].apply(set)
+    grouped = df.groupby(accession_col)[series_col].agg(lambda vals: set(vals.dropna()))
 
-    found = study[study == descriptions]
-    found_df = found.reset_index()
-    found_df.columns = [accession_col, 'Found Set']
-    found_df.insert(1, 'Status', 'Found')
+    records = []
+    for accession, found in grouped.items():
+        missing = descriptions - found
+        status = 'Found' if not missing else 'Missing'
+        records.append({
+            accession_col: accession,
+            'Found Set': found if found else pd.NA,
+            'Missing Set': missing if missing else pd.NA,
+            'Status': status
+        })
 
-    missing = study[study != descriptions]
-    missing_df = missing.reset_index()
-    missing_df.columns = [accession_col, 'Found Set']
-    missing_df.insert(1, 'Status', 'Missing')
-    missing_df['Missing Set'] = missing_df['Found Set'].apply(lambda x: descriptions - x)
-
-    return pd.concat([found_df, missing_df], ignore_index=True)
+    summary = pd.DataFrame.from_records(records)
+    # Ensure consistent column order
+    cols = [accession_col, 'Status', 'Found Set', 'Missing Set']
+    return summary.loc[:, cols]
 
 
-def audit_images(df: DataFrame, img_type: str, descriptions: Set[str], slice_thickness: int = 1) -> DataFrame:
+def audit_images(
+    df: pd.DataFrame,
+    img_type: str,
+    descriptions: Set[str],
+    slice_thickness: int = 1,
+    accession_col: str = 'Accession',
+    series_col: str = 'Series Description',
+    frames_col: str = 'Number of Frames',
+    thickness_col: str = 'Slice Thickness'
+) -> pd.DataFrame:
     """
-    Audit Series by Study using Exodus Indexer text export.
-    Specify image type to handle both 2D and 3D images. Filter export to only the specified series descriptions.
+    Audit image series by study, filtering on 2D vs 3D and summarizing completeness.
 
     Args:
-        df (DataFrame): The DataFrame to analyze.
-        img_type (str): The type of image to analyze.
-        descriptions: Set of series descriptions to audit.
-        slice_thickness (int): The number of frames to filter from the DataFrame.
+        df: Input DataFrame of image instances.
+        img_type: '2D' or '3D'.
+        descriptions: Set of expected series descriptions.
+        slice_thickness: Required slice thickness for 3D images.
+        accession_col: Column name for study accession.
+        series_col: Column name for series description.
+        frames_col: Column name for number of frames.
+        thickness_col: Column name for slice thickness.
 
     Returns:
-        DataFrame: The resulting DataFrame containing the audit sets.
+        DataFrame with one row per study, plus 'Image Type' column.
     """
-    if img_type == '2D':
-        img_df = df[df['Number of Frames'] == 1]
-    elif img_type == '3D':
-        img_df = df[df['Number of Frames'] > 1]
-        img_df = img_df[img_df['Slice Thickness'] == slice_thickness]
+    audit_df = df.copy()
+
+    audit_df[frames_col] = pd.to_numeric(audit_df[frames_col], errors='coerce').fillna(0).astype(int)
+    if img_type.upper() == '3D':
+        audit_df[thickness_col] = pd.to_numeric(audit_df[thickness_col], errors='coerce').fillna(-1).astype(int)
+
+    if img_type.upper() == '2D':
+        mask = audit_df[frames_col] == 1
+    elif img_type.upper() == '3D':
+        mask = (audit_df[frames_col] > 1) & (audit_df[thickness_col] == slice_thickness)
     else:
-        raise ValueError(f"Invalid img_type, must be '2D' or '3D': {img_type}")
+        raise ValueError("img_type must be '2D' or '3D'")
 
-    img_df = img_df[img_df['Series Description'].isin(descriptions)]
-    audit_df = check_series_by_study(
-        img_df, 'Accession', 'Series Description', descriptions
-    )
-    audit_df.insert(2, 'Image Type', img_type)
-    return audit_df
+    filtered_df = audit_df.loc[mask & audit_df[series_col].isin(descriptions)]
+
+    final_df = check_series_by_study(filtered_df, accession_col, series_col, descriptions)
+    final_df.insert(2, 'Image Type', img_type.upper())
+
+    return final_df
