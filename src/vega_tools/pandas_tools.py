@@ -4,7 +4,7 @@ from typing import Set, List, Any, Union, Optional, Callable, Dict
 import pandas as pd
 from pandas import Series, DataFrame
 
-from vega_tools.utils.regex_utils import create_keywords_pattern
+from vega_tools.utils.regex_utils import compile_keywords_pattern
 
 
 Reader = Callable[..., pd.DataFrame]
@@ -111,7 +111,7 @@ def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
     Returns:
         Series: The series containing the keywords.
     """
-    pattern = create_keywords_pattern(keywords)
+    pattern = compile_keywords_pattern(keywords)
     return series.str.extract(pattern)
 
 

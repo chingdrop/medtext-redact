@@ -2,7 +2,7 @@ import re
 from typing import List, Union, Pattern, Match
 
 
-def create_keywords_pattern(
+def compile_keywords_pattern(
         keywords: List[str],
         *,
         boundary: bool = True,
@@ -96,7 +96,7 @@ def mask_keywords(
     Returns:
         The masked string.
     """
-    pat = create_keywords_pattern(keywords, boundary=boundary)
+    pat = compile_keywords_pattern(keywords, boundary=boundary)
     return mask_regex_pattern(pat, text, mask_char=mask_char)
 
 

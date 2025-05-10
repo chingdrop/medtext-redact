@@ -1,6 +1,5 @@
 import re
-from typing import List, Dict, Any
-from typing import Optional
+from typing import List, Optional, Pattern
 
 import pandas as pd
 from rich.console import Console
@@ -8,7 +7,7 @@ from rich.text import Text
 
 from vega_tools.utils.config_loader import ConfigLoader
 from vega_tools.utils.enums import load_census_names
-from vega_tools.utils.regex_utils import create_keywords_pattern, mask_regex_pattern, mask_keywords, NameMasker
+from vega_tools.utils.regex_utils import compile_keywords_pattern, mask_regex_pattern, mask_keywords, NameMasker
 
 
 class PhiSanitizer:
@@ -25,7 +24,7 @@ class PhiSanitizer:
     _DATE_PATTERN = re.compile(
         r"""\b
             (?:0?[1-9]|1[0-2])           # month 1–9 or 01–09 or 10–12
-            (?P<sep>[\/\-\.\s])          # separator: slash, dash, dot or space
+            (?P<sep>[/\-.\s])          # separator: slash, dash, dot or space
             (?:0?[1-9]|[12][0-9]|3[01])  # day 1–9, 01–09, 10–29, 30, 31
             (?P=sep)                     # same sep as before
             (?:19|20)\d{2}               # year 1900–2099
@@ -96,9 +95,9 @@ class PhiSanitizer:
         return self.sanitize_keywords(['male', 'female'])
 
     def sanitize_all(
-        self,
-        config: ConfigLoader,
-        full: bool = False
+            self,
+            config: ConfigLoader,
+            full: bool = False
     ) -> 'PhiSanitizer':
         """
         De‐identify PHI using the provided ConfigLoader.
@@ -123,41 +122,60 @@ class PhiSanitizer:
         return self
 
 
-def print_line_with_keywords(keywords: List[str], text: str) -> None:
+def _highlight_text(
+        text: str,
+        pattern: Pattern[str],
+        style: str = "bold yellow"
+) -> Text:
     """
-    Split the report text into lines with by periods.
-    Iterate through the lines of the report text and highlight the keywords in each line.
-
-    Args:
-        keywords (List[str]): The keywords to sanitize.
-        text (str): The report text.
+    Return a Rich Text object with every regex match styled.
     """
-    console = Console()
-    pattern = create_keywords_pattern(keywords)
-    split_text = re.split(r'(?<=[.!])\s+(?=\D)', text)
-    for line in split_text:
-        if re.match(pattern, line):
-            text_obj = Text(line.title())
-            text_obj.highlight_words(keywords, style="bold yellow", case_sensitive=False)
-            console.print(f"[bold green]{', '.join(set(keywords))}[/bold green] -", text_obj)
+    t = Text(text)
+    for m in pattern.finditer(text):
+        t.stylize(style, m.start(), m.end())
+    return t
 
 
-def print_text_with_keywords(keywords: List[str], text: str) -> None:
+def print_lines_with_keywords(
+        keywords: List[str],
+        text: str,
+        *,
+        boundary: bool = True,
+        style: str = "bold yellow",
+        console: Optional[Console] = None
+) -> None:
     """
-    Highlight the keywords in the report text. Send highlighted text to PyDoc pager view.
+    Split `text` into sentences (on .?!), find lines containing any keyword,
+    and print each line with the keywords highlighted.
+    """
+    console = console or Console()
+    pattern = compile_keywords_pattern(keywords, boundary=boundary)
 
-    Args:
-        keywords (List[str]): The keywords to sanitize.
-        text (str): The report text.
-    """
+    # split into sentences on ., ?, or !, keeping the delimiter
+    sentences = re.split(r'(?<=[.?!])\s+', text)
+    for sentence in sentences:
+        if pattern.search(sentence):
+            highlighted = _highlight_text(sentence.strip(), pattern, style)
+            console.print(highlighted)
+
+
+def print_text_with_keywords(
+        keywords: List[str],
+        text: str,
+        *,
+        boundary: bool = True,
+        style: str = "bold yellow"
+) -> None:
+    """Highlight all occurrences of `keywords` in the full `text` and page it via the system pager (using PyDoc)."""
     import pydoc
     from io import StringIO
 
+    pattern = compile_keywords_pattern(keywords, boundary=boundary)
+    highlighted = _highlight_text(text, pattern, style)
+
     buffer = StringIO()
     console = Console(file=buffer, force_terminal=True)
-    text_obj = Text(text.title())
-    text_obj.highlight_words(keywords, style="bold yellow", case_sensitive=False)
-    console.print(text_obj)
+    console.print(highlighted)
     pydoc.pager(buffer.getvalue())
 
 
