@@ -6,6 +6,7 @@ import pandas as pd
 from rich.console import Console
 from rich.text import Text
 
+from vega_tools.utils.config_loader import ConfigLoader
 from vega_tools.utils.enums import load_census_names
 from vega_tools.utils.regex_utils import create_keywords_pattern, mask_regex_pattern, mask_keywords, NameMasker
 
@@ -68,54 +69,56 @@ class PhiSanitizer:
     def text(self) -> str:
         return self._text
 
-    def sanitize_keywords(self, keywords: List[str]) -> "PhiSanitizer":
+    def sanitize_keywords(self, keywords: List[str]) -> 'PhiSanitizer':
         """Mask out any occurrences of the provided keywords."""
         self._text = mask_keywords(self._text, keywords)
         return self
 
-    def sanitize_names(self) -> "PhiSanitizer":
+    def sanitize_names(self) -> 'PhiSanitizer':
         """Load census names and mask any occurrences."""
         names = load_census_names()
         nm = NameMasker(names)
         self._text = nm.mask(self._text)
         return self
 
-    def sanitize_dates(self) -> "PhiSanitizer":
+    def sanitize_dates(self) -> 'PhiSanitizer':
         """Mask all dates matching MM/DD/YYYY or M/D/YYYY."""
         self._text = mask_regex_pattern(self._DATE_PATTERN, self._text)
         return self
 
-    def sanitize_age(self) -> "PhiSanitizer":
+    def sanitize_age(self) -> 'PhiSanitizer':
         """Mask age expressions like '34 years old' or '100-yrs-old'."""
         self._text = mask_regex_pattern(self._AGE_PATTERN, self._text)
         return self
 
-    def sanitize_gender(self) -> "PhiSanitizer":
+    def sanitize_gender(self) -> 'PhiSanitizer':
         """Mask simple gender terms."""
         return self.sanitize_keywords(['male', 'female'])
 
-    def sanitize_all(self, config: Dict[str, Any], full: bool = False) -> "PhiSanitizer":
+    def sanitize_all(
+        self,
+        config: ConfigLoader,
+        full: bool = False
+    ) -> 'PhiSanitizer':
         """
-        Apply all sanitization steps based on client config.
-        Names and dates always; gender and age if full=True.
-        Also masks additional keywords from config['Masking'].
+        De‐identify PHI using the provided ConfigLoader.
 
         Args:
-            config: Client configuration dict with a 'Masking' key.
-            full: If True, also mask gender and age.
-
-        Returns:
-            self (with _text updated)
+            config: a ConfigLoader instance whose config contains
+                    a 'Masking' section with 'Manufacturers' and 'Locations'.
+            full: if True, also mask gender + age
         """
         self.sanitize_names().sanitize_dates()
         if full:
             self.sanitize_gender().sanitize_age()
 
-        masking = config.get('Masking', {})
-        for key in masking.keys():
-            kws = masking.get(key) or []
-            if kws:
-                self.sanitize_keywords(kws)
+        manufacturers = config.get('Masking.Manufacturers')
+        locations = config.get('Masking.Locations')
+
+        if manufacturers:
+            self.sanitize_keywords(manufacturers)
+        if locations:
+            self.sanitize_keywords(locations)
 
         return self
 

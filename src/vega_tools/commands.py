@@ -41,8 +41,7 @@ def audit_series_by_study(sample, result):
 @click.pass_context
 def parse_report(ctx: Context, config):
     """Parse medical reports."""
-    loader = ConfigLoader(config)
-    ctx.obj = loader.as_kwargs()
+    ctx.obj = ConfigLoader(config)
 
 
 @parse_report.command()

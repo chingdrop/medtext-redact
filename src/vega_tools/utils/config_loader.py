@@ -6,7 +6,6 @@ from typing import Any, Dict, Iterator, Union, Optional
 
 
 class ConfigError(Exception):
-    """Custom exception for configuration loading errors."""
     pass
 
 
@@ -42,18 +41,14 @@ class ConfigLoader(MutableMapping):
         """
         if not self.filepath.exists():
             raise ConfigError(f"Configuration file not found: {self.filepath}")
-
+        text = self.filepath.read_text(encoding="utf-8")
         try:
-            text = self.filepath.read_text(encoding='utf-8')
-
-            # Determine format by extension
             if self.filepath.suffix.lower() in ['.yaml', '.yml']:
                 import yaml
                 data = yaml.safe_load(text)
-            else:
+            elif self.filepath.suffix.lower() == '.json':
                 data = json.loads(text)
-
-            if not isinstance(data, dict):
+            else:
                 raise ConfigError("Configuration root must be a JSON/YAML object")
 
             self._data = data
@@ -84,33 +79,18 @@ class ConfigLoader(MutableMapping):
             return path.expanduser(path.expandvars(current))
         return current
 
-    # MutableMapping interface
+    # Required by MutableMapping:
     def __getitem__(self, key: str) -> Any:
-        if key in self._data:
-            return self._data[key]
-        raise KeyError(key)
+        return self._data[key]
 
-    def __iter__(self) -> Iterator[str]:
-        return iter(self._data)
-
-    def __len__(self) -> int:
-        return len(self._data)
-
-    def __contains__(self, key: object) -> bool:
-        return key in self._data
-
-    # Prevent modification
     def __setitem__(self, key: str, value: Any) -> None:
         raise TypeError("ConfigLoader is read-only")
 
     def __delitem__(self, key: str) -> None:
         raise TypeError("ConfigLoader is read-only")
 
-    def as_dict(self) -> Dict[str, Any]:
-        """
-        Return the entire configuration as a standard dict (shallow copy).
-        """
-        return dict(self._data)
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._data)
 
-    def __repr__(self) -> str:
-        return f"<ConfigLoader path={self.filepath!r} keys={list(self._data.keys())!r}>"
+    def __len__(self) -> int:
+        return len(self._data)
