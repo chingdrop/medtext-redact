@@ -11,12 +11,43 @@ from vega_tools.text_tools import print_lines_with_keywords, print_text_with_key
 from vega_tools.utils.config_loader import ConfigLoader
 from vega_tools.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
 from vega_tools.utils.files_and_storage import read_text_from_file
+from vega_tools.utils.regex_utils import parse_project_name
 
 
 @click.group()
 def cli():
     """Command Line Interface for custom use cases in data analysis."""
     pd.set_option('future.no_silent_downcasting', True)
+
+
+@cli.command()
+@click.option('--sample', '-s', type=click.Path(exists=True), help='File path to Sample Spreadsheet')
+@click.option('--result', '-r', type=click.Path(), help='File path to Result Spreadsheet')
+def compare_projects(sample, result):
+    def find_project_order(row):
+        p1 = row['file_1']
+        p2 = row['file_2']
+
+        t1 = parse_project_name(p1)
+        t2 = parse_project_name(p2)
+        if t1 < t2:
+            return p1, p2
+        else:
+            return p2, p1
+
+    def find_accession_order(row):
+        t1 = parse_project_name(row['file_1'])
+        t2 = parse_project_name(row['file_2'])
+        if t1 < t2:
+            return row['file_1_accession'], row['file_2_accession']
+        else:
+            return row['file_2_accession'], row['file_1_accession']
+
+    data_df = read_structured_file(sample)
+    result_df = data_df[['study_instance_uid']].copy()
+    result_df[['project_1', 'project_2']] = data_df.apply(find_project_order, axis=1, result_type="expand")
+    result_df[['accession_1', 'accession_2']] = data_df.apply(find_accession_order, axis=1, result_type="expand")
+    write_structured_file(result_df, result, index=False)
 
 
 @cli.command()
