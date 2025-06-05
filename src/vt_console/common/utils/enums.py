@@ -2,7 +2,7 @@ from typing import List
 
 import pandas as pd
 
-from vt_console.api_tools import CensusNamesApi
+from vt_console.common.api_tools import CensusNamesApi
 
 
 def load_census_names(year: str = "2010") -> List[str]:

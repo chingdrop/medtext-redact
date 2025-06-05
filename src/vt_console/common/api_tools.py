@@ -6,8 +6,8 @@ from typing import Optional, Union, Dict, Any
 
 import pandas as pd
 
-from vt_console.settings import DATA_DIRECTORY
-from vt_console.utils.rest_utils import RestAdapter, RestAdapterConfig
+from vt_console.config.settings import DATA_DIRECTORY
+from vt_console.common.utils.rest_utils import RestAdapter, RestAdapterConfig
 
 
 class CensusNamesApi:

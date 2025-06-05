@@ -1,6 +1,6 @@
 from vt_console.commands import cli
-from vt_console.settings import DATA_DIRECTORY
-from vt_console.utils.files_and_storage import create_directory
+from vt_console.config.settings import DATA_DIRECTORY
+from vt_console.common.utils import create_directory
 
 
 def main():

@@ -5,9 +5,9 @@ import pandas as pd
 from rich.console import Console
 from rich.text import Text
 
-from vt_console.utils.config_loader import ConfigLoader
-from vt_console.utils.enums import load_census_names
-from vt_console.utils.regex_utils import compile_keywords_pattern, mask_regex_pattern, mask_keywords, NameMasker
+from vt_console.common.utils.config_loader import ConfigLoader
+from vt_console.common.utils.enums import load_census_names
+from vt_console.common.utils.regex_utils import compile_keywords_pattern, mask_regex_pattern, mask_keywords, NameMasker
 
 
 class PhiSanitizer:
