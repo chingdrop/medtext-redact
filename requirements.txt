@@ -26,5 +26,5 @@ setuptools==78.1.0
 six==1.17.0
 tzdata==2025.2
 urllib3==2.4.0
-vega-tools==2.1.0
+vt-console==2.1.0
 wheel==0.45.1

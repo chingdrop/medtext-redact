@@ -1,4 +1,4 @@
-# Vega-Tools
+# Vt-Console
 
 A Command-Line Interface for HIPAA Redaction and Semantic Highlighting in Medical Text
 
