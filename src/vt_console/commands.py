@@ -5,13 +5,13 @@ import numpy as np
 import pandas as pd
 from click import Context
 
-from vega_tools.pandas_tools import read_structured_file, write_structured_file, audit_images, search_report_text
-from vega_tools.text_tools import print_lines_with_keywords, print_text_with_keywords, white_rabbit_parse_report, \
+from vt_console.pandas_tools import read_structured_file, write_structured_file, audit_images, search_report_text
+from vt_console.text_tools import print_lines_with_keywords, print_text_with_keywords, white_rabbit_parse_report, \
     PhiSanitizer
-from vega_tools.utils.config_loader import ConfigLoader
-from vega_tools.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
-from vega_tools.utils.files_and_storage import read_text_from_file
-from vega_tools.utils.regex_utils import parse_project_name
+from vt_console.utils.config_loader import ConfigLoader
+from vt_console.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
+from vt_console.utils.files_and_storage import read_text_from_file
+from vt_console.utils.regex_utils import parse_project_name
 
 
 @click.group()

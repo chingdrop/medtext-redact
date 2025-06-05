@@ -4,7 +4,7 @@ from typing import Set, List, Any, Union, Optional, Callable, Dict
 import pandas as pd
 from pandas import Series, DataFrame
 
-from vega_tools.utils.regex_utils import compile_keywords_pattern
+from vt_console.utils.regex_utils import compile_keywords_pattern
 
 Reader = Callable[..., pd.DataFrame]
 READERS: Dict[str, Reader] = {
