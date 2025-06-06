@@ -171,3 +171,18 @@ def parse_project_name(s: str) -> tuple[int, int]:
         rev_rank = ord(rev_letter) - ord('a') + 1
 
     return base_num, rev_rank
+
+
+def to_snake_case(name: str) -> str:
+    """
+    Convert an arbitrary string into snake_case:
+      1) Replace any non-alphanumeric character with underscore.
+      2) Insert an underscore between a lower‐letter/digit and an uppercase letter.
+      3) Lower‐case everything.
+      4) Collapse multiple underscores to a single one, and strip leading/trailing underscores.
+    """
+    s = re.sub(r"[^0-9A-Za-z]+", "_", name)
+    s = re.sub(r"(?<=[0-9a-z])(?=[A-Z])", "_", s)
+    s = s.lower()
+    s = re.sub(r"_+", "_", s).strip("_")
+    return s

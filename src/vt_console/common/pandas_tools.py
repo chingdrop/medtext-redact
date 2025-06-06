@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Set, List, Any, Union, Optional, Callable, Dict
+from typing import Set, List, Any, Union, Optional, Callable, Dict, Hashable
 
 import pandas as pd
 from pandas import Series, DataFrame
@@ -219,3 +219,15 @@ def audit_images(
     final_df.insert(2, 'Image Type', img_type.upper())
 
     return final_df
+
+
+def find_column_for_value(df: pd.DataFrame, value) -> str | None:
+    """
+    Scan each column of df. If `value` appears anywhere in column `col`,
+    return the column name. If not found in any column, return None.
+    """
+    for col in df.columns:
+        # You can use .values or faster checks like .eq(..).any()
+        if value in df[col].values:
+            return col
+    return 'Failure Not Found'

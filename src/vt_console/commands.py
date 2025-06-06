@@ -1,23 +1,45 @@
 import sys
+from pathlib import Path
 
 import click
 import numpy as np
 import pandas as pd
 from click import Context
 
-from vt_console.common.pandas_tools import read_structured_file, write_structured_file, audit_images, search_report_text
+from vt_console.common.pandas_tools import read_structured_file, write_structured_file, audit_images, \
+    search_report_text, find_column_for_value, merge_on_matched_column
 from vt_console.common.text_tools import print_lines_with_keywords, print_text_with_keywords, white_rabbit_parse_report, \
     PhiSanitizer
 from vt_console.common.utils.config_loader import ConfigLoader
-from vt_console.common.utils import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
-from vt_console.common.utils import read_text_from_file
-from vt_console.common.utils import parse_project_name
+from vt_console.common.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
+from vt_console.common.utils.files_and_storage import read_text_from_file
+from vt_console.common.utils.regex_utils import parse_project_name
 
 
 @click.group()
 def cli():
     """Command Line Interface for custom use cases in data analysis."""
     pd.set_option('future.no_silent_downcasting', True)
+
+
+@cli.command()
+@click.option('--project', '-p', help='Project tag to filter from the reference spreadsheet.')
+@click.option('--sample', '-s', type=click.Path(exists=True), help='File path to Sample Spreadsheet')
+@click.option('--result', '-r', type=click.Path(), help='File path to Result Spreadsheet')
+def validate_studies(project, sample, result):
+    data_path = Path(__file__).resolve().parent.parent.parent / 'data'
+    ref_df = read_structured_file(data_path / 'dupe_audit.xlsx')
+    ref_df = ref_df[ref_df['project_1'] == project]
+
+    data_df = read_structured_file(sample)
+    matched_col = ref_df['accession_1'].apply(lambda x: find_column_for_value(data_df, x))
+    result_df = pd.DataFrame({
+        'study_instance_uid': ref_df['study_instance_uid'],
+        'accession': ref_df['accession_1'],
+        'matched_col': matched_col
+    })
+    result_df['failure'] = result_df['matched_col'] == 'Failure Not Found'
+    write_structured_file(result_df, result, index=False)
 
 
 @cli.command()
