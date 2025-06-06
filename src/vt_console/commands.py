@@ -26,19 +26,43 @@ def cli():
 @click.option('--project', '-p', help='Project tag to filter from the reference spreadsheet.')
 @click.option('--sample', '-s', type=click.Path(exists=True), help='File path to Sample Spreadsheet')
 @click.option('--result', '-r', type=click.Path(), help='File path to Result Spreadsheet')
-def validate_studies(project, sample, result):
+@click.option(
+    '--order',
+    '-o',
+    type=click.Choice(['first', 'second'], case_sensitive=False),
+    help='Choose which project order to use'
+)
+def validate_studies(project, sample, result, order):
     data_path = Path(__file__).resolve().parent.parent.parent / 'data'
+    if order == 'first':
+        proj_col = 'project_1'
+        access_col = 'accession_1'
+    else:
+        proj_col = 'project_2'
+        access_col = 'accession_2'
+
     ref_df = read_structured_file(data_path / 'dupe_audit.xlsx')
-    ref_df = ref_df[ref_df['project_1'] == project]
+    ref_df = ref_df[ref_df[proj_col] == project]
 
     data_df = read_structured_file(sample)
-    matched_col = ref_df['accession_1'].apply(lambda x: find_column_for_value(data_df, x))
+    matched_col = ref_df[access_col].apply(lambda x: find_column_for_value(data_df, x))
     result_df = pd.DataFrame({
         'study_instance_uid': ref_df['study_instance_uid'],
-        'accession': ref_df['accession_1'],
+        'accession': ref_df[access_col],
         'matched_col': matched_col
     })
     result_df['failure'] = result_df['matched_col'] == 'Failure Not Found'
+    result_df['type'] = np.where(
+        result_df['matched_col'].str.contains('prior', case=False, na=False),
+        'Prior',
+        'Index'
+    )
+    result_df = merge_on_matched_column(result_df, data_df, key_col="accession", matched_col_col="matched_col")
+
+    keep_columns = ['study_instance_uid', 'accession', 'matched_col', 'failure', 'type']
+    group_columns = [col for col in result_df.columns if 'group' in str(col).lower()]
+    final_columns = keep_columns + group_columns
+    result_df = result_df[final_columns]
     write_structured_file(result_df, result, index=False)
 
 

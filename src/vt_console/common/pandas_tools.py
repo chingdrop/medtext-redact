@@ -231,3 +231,61 @@ def find_column_for_value(df: pd.DataFrame, value) -> str | None:
         if value in df[col].values:
             return col
     return 'Failure Not Found'
+
+
+def merge_on_matched_column(
+    result_df: pd.DataFrame,
+    data_df: pd.DataFrame,
+    key_col: str = "accession",
+    matched_col_col: str = "matched_col"
+) -> pd.DataFrame:
+    """
+    Given a result_df with columns [key_col, matched_col_col], and a data_df where
+    matched_col_col indicates which column of data_df contains key_col, return a
+    DataFrame that brings in all of data_df’s fields for each match.
+
+    Parameters:
+    -----------
+    result_df : pd.DataFrame
+        Must contain at least:
+          • key_col (e.g. "accession"): the value you looked up
+          • matched_col_col (e.g. "matched_col"): the name of the column in data_df
+            where that value was found, or a failure marker.
+    data_df : pd.DataFrame
+        The source DataFrame. We will reset its index, melt it, and then use [matched_col_col, key_col]
+        to locate the matching row.
+    key_col : str
+        Name of the column in both result_df and data_df that holds the lookup value.
+    matched_col_col : str
+        Name of the column in result_df that contains the name of data_df’s column where
+        key_col was found.
+
+    Returns:
+    --------
+    pd.DataFrame
+        A merged DataFrame containing:
+          • all columns from result_df,
+          • all columns from data_df for the matched row (NaN if no match),
+        with helper columns dropped.
+    """
+    data_with_index = data_df.reset_index().rename(columns={"index": "orig_index"})
+    value_vars = [col for col in data_with_index.columns if col != "orig_index"]
+    data_melted = data_with_index.melt(
+        id_vars=["orig_index"],
+        value_vars=value_vars,
+        var_name=matched_col_col,
+        value_name=key_col
+    )
+    data_melted = data_melted.dropna(subset=[key_col])
+    merged_lookup = result_df.merge(
+        data_melted[["orig_index", matched_col_col, key_col]],
+        on=[matched_col_col, key_col],
+        how="left"
+    )
+    final = merged_lookup.merge(
+        data_with_index,
+        on="orig_index",
+        how="left",
+        suffixes=("", "_from_data")
+    )
+    return final.drop(columns=["orig_index"])
