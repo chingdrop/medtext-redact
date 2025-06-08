@@ -223,14 +223,20 @@ def audit_images(
 
 def find_column_for_value(df: pd.DataFrame, value) -> str | None:
     """
-    Scan each column of df. If `value` appears anywhere in column `col`,
-    return the column name. If not found in any column, return None.
+    Scan each column of the DataFrame for a specified value.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to search.
+        value: The value to locate in the DataFrame's columns.
+
+    Returns:
+        str | None: The name of the first column containing the value,
+            or None if the value is not found.
     """
     for col in df.columns:
-        # You can use .values or faster checks like .eq(..).any()
         if value in df[col].values:
             return col
-    return 'Failure Not Found'
+    return None
 
 
 def merge_on_matched_column(
@@ -240,33 +246,30 @@ def merge_on_matched_column(
         matched_col_col: str = "matched_col"
 ) -> pd.DataFrame:
     """
-    Given a result_df with columns [key_col, matched_col_col], and a data_df where
-    matched_col_col indicates which column of data_df contains key_col, return a
-    DataFrame that brings in all of data_df’s fields for each match.
+    Merge lookup results back onto the full source DataFrame by dynamically matched columns.
 
-    Parameters:
-    -----------
-    result_df : pd.DataFrame
-        Must contain at least:
-          • key_col (e.g. "accession"): the value you looked up
-          • matched_col_col (e.g. "matched_col"): the name of the column in data_df
-            where that value was found, or a failure marker.
-    data_df : pd.DataFrame
-        The source DataFrame. We will reset its index, melt it, and then use [matched_col_col, key_col]
-        to locate the matching row.
-    key_col : str
-        Name of the column in both result_df and data_df that holds the lookup value.
-    matched_col_col : str
-        Name of the column in result_df that contains the name of data_df’s column where
-        key_col was found.
+    Args:
+        result_df (pd.DataFrame):
+            A DataFrame containing at least two columns:
+            - `key_col` (e.g. "accession"): the lookup values you searched for.
+            - `matched_col_col` (e.g. "matched_col"): the name of the column in `data_df`
+              where that lookup value was found, or a failure marker.
+        data_df (pd.DataFrame):
+            The source DataFrame. This will be reset its index (into `orig_index`),
+            melted into a long form, and then matched on `[matched_col_col, key_col]`.
+        key_col (str):
+            Name of the lookup column present in both `result_df` and the melted form
+            of `data_df`.
+        matched_col_col (str):
+            Name of the column in `result_df` that holds the name of the column in
+            `data_df` where `key_col` was found.
 
     Returns:
-    --------
-    pd.DataFrame
-        A merged DataFrame containing:
-          • all columns from result_df,
-          • all columns from data_df for the matched row (NaN if no match),
-            with helper columns dropped.
+        pd.DataFrame:
+        A merged DataFrame with:
+          - all columns from `result_df`,
+          - all original columns from `data_df` for the matched row (or NaN if no match),
+          with intermediate helper columns (such as `orig_index`) dropped.
     """
     data_with_index = data_df.reset_index().rename(columns={"index": "orig_index"})
     value_vars = [col for col in data_with_index.columns if col != "orig_index"]
@@ -275,8 +278,8 @@ def merge_on_matched_column(
         value_vars=value_vars,
         var_name=matched_col_col,
         value_name=key_col
-    )
-    data_melted = data_melted.dropna(subset=[key_col])
+    ).dropna(subset=[key_col])
+
     merged_lookup = result_df.merge(
         data_melted[["orig_index", matched_col_col, key_col]],
         on=[matched_col_col, key_col],
