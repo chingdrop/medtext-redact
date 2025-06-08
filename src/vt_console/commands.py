@@ -7,9 +7,9 @@ import pandas as pd
 from click import Context
 
 from vt_console.common.pandas_tools import read_structured_file, write_structured_file, audit_images, \
-    search_report_text, find_column_for_value, merge_on_matched_column
-from vt_console.common.text_tools import print_lines_with_keywords, print_text_with_keywords, white_rabbit_parse_report, \
-    PhiSanitizer
+    search_report_text, find_column_for_value, merge_on_matched_column, create_project_comparison
+from vt_console.common.text_tools import print_lines_with_keywords, print_text_with_keywords, \
+    white_rabbit_parse_report, PhiSanitizer
 from vt_console.common.utils.config_loader import ConfigLoader
 from vt_console.common.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
 from vt_console.common.utils.files_and_storage import read_text_from_file
@@ -70,29 +70,8 @@ def validate_studies(project, sample, result, order):
 @click.option('--sample', '-s', type=click.Path(exists=True), help='File path to Sample Spreadsheet')
 @click.option('--result', '-r', type=click.Path(), help='File path to Result Spreadsheet')
 def compare_projects(sample, result):
-    def find_project_order(row):
-        p1 = row['file_1']
-        p2 = row['file_2']
-
-        t1 = parse_project_name(p1)
-        t2 = parse_project_name(p2)
-        if t1 < t2:
-            return p1, p2
-        else:
-            return p2, p1
-
-    def find_accession_order(row):
-        t1 = parse_project_name(row['file_1'])
-        t2 = parse_project_name(row['file_2'])
-        if t1 < t2:
-            return row['file_1_accession'], row['file_2_accession']
-        else:
-            return row['file_2_accession'], row['file_1_accession']
-
     data_df = read_structured_file(sample)
-    result_df = data_df[['study_instance_uid']].copy()
-    result_df[['project_1', 'project_2']] = data_df.apply(find_project_order, axis=1, result_type="expand")
-    result_df[['accession_1', 'accession_2']] = data_df.apply(find_accession_order, axis=1, result_type="expand")
+    result_df = create_project_comparison(data_df)
     write_structured_file(result_df, result, index=False)
 
 

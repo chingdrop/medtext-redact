@@ -2,9 +2,10 @@ from pathlib import Path
 from typing import Set, List, Any, Union, Optional, Callable, Dict
 
 import pandas as pd
+import numpy as np
 from pandas import Series, DataFrame
 
-from vt_console.common.utils.regex_utils import compile_keywords_pattern
+from vt_console.common.utils.regex_utils import compile_keywords_pattern, parse_project_name
 
 Reader = Callable[..., pd.DataFrame]
 READERS: Dict[str, Reader] = {
@@ -292,3 +293,24 @@ def merge_on_matched_column(
         suffixes=("", "_from_data")
     )
     return final.drop(columns=["orig_index"])
+
+
+def create_project_comparison(data_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Given a DataFrame with columns
+      - file_1, file_2, file_1_accession, file_2_accession
+      - study_instance_uid
+
+    Generate a new DataFrame that, for each row, orders file_1/2 (and their
+    corresponding accession numbers) by parse_project_name(file).
+    """
+    key1 = data_df['file_1'].map(parse_project_name)
+    key2 = data_df['file_2'].map(parse_project_name)
+    mask = key1 < key2
+    return pd.DataFrame({
+        'study_instance_uid': data_df['study_instance_uid'],
+        'project_1': np.where(mask, data_df['file_1'], data_df['file_2']),
+        'project_2': np.where(mask, data_df['file_2'], data_df['file_1']),
+        'accession_1': np.where(mask, data_df['file_1_accession'], data_df['file_2_accession']),
+        'accession_2': np.where(mask, data_df['file_2_accession'], data_df['file_1_accession']),
+    })
