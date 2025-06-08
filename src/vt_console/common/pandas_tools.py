@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Set, List, Any, Union, Optional, Callable, Dict, Hashable
+from typing import Set, List, Any, Union, Optional, Callable, Dict
 
 import pandas as pd
 from pandas import Series, DataFrame
@@ -234,10 +234,10 @@ def find_column_for_value(df: pd.DataFrame, value) -> str | None:
 
 
 def merge_on_matched_column(
-    result_df: pd.DataFrame,
-    data_df: pd.DataFrame,
-    key_col: str = "accession",
-    matched_col_col: str = "matched_col"
+        result_df: pd.DataFrame,
+        data_df: pd.DataFrame,
+        key_col: str = "accession",
+        matched_col_col: str = "matched_col"
 ) -> pd.DataFrame:
     """
     Given a result_df with columns [key_col, matched_col_col], and a data_df where
@@ -266,7 +266,7 @@ def merge_on_matched_column(
         A merged DataFrame containing:
           • all columns from result_df,
           • all columns from data_df for the matched row (NaN if no match),
-        with helper columns dropped.
+            with helper columns dropped.
     """
     data_with_index = data_df.reset_index().rename(columns={"index": "orig_index"})
     value_vars = [col for col in data_with_index.columns if col != "orig_index"]
