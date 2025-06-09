@@ -224,20 +224,12 @@ def audit_images(
 
 def find_column_for_value(df: pd.DataFrame, value) -> str | None:
     """
-    Scan each column of the DataFrame for a specified value.
-
-    Args:
-        df (pd.DataFrame): The DataFrame to search.
-        value: The value to locate in the DataFrame's columns.
-
-    Returns:
-        str | None: The name of the first column containing the value,
-            or None if the value is not found.
+    Returns the first column name in which `value` appears, or None if not found.
     """
-    for col in df.columns:
-        if value in df[col].values:
-            return col
-    return None
+    mask = df.eq(value).any(axis=0)
+    if not mask.any():
+        return None
+    return mask.idxmax()
 
 
 def merge_on_matched_column(
