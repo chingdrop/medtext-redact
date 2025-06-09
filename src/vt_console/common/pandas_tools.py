@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Set, List, Any, Union, Optional, Callable, Dict
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from pandas import Series, DataFrame
 
 from vt_console.common.utils.regex_utils import compile_keywords_pattern, parse_project_name
@@ -235,8 +235,8 @@ def find_column_for_value(df: pd.DataFrame, value) -> str | None:
 def merge_on_matched_column(
         result_df: pd.DataFrame,
         data_df: pd.DataFrame,
-        key_col: str = "accession",
-        matched_col_col: str = "matched_col"
+        key_col: str = 'accession',
+        matched_col_col: str = 'matched_col'
 ) -> pd.DataFrame:
     """
     Merge lookup results back onto the full source DataFrame by dynamically matched columns.
@@ -264,27 +264,40 @@ def merge_on_matched_column(
           - all original columns from `data_df` for the matched row (or NaN if no match),
           with intermediate helper columns (such as `orig_index`) dropped.
     """
-    data_with_index = data_df.reset_index().rename(columns={"index": "orig_index"})
-    value_vars = [col for col in data_with_index.columns if col != "orig_index"]
-    data_melted = data_with_index.melt(
-        id_vars=["orig_index"],
-        value_vars=value_vars,
-        var_name=matched_col_col,
-        value_name=key_col
-    ).dropna(subset=[key_col])
+    data_with_index = data_df.reset_index().rename(columns={'index': 'orig_index'})
 
-    merged_lookup = result_df.merge(
-        data_melted[["orig_index", matched_col_col, key_col]],
+    matched_cols = (
+        result_df[matched_col_col]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+    matched_cols = [c for c in matched_cols if c in data_with_index.columns]
+    if not matched_cols:
+        return result_df.copy()
+
+    melted_df = (
+        data_with_index[['orig_index', *matched_cols]]
+        .melt(
+            id_vars=['orig_index'],
+            value_vars=matched_cols,
+            var_name=matched_col_col,
+            value_name=key_col,
+        )
+        .dropna(subset=[key_col])
+    )
+    joined_df = result_df.merge(
+        melted_df[['orig_index', matched_col_col, key_col]],
         on=[matched_col_col, key_col],
-        how="left"
+        how='left',
     )
-    final = merged_lookup.merge(
+    final_df = joined_df.merge(
         data_with_index,
-        on="orig_index",
-        how="left",
-        suffixes=("", "_from_data")
+        on='orig_index',
+        how='left',
+        suffixes=('', '_from_data'),
     )
-    return final.drop(columns=["orig_index"])
+    return final_df.drop(columns=['orig_index'])
 
 
 def create_project_comparison(data_df: pd.DataFrame) -> pd.DataFrame:
