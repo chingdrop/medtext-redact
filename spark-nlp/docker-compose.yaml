@@ -10,4 +10,4 @@ services:
     ports:
       - "8888:8888"
     env_file:
-      - sparknlp_keys.txt
+      - .env
