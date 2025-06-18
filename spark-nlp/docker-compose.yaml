@@ -6,7 +6,7 @@ services:
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
     volumes:
-      - ./:/mnt
+      - ./notebooks:/notebooks
     ports:
       - "8888:8888"
     env_file:

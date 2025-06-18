@@ -1,0 +1,11 @@
+.git
+.gitignore
+.env
+docker-compose.yaml
+Dockerfile
+entrypoint.sh
+requirements.txt
+__pycache__/
+*.pyc
+*.pyo
+*.ipynb_checkpoints
