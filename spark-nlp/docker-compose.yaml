@@ -1,0 +1,13 @@
+services:
+  datascience-notebook:
+    image: johnsnowlabs/sparknlp:sparknlp_for_healthcare_jupyter
+    container_name: sparknlp_for_healthcare_jupyter
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./:/mnt
+    ports:
+      - "8888:8888"
+    env_file:
+      - sparknlp_keys.txt
