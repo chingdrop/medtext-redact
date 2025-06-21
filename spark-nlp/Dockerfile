@@ -17,6 +17,12 @@ RUN apt-get update -y && apt-get -y upgrade && \
     pip3 install --quiet --upgrade pip && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/man /usr/share/doc /usr/share/doc-base
 
+COPY requirements.txt /requirements.txt
+COPY entrypoint.sh /entrypoint.sh
+RUN pip install -r requirements.txt
+
+RUN chmod +x /entrypoint.sh
+
 # Create Local User
 ENV NB_USER johnsnow
 ENV NB_UID 1000
@@ -35,5 +41,4 @@ ENV PYSPARK_DRIVER_PYTHON=python3
 USER ${NB_USER}
 WORKDIR ${HOME}
 
-EXPOSE 8888
-CMD ["jupyter", "lab", "--ip", "0.0.0.0"]
+ENTRYPOINT ["/entrypoint.sh"]
