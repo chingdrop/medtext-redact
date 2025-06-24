@@ -1,6 +1,6 @@
 services:
   datascience-notebook:
-    image: johnsnowlabs/sparknlp:sparknlp_for_healthcare_jupyter
+    build: .
     container_name: sparknlp_healthcare_jupyter
     runtime: nvidia
     environment:

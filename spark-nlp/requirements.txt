@@ -1,0 +1,8 @@
+pandas==1.4.1
+beautifulsoup4
+jupyter
+pyspark==3.5.0
+tensorflow==2.8.0
+tensorflow-addons
+svgwrite==1.4.2
+requests
