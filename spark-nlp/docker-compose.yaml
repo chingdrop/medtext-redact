@@ -7,6 +7,7 @@ services:
       - NVIDIA_VISIBLE_DEVICES=all
     volumes:
       - ./notebooks:/notebooks
+      - /run/desktop/mnt/host/r/johnsnowlabs/data:/data
     ports:
       - "8888:8888"
     env_file:
