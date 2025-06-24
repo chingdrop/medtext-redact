@@ -7,7 +7,8 @@ services:
       - NVIDIA_VISIBLE_DEVICES=all
     volumes:
       - ./notebooks:/notebooks
-      - /run/desktop/mnt/host/r/johnsnowlabs/data:/data
+      # R is a mapped drive on Vega-OMA3
+      - /run/desktop/mnt/host/r/johnsnowlabs/data:/data  # THIS MUST BE CHANGED IN A DIFFERENT ENVIRONMENT
     ports:
       - "8888:8888"
     env_file:
