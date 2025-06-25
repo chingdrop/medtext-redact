@@ -1,8 +1,11 @@
-# Import key operating system functionality
 import os
+import nltk
 import pandas as pd
 from pathlib import Path
 
+
+nltk.download('averaged_perceptron_tagger')
+nltk.download('averaged_perceptron_tagger_eng')
 
 base_path = Path(__file__).resolve().parent
 
@@ -35,6 +38,7 @@ def repackage_into_csv(result_report):
             data.append((filename, contents))
 
     df = pd.DataFrame(data, columns=['Filename', 'Contents'])
+    df['Filename'] = df['Filename'].str.replace('.txt', '', regex=False)
     df.to_csv(result_report, index=False)
 
 
