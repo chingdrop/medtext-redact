@@ -1,14 +1,19 @@
 services:
   datascience-notebook:
     build: .
-    container_name: sparknlp_healthcare_jupyter
+    container_name: sparknlp_jupyter
     runtime: nvidia
     environment:
-      - NVIDIA_VISIBLE_DEVICES=all
+      NVIDIA_VISIBLE_DEVICES: all
+      SPARK_DRIVER_MEMORY: 8g
+      SPARK_EXECUTOR_MEMORY: 8g
+      SPARK_LOCAL_DIRS: /tmp/spark
+    mem_limit: 10g
     volumes:
-      - ./notebooks:/notebooks
+      - ./notebooks:/home/jovyan/notebooks
       # R is a mapped drive on Vega-OMA3
-      - /run/desktop/mnt/host/r/johnsnowlabs/data:/data  # THIS MUST BE CHANGED IN A DIFFERENT ENVIRONMENT
+      # THIS MUST BE CHANGED IN A DIFFERENT ENVIRONMENT
+      - /run/desktop/mnt/host/r/johnsnowlabs/data:/home/jovyan/data
     ports:
       - "8888:8888"
     env_file:
