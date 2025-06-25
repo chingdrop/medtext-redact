@@ -1,27 +1,32 @@
-FROM ubuntu:24.04
+FROM nvidia/cuda:12.8.0-cudnn-runtime-ubuntu22.04
 
-RUN apt-get update -y && apt-get -y upgrade && \
-    apt-get install -y \
-        wget \
-        jq \
-        lsb-release \
-        openjdk-8-jdk-headless \
-        build-essential \
-        python3 \
-        python3-pip && \
-    pip3 install --quiet --upgrade pip && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/man /usr/share/doc /usr/share/doc-base
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      python3 python3-pip openjdk-11-jdk-headless \
+      wget jq build-essential \
+ && rm -rf /var/lib/apt/lists/*
 
-ENV PYSPARK_DRIVER_PYTHON=python3
-ENV PYSPARK_PYTHON=python3
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ENV PATH=$JAVA_HOME/bin:$PATH
+ENV PYSPARK_DRIVER_PYTHON=python3 \
+    PYSPARK_PYTHON=python3
 
-COPY ./requirements.txt /requirements.txt
-RUN pip install -r /requirements.txt
+COPY requirements.txt /tmp/requirements.txt
+RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
 
-COPY ./entrypoint.sh /entrypoint.sh
-RUN chmod +x entrypoint.sh
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN mkdir -p /notebooks 
-WORKDIR /notebooks
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
+RUN mkdir -p /home/joyvan/notebooks
+WORKDIR /home/jovyan/notebooks
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["jupyter", "notebook", \
+     "--ip=0.0.0.0", \
+     "--port=8888", \
+     "--NotebookApp.token=''", \
+     "--NotebookApp.password=''", \
+     "--allow-root"]
