@@ -1,0 +1,50 @@
+# === Gradle build artifacts ===
+.gradle/
+build/
+out/
+!gradle/wrapper/gradle-wrapper.jar
+
+# === Logs ===
+*.log
+
+# === OS-generated files ===
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# === IDEs and editors ===
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# === Java ===
+*.class
+*.jar
+*.war
+*.ear
+
+# === Backup and temp files ===
+*.swp
+*.swo
+*.bak
+*.tmp
+*~
+
+# === Test results ===
+test-results/
+test-output/
+*.coverage
+*.lcov
+
+# === Misc ===
+/philter-*.jar
+/local.properties
