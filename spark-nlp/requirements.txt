@@ -1,9 +1,19 @@
-pandas==1.4.1
-beautifulsoup4
-jupyter
-jupyterlabs
-pyspark==3.5.0
-tensorflow==2.8.0
+# Data processing & Spark
+pandas==2.0.3
+pyarrow==16.1.0
+pyspark==3.5.1
+
+# Deep learning & GPU
+tensorflow==2.18.0
 tensorflow-addons
-svgwrite==1.4.2
+
+# Image handling
+pillow
+
+# Notebook environment
+jupyter
+jupyterlab
+
+# HTTP/HTML client
 requests
+beautifulsoup4
