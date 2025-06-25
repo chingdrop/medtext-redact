@@ -1,5 +1,6 @@
-import pandas as pd
 import os
+
+import pandas as pd
 
 # Read the CSV file into a pandas dataframe
 df = pd.read_csv('C:/Users/luke/Desktop/test/OriginalReports.csv')
@@ -14,6 +15,5 @@ for index, row in df.iterrows():
     # Create a new text file with the name of the accession and write the report to it
     with open(f'{accession}.txt', 'w') as f:
         f.write(report)
-
 
 print("Done...")
