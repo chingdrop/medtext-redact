@@ -31,18 +31,23 @@ def split_csv_to_txt(csv_path, output_path):
         outfile.write_text(report, encoding='utf-8')
 
 
-def repackage_into_csv(result_report):
+def repackage_txts_to_csv(input_path, csv_path):
+    """
+    Read every .txt file in input_dir and write out a CSV at csv_path
+    with columns: Filename (no .txt) and Contents.
+    """
+    input_path.mkdir(parents=True, exist_ok=True)
+
+    # Build list of (stem, contents)
     data = []
-    for filename in os.listdir(output_path):
-        if filename.endswith(".txt"):
-            with open(os.path.join(output_path, filename), 'r') as f:
-                contents = f.read()
+    for txt_file in input_path.glob("*.txt"):
+        print(f"Reading report in {txt_file.name}")
+        contents = txt_file.read_text(encoding="utf-8")
+        data.append((txt_file.stem, contents))
 
-            data.append((filename, contents))
-
-    df = pd.DataFrame(data, columns=['Filename', 'Contents'])
-    df['Filename'] = df['Filename'].str.replace('.txt', '', regex=False)
-    df.to_csv(result_report, index=False)
+    # Create DataFrame and write CSV
+    df = pd.DataFrame(data, columns=["Filename", "Contents"])
+    df.to_csv(csv_path, index=False, encoding="utf-8")
 
 
 def main():
@@ -54,7 +59,7 @@ def main():
     split_csv_to_txt(original_report_path, input_path)
     os.chdir(philter_base_path)
     os.system(f'python main.py -i {input_path} -o {output_path} -f {philter_delta_path} --prod=True --outputformat "asterisk"')
-    repackage_into_csv(result_report)
+    repackage_txts_to_csv(output_path, result_report)
     print("Done...")
 
 
