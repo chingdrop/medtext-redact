@@ -45,7 +45,7 @@ def repackage_txts_to_csv(input_path, csv_path):
 def main():
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s %(levelname)s: %(message)s"
+        format="%(asctime)s [%(levelname)s]: %(message)s"
     )
 
     # Ensure NLTK models are available
@@ -80,7 +80,7 @@ def main():
         repackage_txts_to_csv(output_path, result_report_path)
 
     except subprocess.CalledProcessError as e:
-        logging.exception(f"PHILTER failed with exit code {e.returncode}")
+        logging.error(f"PHILTER failed with exit code {e.returncode}")
         raise
     except Exception as e:
         logging.exception("Unexpected error during processing")
