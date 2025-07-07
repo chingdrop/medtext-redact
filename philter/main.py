@@ -1,16 +1,8 @@
-import os
 import nltk
+import logging
+import subprocess
 import pandas as pd
 from pathlib import Path
-
-
-nltk.download('averaged_perceptron_tagger')
-nltk.download('averaged_perceptron_tagger_eng')
-
-base_path = Path(__file__).resolve().parent
-data_path = base_path / 'data'
-input_path = data_path / 'input'
-output_path = data_path / 'output'
 
 
 def split_csv_to_txt(csv_path, output_path):
@@ -45,22 +37,55 @@ def repackage_txts_to_csv(input_path, csv_path):
         contents = txt_file.read_text(encoding="utf-8")
         data.append((txt_file.stem, contents))
 
-    # Create DataFrame and write CSV
     df = pd.DataFrame(data, columns=["Filename", "Contents"])
     df.to_csv(csv_path, index=False, encoding="utf-8")
 
 
 def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s: %(message)s"
+    )
+
+    # Ensure NLTK models are available
+    nltk.download('averaged_perceptron_tagger', quiet=True)
+    nltk.download('averaged_perceptron_tagger_eng', quiet=True)
+
+    base_path = Path(__file__).resolve().parent
+    data_path = base_path / 'data'
+    input_path = data_path / 'input'
+    output_path = data_path / 'output'
     original_report_path = data_path / 'original_reports.csv'
-    result_report = data_path / 'result_report.csv'
+    result_report_path = data_path / 'result_report.csv'
     philter_base_path = base_path / 'philter-ucsf'
     philter_delta_path = philter_base_path / 'configs' / 'philter_delta.json'
 
-    split_csv_to_txt(original_report_path, input_path)
-    os.chdir(philter_base_path)
-    os.system(f'python main.py -i {input_path} -o {output_path} -f {philter_delta_path} --prod=True --outputformat "asterisk"')
-    repackage_txts_to_csv(output_path, result_report)
-    print("Done...")
+    try:
+        logging.info(f"Splitting CSV → TXT in {input_path}")
+        split_csv_to_txt(original_report_path, input_path)
+
+        cmd = [
+            "python", str(philter_base_path / "main.py"),
+            "-i", str(input_path),
+            "-o", str(output_path),
+            "-f", str(philter_delta_path),
+            "--prod", "True",
+            "--outputformat", "asterisk",
+        ]
+        logging.info(f"Running PHILTER: {' '.join(cmd)}")
+        subprocess.run(cmd, check=True)
+
+        logging.info(f"Repackaging TXT → CSV at {result_report_path}")
+        repackage_txts_to_csv(output_path, result_report_path)
+
+    except subprocess.CalledProcessError as e:
+        logging.exception(f"PHILTER failed with exit code {e.returncode}")
+        raise
+    except Exception as e:
+        logging.exception("Unexpected error during processing")
+        raise
+    else:
+        logging.info("All done!")
 
 
 if __name__ == "__main__":
