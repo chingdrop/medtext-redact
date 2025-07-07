@@ -74,7 +74,7 @@ def main():
             "--outputformat", "asterisk",
         ]
         logging.info(f"Running PHILTER: {' '.join(cmd)}")
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, cwd=str(philter_base_path), check=True)
 
         logging.info(f"Repackaging TXT → CSV at {result_report_path}")
         repackage_txts_to_csv(output_path, result_report_path)
