@@ -8,13 +8,11 @@ nltk.download('averaged_perceptron_tagger')
 nltk.download('averaged_perceptron_tagger_eng')
 
 base_path = Path(__file__).resolve().parent
-
 data_path = base_path / 'data'
 input_path = data_path / 'input'
 output_path = data_path / 'output'
-
-philter_base_path = base_path / 'philter-ucsf'
-philter_delta_path = philter_base_path / 'configs' / 'philter_delta.json'
+input_path.mkdir(parents=True, exist_ok=True)
+output_path.mkdir(parents=True, exist_ok=True)
 
 
 def csv_splitter(original_report):
@@ -45,14 +43,13 @@ def repackage_into_csv(result_report):
 def main():
     original_report_path = data_path / 'original_reports.csv'
     result_report = data_path / 'result_report.csv'
+    philter_base_path = base_path / 'philter-ucsf'
+    philter_delta_path = philter_base_path / 'configs' / 'philter_delta.json'
 
     csv_splitter(original_report_path)
-
     os.chdir(philter_base_path)
     os.system(f'python main.py -i {input_path} -o {output_path} -f {philter_delta_path} --prod=True --outputformat "asterisk"')
-
     repackage_into_csv(result_report)
-
     print("Done...")
 
 
