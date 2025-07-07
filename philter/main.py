@@ -62,7 +62,7 @@ def main():
     philter_delta_path = philter_base_path / 'configs' / 'philter_delta.json'
 
     try:
-        logging.info(f"Splitting CSV → TXT in {input_path}")
+        logging.info(f"Splitting CSV → TXT files at {input_path}")
         split_csv_to_txt(original_report_path, input_path)
 
         cmd = [
@@ -76,14 +76,14 @@ def main():
         logging.info(f"Running PHILTER: {' '.join(cmd)}")
         subprocess.run(cmd, cwd=str(philter_base_path), check=True)
 
-        logging.info(f"Repackaging TXT → CSV at {result_report_path}")
+        logging.info(f"Repackaging TXT files → CSV at {result_report_path}")
         repackage_txts_to_csv(output_path, result_report_path)
 
     except subprocess.CalledProcessError as e:
-        logging.error(f"PHILTER failed with exit code {e.returncode}")
+        logging.error(f"PHILTER failed with error: {e.returncode}")
         raise
     except Exception as e:
-        logging.exception("Unexpected error during processing")
+        logging.exception(f"Unexpected error: {e}")
         raise
     else:
         logging.info("All done!")
