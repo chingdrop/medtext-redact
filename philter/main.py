@@ -1,8 +1,9 @@
-import nltk
 import logging
 import subprocess
-import pandas as pd
 from pathlib import Path
+
+import nltk
+import pandas as pd
 
 
 def split_csv_to_txt(csv_path, output_path):
@@ -16,8 +17,8 @@ def split_csv_to_txt(csv_path, output_path):
     df = pd.read_csv(csv_path, usecols=['Accession', 'Reports'], dtype=str)
 
     for accession, report in df.itertuples(index=False):
-        accession = accession.strip()   # sanitize whitespace
-        report = report or ''           # guard against None/NaN
+        accession = accession.strip()  # sanitize whitespace
+        report = report or ''  # guard against None/NaN
         outfile = output_path / f"{accession}.txt"
         print(f"Writing report for Accession: {accession}")
         outfile.write_text(report, encoding='utf-8')
