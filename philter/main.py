@@ -11,8 +11,6 @@ def split_csv_to_txt(csv_path, output_path):
     Read a CSV and write each 'Reports' field to a separate text file
     named <Accession>.txt under output_dir.
     """
-    output_path.mkdir(parents=True, exist_ok=True)
-
     # Read only what we need, force strings so NaNs become 'nan' not float
     df = pd.read_csv(csv_path, usecols=['Accession', 'Reports'], dtype=str)
 
@@ -29,8 +27,6 @@ def repackage_txts_to_csv(input_path, csv_path):
     Read every .txt file in input_dir and write out a CSV at csv_path
     with columns: Filename (no .txt) and Contents.
     """
-    input_path.mkdir(parents=True, exist_ok=True)
-
     # Build list of (stem, contents)
     data = []
     for txt_file in input_path.glob("*.txt"):
@@ -54,8 +50,12 @@ def main():
 
     base_path = Path(__file__).resolve().parent
     data_path = base_path / 'data'
+
     input_path = data_path / 'input'
     output_path = data_path / 'output'
+    input_path.mkdir(parents=True, exist_ok=True)
+    output_path.mkdir(parents=True, exist_ok=True)
+
     original_report_path = data_path / 'original_reports.csv'
     result_report_path = data_path / 'result_report.csv'
     philter_base_path = base_path / 'philter-ucsf'
