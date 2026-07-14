@@ -30,3 +30,5 @@ In addition to text redaction and highlighting, Vega-Tools includes commands for
 Vega-Tools also wraps the GPU-based Spark NLP / Spark OCR de-identification environment in [`spark-nlp/`](spark-nlp/):
 
 - **`spark-nlp`**: Passes arguments straight through to `docker compose`, run from the `spark-nlp/` directory (e.g. `vega-tools spark-nlp down`, `vega-tools spark-nlp logs -f`). With no arguments, it defaults to `up --build`, launching the Jupyter notebook environment. Requires Docker and a `spark-nlp/.env` file with the John Snow Labs license keys (see `spark-nlp/docker-compose.yaml`).
+
+Vega-Tools also includes a third de-identification workflow in [`philter/`](philter/), built on [Philter-UCSF](https://github.com/BCHSI/philter-ucsf), which is tracked as a git submodule (`philter/philter-ucsf`). After cloning, run `git submodule update --init` before use. `philter/main.py` splits a reference CSV of reports into per-accession text files, runs them through Philter, and repackages the results back into a CSV — see `philter/README.md` for the current (pre-consolidation) usage instructions.
