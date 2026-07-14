@@ -1,0 +1,93 @@
+import logging
+import subprocess
+from pathlib import Path
+
+import nltk
+import pandas as pd
+
+
+def split_csv_to_txt(csv_path, output_path):
+    """
+    Read a CSV and write each 'Reports' field to a separate text file
+    named <Accession>.txt under output_dir.
+    """
+    # Read only what we need, force strings so NaNs become 'nan' not float
+    df = pd.read_csv(csv_path, usecols=['Accession', 'Reports'], dtype=str)
+
+    for accession, report in df.itertuples(index=False):
+        accession = accession.strip()  # sanitize whitespace
+        report = report or ''  # guard against None/NaN
+        outfile = output_path / f"{accession}.txt"
+        print(f"Writing report for Accession: {accession}")
+        outfile.write_text(report, encoding='utf-8')
+
+
+def repackage_txts_to_csv(input_path, csv_path):
+    """
+    Read every .txt file in input_dir and write out a CSV at csv_path
+    with columns: Filename (no .txt) and Contents.
+    """
+    # Build list of (stem, contents)
+    data = []
+    for txt_file in input_path.glob("*.txt"):
+        print(f"Reading report in {txt_file.name}")
+        contents = txt_file.read_text(encoding="utf-8")
+        data.append((txt_file.stem, contents))
+
+    df = pd.DataFrame(data, columns=["Filename", "Contents"])
+    df.to_csv(csv_path, index=False, encoding="utf-8")
+
+
+def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s]: %(message)s"
+    )
+
+    # Ensure NLTK models are available
+    nltk.download('averaged_perceptron_tagger', quiet=True)
+    nltk.download('averaged_perceptron_tagger_eng', quiet=True)
+
+    base_path = Path(__file__).resolve().parent
+    data_path = base_path / 'data'
+
+    input_path = data_path / 'input'
+    output_path = data_path / 'output'
+    input_path.mkdir(parents=True, exist_ok=True)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    original_report_path = data_path / 'original_reports.csv'
+    result_report_path = data_path / 'result_report.csv'
+    philter_base_path = base_path / 'philter-ucsf'
+    philter_delta_path = philter_base_path / 'configs' / 'philter_delta.json'
+
+    try:
+        logging.info(f"Splitting CSV → TXT files at {input_path}")
+        split_csv_to_txt(original_report_path, input_path)
+
+        cmd = [
+            "python", str(philter_base_path / "main.py"),
+            "-i", str(input_path),
+            "-o", str(output_path),
+            "-f", str(philter_delta_path),
+            "--prod", "True",
+            "--outputformat", "asterisk",
+        ]
+        logging.info(f"Running PHILTER: {' '.join(cmd)}")
+        subprocess.run(cmd, cwd=str(philter_base_path), check=True)
+
+        logging.info(f"Repackaging TXT files → CSV at {result_report_path}")
+        repackage_txts_to_csv(output_path, result_report_path)
+
+    except subprocess.CalledProcessError as e:
+        logging.error(f"PHILTER failed with error: {e.returncode}")
+        raise
+    except Exception as e:
+        logging.exception(f"Unexpected error: {e}")
+        raise
+    else:
+        logging.info("All done!")
+
+
+if __name__ == "__main__":
+    main()
