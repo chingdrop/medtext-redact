@@ -26,3 +26,7 @@ In addition to text redaction and highlighting, Vega-Tools includes commands for
 - **`compare-projects`**: Given a spreadsheet of paired studies (`file_1`/`file_2` plus their accession numbers), produces a normalized comparison ordered by project name.
 - **`validate-studies`**: Cross-references a project's reference spreadsheet against a sample spreadsheet to confirm each study's accession number appears where expected, flagging failures and prior/index study type.
 - **`audit-series-by-study`**: Summarizes which required 2D/3D image series are present or missing per study accession.
+
+Vega-Tools also wraps the GPU-based Spark NLP / Spark OCR de-identification environment in [`spark-nlp/`](spark-nlp/):
+
+- **`spark-nlp`**: Passes arguments straight through to `docker compose`, run from the `spark-nlp/` directory (e.g. `vega-tools spark-nlp down`, `vega-tools spark-nlp logs -f`). With no arguments, it defaults to `up --build`, launching the Jupyter notebook environment. Requires Docker and a `spark-nlp/.env` file with the John Snow Labs license keys (see `spark-nlp/docker-compose.yaml`).
