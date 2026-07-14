@@ -1,6 +1,6 @@
 from vega_tools.commands import cli
-from vega_tools.settings import DATA_DIRECTORY
-from vega_tools.utils.files_and_storage import create_directory
+from vega_tools.config.settings import DATA_DIRECTORY
+from vega_tools.common.utils.files_and_storage import create_directory
 
 
 def main():
