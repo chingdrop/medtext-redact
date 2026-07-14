@@ -1,10 +1,11 @@
 from pathlib import Path
 from typing import Set, List, Any, Union, Optional, Callable, Dict
 
+import numpy as np
 import pandas as pd
 from pandas import Series, DataFrame
 
-from vega_tools.utils.regex_utils import compile_keywords_pattern
+from vega_tools.common.utils.regex_utils import compile_keywords_pattern, parse_project_name
 
 Reader = Callable[..., pd.DataFrame]
 READERS: Dict[str, Reader] = {
@@ -219,3 +220,102 @@ def audit_images(
     final_df.insert(2, 'Image Type', img_type.upper())
 
     return final_df
+
+
+def find_column_for_value(df: pd.DataFrame, value) -> str | None:
+    """
+    Returns the first column name in which `value` appears, or None if not found.
+    """
+    mask = df.eq(value).any(axis=0)
+    if not mask.any():
+        return None
+    return mask.idxmax()
+
+
+def merge_on_matched_column(
+        result_df: pd.DataFrame,
+        data_df: pd.DataFrame,
+        key_col: str = 'accession',
+        matched_col_col: str = 'matched_col'
+) -> pd.DataFrame:
+    """
+    Merge lookup results back onto the full source DataFrame by dynamically matched columns.
+
+    Args:
+        result_df (pd.DataFrame):
+            A DataFrame containing at least two columns:
+            - `key_col` (e.g. "accession"): the lookup values you searched for.
+            - `matched_col_col` (e.g. "matched_col"): the name of the column in `data_df`
+              where that lookup value was found, or a failure marker.
+        data_df (pd.DataFrame):
+            The source DataFrame. This will be reset its index (into `orig_index`),
+            melted into a long form, and then matched on `[matched_col_col, key_col]`.
+        key_col (str):
+            Name of the lookup column present in both `result_df` and the melted form
+            of `data_df`.
+        matched_col_col (str):
+            Name of the column in `result_df` that holds the name of the column in
+            `data_df` where `key_col` was found.
+
+    Returns:
+        pd.DataFrame:
+        A merged DataFrame with:
+          - all columns from `result_df`,
+          - all original columns from `data_df` for the matched row (or NaN if no match),
+          with intermediate helper columns (such as `orig_index`) dropped.
+    """
+    data_with_index = data_df.reset_index().rename(columns={'index': 'orig_index'})
+
+    matched_cols = (
+        result_df[matched_col_col]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+    matched_cols = [c for c in matched_cols if c in data_with_index.columns]
+    if not matched_cols:
+        return result_df.copy()
+
+    melted_df = (
+        data_with_index[['orig_index', *matched_cols]]
+        .melt(
+            id_vars=['orig_index'],
+            value_vars=matched_cols,
+            var_name=matched_col_col,
+            value_name=key_col,
+        )
+        .dropna(subset=[key_col])
+    )
+    joined_df = result_df.merge(
+        melted_df[['orig_index', matched_col_col, key_col]],
+        on=[matched_col_col, key_col],
+        how='left',
+    )
+    final_df = joined_df.merge(
+        data_with_index,
+        on='orig_index',
+        how='left',
+        suffixes=('', '_from_data'),
+    )
+    return final_df.drop(columns=['orig_index'])
+
+
+def create_project_comparison(data_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Given a DataFrame with columns
+      - file_1, file_2, file_1_accession, file_2_accession
+      - study_instance_uid
+
+    Generate a new DataFrame that, for each row, orders file_1/2 (and their
+    corresponding accession numbers) by parse_project_name(file).
+    """
+    key1 = data_df['file_1'].map(parse_project_name)
+    key2 = data_df['file_2'].map(parse_project_name)
+    mask = key1 < key2
+    return pd.DataFrame({
+        'study_instance_uid': data_df['study_instance_uid'],
+        'project_1': np.where(mask, data_df['file_1'], data_df['file_2']),
+        'project_2': np.where(mask, data_df['file_2'], data_df['file_1']),
+        'accession_1': np.where(mask, data_df['file_1_accession'], data_df['file_2_accession']),
+        'accession_2': np.where(mask, data_df['file_2_accession'], data_df['file_1_accession']),
+    })
