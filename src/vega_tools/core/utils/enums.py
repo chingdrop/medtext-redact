@@ -2,7 +2,7 @@ from typing import List
 
 import pandas as pd
 
-from vega_tools.common.api_tools import CensusNamesApi
+from vega_tools.core.api_tools import CensusNamesApi
 
 
 def load_census_names(year: str = "2010") -> List[str]:

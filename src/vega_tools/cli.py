@@ -5,8 +5,8 @@ from vega_tools.commands.philter import philter
 from vega_tools.commands.reports import parse_report
 from vega_tools.commands.spark_nlp import spark_nlp
 from vega_tools.commands.studies import audit_series_by_study, compare_projects, validate_studies
-from vega_tools.common.utils.files_and_storage import create_directory
-from vega_tools.config.settings import DATA_DIRECTORY
+from vega_tools.core.utils.files_and_storage import create_directory
+from vega_tools.paths import DATA_DIRECTORY
 
 
 @click.group()

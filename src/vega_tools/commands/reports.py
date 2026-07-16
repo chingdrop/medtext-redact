@@ -4,11 +4,11 @@ import click
 import numpy as np
 from click import Context
 
-from vega_tools.common.pandas_tools import read_structured_file, write_structured_file, search_report_text
-from vega_tools.common.text_tools import print_lines_with_keywords, print_text_with_keywords, \
+from vega_tools.core.pandas_tools import read_structured_file, write_structured_file, search_report_text
+from vega_tools.core.text_tools import print_lines_with_keywords, print_text_with_keywords, \
     white_rabbit_parse_report, PhiSanitizer
-from vega_tools.common.utils.config_loader import ConfigLoader
-from vega_tools.common.utils.files_and_storage import read_text_from_file
+from vega_tools.core.utils.config_loader import ConfigLoader
+from vega_tools.core.utils.files_and_storage import read_text_from_file
 
 
 # ToDo - Optimize the commands in parse_report, they are too slow.

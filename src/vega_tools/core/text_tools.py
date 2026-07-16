@@ -5,9 +5,9 @@ import pandas as pd
 from rich.console import Console
 from rich.text import Text
 
-from vega_tools.common.utils.config_loader import ConfigLoader
-from vega_tools.common.utils.enums import load_census_names
-from vega_tools.common.utils.regex_utils import compile_keywords_pattern, mask_regex_pattern, mask_keywords, NameMasker
+from vega_tools.core.utils.config_loader import ConfigLoader
+from vega_tools.core.utils.enums import load_census_names
+from vega_tools.core.utils.regex_utils import compile_keywords_pattern, mask_regex_pattern, mask_keywords, NameMasker
 
 
 class PhiSanitizer:

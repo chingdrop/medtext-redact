@@ -8,7 +8,7 @@ from pathlib import Path
 import click
 import nltk
 
-from vega_tools.common.pandas_tools import split_csv_to_txt, repackage_txts_to_csv
+from vega_tools.core.pandas_tools import split_csv_to_txt, repackage_txts_to_csv
 
 PHILTER_UCSF_DIR = Path(__file__).resolve().parent.parent.parent.parent / 'philter' / 'philter-ucsf'
 

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from pandas import Series, DataFrame
 
-from vega_tools.common.utils.regex_utils import compile_keywords_pattern, parse_project_name
+from vega_tools.core.utils.regex_utils import compile_keywords_pattern, parse_project_name
 
 Reader = Callable[..., pd.DataFrame]
 READERS: Dict[str, Reader] = {
