@@ -94,3 +94,18 @@ class ConfigLoader(MutableMapping):
 
     def __len__(self) -> int:
         return len(self._data)
+
+    def copy(self) -> 'ConfigLoader':
+        """
+        Return a shallow, in-memory copy that still supports dot-notation .get().
+
+        MutableMapping doesn't provide .copy(), and a plain dict.copy() would
+        silently break callers relying on dot-notation lookups, so this builds
+        a new ConfigLoader without re-reading filepath from disk.
+        """
+        new = ConfigLoader.__new__(ConfigLoader)
+        new.filepath = self.filepath
+        new.env_expand = self.env_expand
+        new.logger = self.logger
+        new._data = dict(self._data)
+        return new
