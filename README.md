@@ -12,6 +12,18 @@ This tool is intended for use by health data engineers, clinical researchers, an
 
 ---
 
+## Installation
+
+Vega-Tools uses [uv](https://docs.astral.sh/uv/) for dependency management and packaging.
+
+```bash
+git submodule update --init  # needed for the philter command, see below
+uv sync
+uv run vega-tools --help
+```
+
+---
+
 ## Process
 
 Vega-Tools is implemented as a modular CLI using the Click framework and currently supports the following core commands:
