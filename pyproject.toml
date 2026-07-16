@@ -30,6 +30,9 @@ vega-tools = "vega_tools.cli:main"
 [dependency-groups]
 dev = [
     "pytest>=8.3",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pre-commit>=4.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -37,3 +40,17 @@ packages = ["src/vega_tools"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+]
