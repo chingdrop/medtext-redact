@@ -73,3 +73,9 @@ warn_unused_ignores = true
 [[tool.mypy.overrides]]
 module = ["ahocorasick", "nltk"]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# py-shared-tools has full inline type hints but no py.typed marker (PEP
+# 561), so mypy can't trust them from an installed package as-is.
+module = ["shared_tools.*"]
+ignore_missing_imports = true

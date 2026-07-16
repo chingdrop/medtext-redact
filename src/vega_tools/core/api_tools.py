@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from shared_tools.rest_adapter import RestAdapter, RestAdapterConfig
 
-from vega_tools.core.utils.rest_utils import RestAdapter, RestAdapterConfig
 from vega_tools.paths import DATA_DIRECTORY
 
 
