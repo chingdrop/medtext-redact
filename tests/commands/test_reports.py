@@ -127,3 +127,26 @@ class TestSpreadsheet:
         assert outcome.exit_code == 0, outcome.output
         result_df = pd.read_csv(result_path)
         assert pd.isna(result_df.iloc[0]["ReportText"])
+
+    def test_unreadable_sample_exits_with_error_instead_of_crashing(self, tmp_path, config_path):
+        sample_path = tmp_path / "sample.parquet"
+        sample_path.write_text("not a real parquet file", encoding="utf-8")
+        result_path = tmp_path / "result.csv"
+
+        runner = CliRunner()
+        outcome = runner.invoke(
+            parse_report,
+            [
+                "--config",
+                str(config_path),
+                "spreadsheet",
+                "--sample",
+                str(sample_path),
+                "--result",
+                str(result_path),
+            ],
+        )
+
+        assert outcome.exit_code == 1
+        assert "Could not read sample spreadsheet" in outcome.output
+        assert not result_path.exists()

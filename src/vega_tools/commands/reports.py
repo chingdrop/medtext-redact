@@ -65,6 +65,9 @@ def single(ctx: Context, text, keywords, keywords_file, verbose):
 def spreadsheet(ctx: Context, sample, result):
     config = ctx.obj.copy()
     df = read_structured_file(sample)
+    if df is None:
+        click.echo(f"Could not read sample spreadsheet: {sample}", err=True)
+        sys.exit(1)
     result_df = df[["Accession", "ReportText"]]
     result_df.replace("<NONE>", np.nan, inplace=True)
     result_df["ReportText"] = result_df["ReportText"].apply(

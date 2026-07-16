@@ -149,7 +149,8 @@ def check_series_by_study(
           - Missing Set: descriptions not found (empty if all present)
           - Status: 'Found' if no missing, else 'Missing'
     """
-    grouped = df.groupby(accession_col)[series_col].agg(lambda vals: set(vals.dropna()))
+    # pandas-stubs' .agg() overloads don't model callables returning a set; this is valid pandas.
+    grouped = df.groupby(accession_col)[series_col].agg(lambda vals: set(vals.dropna()))  # type: ignore[type-var]
 
     records = []
     for accession, found in grouped.items():
@@ -224,7 +225,7 @@ def find_column_for_value(df: pd.DataFrame, value) -> str | None:
     mask = df.eq(value).any(axis=0)
     if not mask.any():
         return None
-    return mask.idxmax()
+    return str(mask.idxmax())
 
 
 def merge_on_matched_column(
