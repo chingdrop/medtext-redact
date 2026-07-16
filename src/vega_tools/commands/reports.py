@@ -34,10 +34,10 @@ def parse_report(ctx: Context, config):
 @click.pass_context
 def single(ctx: Context, text, keywords, keywords_file, verbose):
     config = ctx.obj.copy()
-    if not sys.stdin.isatty():
-        input_text = sys.stdin.read()
-    elif text:
+    if text:
         input_text = text
+    elif not sys.stdin.isatty():
+        input_text = sys.stdin.read()
     else:
         click.echo("No input provided. Use --text or pipe data via stdin.")
         sys.exit(1)
@@ -71,5 +71,5 @@ def spreadsheet(ctx: Context, sample, result):
         lambda x: PhiSanitizer(x).sanitize_all(config, full=True).text
     )
     result_df['ReportText'] = result_df['ReportText'].apply(white_rabbit_parse_report)
-    result_df = search_report_text(df, config=config)
+    result_df = search_report_text(result_df, config=config)
     write_structured_file(result_df, result, index=False)
