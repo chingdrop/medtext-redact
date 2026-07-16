@@ -27,5 +27,13 @@ Repository = "https://github.com/churley-vega/vega-tools"
 [project.scripts]
 vega-tools = "vega_tools.cli:main"
 
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/vega_tools"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
