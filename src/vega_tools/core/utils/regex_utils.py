@@ -2,12 +2,7 @@ import re
 from typing import List, Union, Pattern, Match
 
 
-def compile_keywords_pattern(
-        keywords: List[str],
-        *,
-        boundary: bool = True,
-        flags: int = re.IGNORECASE
-) -> Pattern[str]:
+def compile_keywords_pattern(keywords: List[str], *, boundary: bool = True, flags: int = re.IGNORECASE) -> Pattern[str]:
     """
     Build a regex that matches any of the given keywords.
 
@@ -43,11 +38,7 @@ def compile_keywords_pattern(
 
 
 def mask_regex_pattern(
-        pattern: Union[str, Pattern[str]],
-        text: str,
-        *,
-        mask_char: str = '*',
-        char_class: str = r'\w'
+    pattern: Union[str, Pattern[str]], text: str, *, mask_char: str = "*", char_class: str = r"\w"
 ) -> str:
     """
     Mask all matches of `pattern` in `text`, replacing each alphanumeric
@@ -69,21 +60,12 @@ def mask_regex_pattern(
     def repl(m: Match[str]) -> str:
         s = m.group(0)
         # Only mask characters matching `char_class`; leave punctuation/spaces
-        return ''.join(
-            mask_char if re.fullmatch(char_class, c) else c
-            for c in s
-        )
+        return "".join(mask_char if re.fullmatch(char_class, c) else c for c in s)
 
     return pattern.sub(repl, text)
 
 
-def mask_keywords(
-        text: str,
-        keywords: List[str],
-        *,
-        boundary: bool = True,
-        mask_char: str = '*'
-) -> str:
+def mask_keywords(text: str, keywords: List[str], *, boundary: bool = True, mask_char: str = "*") -> str:
     """
     Shortcut for masking a list of keywords in `text`.
 
@@ -139,14 +121,14 @@ class NameMasker:
             last_idx = end_idx + 1
 
         result.append(text[last_idx:])
-        return ''.join(result)
+        return "".join(result)
 
 
 #   .*-      anything up to the hyphen before the number
 #   (\d+)    capture as many digits as possible (= the base project index)
 #   ([a-z]?) optionally capture exactly one lowercase letter (revision)
 #   (?:-.*)? optionally ignore any further suffix like "-Fuji" or "-GE"
-PROJECT_RX = re.compile(r'.*-(\d+)([a-z]?)(?:-.*)?$', flags=re.IGNORECASE)
+PROJECT_RX = re.compile(r".*-(\d+)([a-z]?)(?:-.*)?$", flags=re.IGNORECASE)
 
 
 def parse_project_name(s: str) -> tuple[int, int]:
@@ -164,11 +146,11 @@ def parse_project_name(s: str) -> tuple[int, int]:
     rev_letter = m.group(2).lower()  # may be '' if no revision letter
 
     base_num = int(base_num_str)
-    if rev_letter == '':
+    if rev_letter == "":
         rev_rank = 0
     else:
         # Map 'a'→1, 'b'→2, 'c'→3, …S
-        rev_rank = ord(rev_letter) - ord('a') + 1
+        rev_rank = ord(rev_letter) - ord("a") + 1
 
     return base_num, rev_rank
 

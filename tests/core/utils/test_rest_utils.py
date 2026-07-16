@@ -50,9 +50,7 @@ class TestRestAdapterRequest:
 
     def test_get_returns_text_for_text_content_type(self):
         adapter = RestAdapter(RestAdapterConfig(base_url="https://example.com/"))
-        adapter.session.request = MagicMock(
-            return_value=make_response(text="hello", content_type="text/plain")
-        )
+        adapter.session.request = MagicMock(return_value=make_response(text="hello", content_type="text/plain"))
         assert adapter.get("endpoint") == "hello"
 
     def test_get_returns_raw_bytes_for_other_content_type(self):

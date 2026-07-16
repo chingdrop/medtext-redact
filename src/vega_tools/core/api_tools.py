@@ -31,11 +31,11 @@ class CensusNamesApi:
     ZIP_ENDPOINT = "/names.zip"
 
     def __init__(
-            self,
-            year: str,
-            save_file: Optional[Union[Path, str]] = None,
-            rest_adapter: Optional[RestAdapter] = None,
-            adapter_config: Optional[Dict[str, Any]] = None,
+        self,
+        year: str,
+        save_file: Optional[Union[Path, str]] = None,
+        rest_adapter: Optional[RestAdapter] = None,
+        adapter_config: Optional[Dict[str, Any]] = None,
     ):
         if year not in self.VALID_YEARS:
             raise ValueError(f"Year must be one of {sorted(self.VALID_YEARS)}, got '{year}'")
@@ -84,7 +84,7 @@ class CensusNamesApi:
         try:
             with zipfile.ZipFile(zip_buf) as z:
                 # pick the first CSV file in the archive
-                csv_files = [f for f in z.namelist() if f.lower().endswith('.csv')]
+                csv_files = [f for f in z.namelist() if f.lower().endswith(".csv")]
                 if not csv_files:
                     raise KeyError("No CSV file found in the ZIP archive")
                 filename = csv_files[0]

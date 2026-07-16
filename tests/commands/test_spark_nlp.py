@@ -52,7 +52,8 @@ class TestSparkNlpCommand:
 
     def test_docker_not_installed(self, monkeypatch):
         monkeypatch.setattr(
-            spark_nlp_module.subprocess, "run",
+            spark_nlp_module.subprocess,
+            "run",
             MagicMock(side_effect=FileNotFoundError()),
         )
 
@@ -64,7 +65,8 @@ class TestSparkNlpCommand:
 
     def test_called_process_error_propagates_exit_code(self, monkeypatch):
         monkeypatch.setattr(
-            spark_nlp_module.subprocess, "run",
+            spark_nlp_module.subprocess,
+            "run",
             MagicMock(side_effect=subprocess.CalledProcessError(returncode=5, cmd=["docker"])),
         )
 

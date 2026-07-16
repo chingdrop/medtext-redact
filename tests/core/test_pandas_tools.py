@@ -96,42 +96,50 @@ class TestSearchReportText:
 
 class TestCheckSeriesByStudy:
     def test_found_when_all_descriptions_present(self):
-        df = pd.DataFrame({
-            "Accession": ["A1", "A1"],
-            "Series": ["X", "Y"],
-        })
+        df = pd.DataFrame(
+            {
+                "Accession": ["A1", "A1"],
+                "Series": ["X", "Y"],
+            }
+        )
         result = check_series_by_study(df, "Accession", "Series", {"X", "Y"})
         row = result.iloc[0]
         assert row["Status"] == "Found"
         assert pd.isna(row["Missing Set"])
 
     def test_missing_when_description_absent(self):
-        df = pd.DataFrame({
-            "Accession": ["A1"],
-            "Series": ["X"],
-        })
+        df = pd.DataFrame(
+            {
+                "Accession": ["A1"],
+                "Series": ["X"],
+            }
+        )
         result = check_series_by_study(df, "Accession", "Series", {"X", "Y"})
         row = result.iloc[0]
         assert row["Status"] == "Missing"
         assert row["Missing Set"] == {"Y"}
 
     def test_one_row_per_accession(self):
-        df = pd.DataFrame({
-            "Accession": ["A1", "A1", "A2"],
-            "Series": ["X", "Y", "X"],
-        })
+        df = pd.DataFrame(
+            {
+                "Accession": ["A1", "A1", "A2"],
+                "Series": ["X", "Y", "X"],
+            }
+        )
         result = check_series_by_study(df, "Accession", "Series", {"X"})
         assert len(result) == 2
 
 
 class TestAuditImages:
     def _base_df(self):
-        return pd.DataFrame({
-            "Accession": ["A1", "A1", "A2"],
-            "Series Description": ["2D-VIEW", "3D-VOL", "2D-VIEW"],
-            "Number of Frames": [1, 3, 1],
-            "Slice Thickness": [0, 1, 0],
-        })
+        return pd.DataFrame(
+            {
+                "Accession": ["A1", "A1", "A2"],
+                "Series Description": ["2D-VIEW", "3D-VOL", "2D-VIEW"],
+                "Number of Frames": [1, 3, 1],
+                "Slice Thickness": [0, 1, 0],
+            }
+        )
 
     def test_2d_filters_single_frame_series(self):
         result = audit_images(self._base_df(), "2D", {"2D-VIEW"})
@@ -184,13 +192,15 @@ class TestMergeOnMatchedColumn:
 
 class TestCreateProjectComparison:
     def test_orders_by_parsed_project_name(self):
-        df = pd.DataFrame({
-            "file_1": ["vega-200"],
-            "file_2": ["vega-100"],
-            "file_1_accession": ["ACC2"],
-            "file_2_accession": ["ACC1"],
-            "study_instance_uid": ["UID1"],
-        })
+        df = pd.DataFrame(
+            {
+                "file_1": ["vega-200"],
+                "file_2": ["vega-100"],
+                "file_1_accession": ["ACC2"],
+                "file_2_accession": ["ACC1"],
+                "study_instance_uid": ["UID1"],
+            }
+        )
         result = create_project_comparison(df)
         assert result.iloc[0]["project_1"] == "vega-100"
         assert result.iloc[0]["project_2"] == "vega-200"
@@ -198,13 +208,15 @@ class TestCreateProjectComparison:
         assert result.iloc[0]["accession_2"] == "ACC2"
 
     def test_already_ordered_stays_in_place(self):
-        df = pd.DataFrame({
-            "file_1": ["vega-100"],
-            "file_2": ["vega-200"],
-            "file_1_accession": ["ACC1"],
-            "file_2_accession": ["ACC2"],
-            "study_instance_uid": ["UID1"],
-        })
+        df = pd.DataFrame(
+            {
+                "file_1": ["vega-100"],
+                "file_2": ["vega-200"],
+                "file_1_accession": ["ACC1"],
+                "file_2_accession": ["ACC2"],
+                "study_instance_uid": ["UID1"],
+            }
+        )
         result = create_project_comparison(df)
         assert result.iloc[0]["project_1"] == "vega-100"
         assert result.iloc[0]["project_2"] == "vega-200"
@@ -213,10 +225,12 @@ class TestCreateProjectComparison:
 class TestSplitCsvToTxt:
     def test_writes_one_txt_file_per_accession(self, tmp_path):
         csv_path = tmp_path / "sample.csv"
-        pd.DataFrame({
-            "Accession": ["ACC001", "ACC002"],
-            "Reports": ["Report one text", "Report two text"],
-        }).to_csv(csv_path, index=False)
+        pd.DataFrame(
+            {
+                "Accession": ["ACC001", "ACC002"],
+                "Reports": ["Report one text", "Report two text"],
+            }
+        ).to_csv(csv_path, index=False)
         output_dir = tmp_path / "out"
         output_dir.mkdir()
 
@@ -227,10 +241,12 @@ class TestSplitCsvToTxt:
 
     def test_strips_whitespace_from_accession(self, tmp_path):
         csv_path = tmp_path / "sample.csv"
-        pd.DataFrame({
-            "Accession": [" ACC001 "],
-            "Reports": ["text"],
-        }).to_csv(csv_path, index=False)
+        pd.DataFrame(
+            {
+                "Accession": [" ACC001 "],
+                "Reports": ["text"],
+            }
+        ).to_csv(csv_path, index=False)
         output_dir = tmp_path / "out"
         output_dir.mkdir()
 

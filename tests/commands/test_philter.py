@@ -24,18 +24,26 @@ class TestPhilterCommand:
         monkeypatch.setattr(philter_module, "PHILTER_UCSF_DIR", make_fake_philter_ucsf_dir(tmp_path))
 
         sample_path = tmp_path / "sample.csv"
-        pd.DataFrame({
-            "Accession": ["ACC001", "ACC002"],
-            "Reports": ["First report text", "Second report text"],
-        }).to_csv(sample_path, index=False)
+        pd.DataFrame(
+            {
+                "Accession": ["ACC001", "ACC002"],
+                "Reports": ["First report text", "Second report text"],
+            }
+        ).to_csv(sample_path, index=False)
         result_path = tmp_path / "result.csv"
 
         runner = CliRunner()
-        outcome = runner.invoke(philter, [
-            "--sample", str(sample_path),
-            "--result", str(result_path),
-            "--python", sys.executable,
-        ])
+        outcome = runner.invoke(
+            philter,
+            [
+                "--sample",
+                str(sample_path),
+                "--result",
+                str(result_path),
+                "--python",
+                sys.executable,
+            ],
+        )
 
         assert outcome.exit_code == 0, outcome.output
         result_df = pd.read_csv(result_path).sort_values("Filename").reset_index(drop=True)
@@ -50,11 +58,17 @@ class TestPhilterCommand:
         result_path = tmp_path / "result.csv"
 
         runner = CliRunner()
-        outcome = runner.invoke(philter, [
-            "--sample", str(sample_path),
-            "--result", str(result_path),
-            "--python", "/nonexistent/python-does-not-exist",
-        ])
+        outcome = runner.invoke(
+            philter,
+            [
+                "--sample",
+                str(sample_path),
+                "--result",
+                str(result_path),
+                "--python",
+                "/nonexistent/python-does-not-exist",
+            ],
+        )
 
         assert outcome.exit_code == 1
         assert "is not installed or not on PATH" in outcome.output
@@ -62,7 +76,8 @@ class TestPhilterCommand:
 
     def test_subprocess_failure_preserves_intermediate_files(self, tmp_path, monkeypatch):
         monkeypatch.setattr(
-            philter_module, "PHILTER_UCSF_DIR",
+            philter_module,
+            "PHILTER_UCSF_DIR",
             make_fake_philter_ucsf_dir(tmp_path, stub_name="fake_philter_main_failing.py"),
         )
 
@@ -71,11 +86,17 @@ class TestPhilterCommand:
         result_path = tmp_path / "result.csv"
 
         runner = CliRunner()
-        outcome = runner.invoke(philter, [
-            "--sample", str(sample_path),
-            "--result", str(result_path),
-            "--python", sys.executable,
-        ])
+        outcome = runner.invoke(
+            philter,
+            [
+                "--sample",
+                str(sample_path),
+                "--result",
+                str(result_path),
+                "--python",
+                sys.executable,
+            ],
+        )
 
         assert outcome.exit_code != 0
         assert "intermediate files left at" in outcome.output

@@ -17,10 +17,15 @@ def fake_census_names(monkeypatch):
 @pytest.fixture()
 def config_path(tmp_path):
     path = tmp_path / "config.json"
-    path.write_text(json.dumps({
-        "Masking": {"Manufacturers": [], "Locations": []},
-        "Searching": {"AnatomicalTags": ["left", "right"], "PathologyKeywords": ["carcinoma"]},
-    }), encoding="utf-8")
+    path.write_text(
+        json.dumps(
+            {
+                "Masking": {"Manufacturers": [], "Locations": []},
+                "Searching": {"AnatomicalTags": ["left", "right"], "PathologyKeywords": ["carcinoma"]},
+            }
+        ),
+        encoding="utf-8",
+    )
     return path
 
 
@@ -63,19 +68,27 @@ class TestSingle:
 class TestSpreadsheet:
     def test_output_keeps_sanitized_text_and_search_columns(self, tmp_path, config_path):
         sample_path = tmp_path / "sample.csv"
-        pd.DataFrame({
-            "Accession": ["A1"],
-            "ReportText": ["Smith has left breast carcinoma, benign result"],
-        }).to_csv(sample_path, index=False)
+        pd.DataFrame(
+            {
+                "Accession": ["A1"],
+                "ReportText": ["Smith has left breast carcinoma, benign result"],
+            }
+        ).to_csv(sample_path, index=False)
         result_path = tmp_path / "result.csv"
 
         runner = CliRunner()
-        outcome = runner.invoke(parse_report, [
-            "--config", str(config_path),
-            "spreadsheet",
-            "--sample", str(sample_path),
-            "--result", str(result_path),
-        ])
+        outcome = runner.invoke(
+            parse_report,
+            [
+                "--config",
+                str(config_path),
+                "spreadsheet",
+                "--sample",
+                str(sample_path),
+                "--result",
+                str(result_path),
+            ],
+        )
 
         assert outcome.exit_code == 0, outcome.output
         result_df = pd.read_csv(result_path)
@@ -89,19 +102,27 @@ class TestSpreadsheet:
 
     def test_none_placeholder_replaced(self, tmp_path, config_path):
         sample_path = tmp_path / "sample.csv"
-        pd.DataFrame({
-            "Accession": ["A1"],
-            "ReportText": ["<NONE>"],
-        }).to_csv(sample_path, index=False)
+        pd.DataFrame(
+            {
+                "Accession": ["A1"],
+                "ReportText": ["<NONE>"],
+            }
+        ).to_csv(sample_path, index=False)
         result_path = tmp_path / "result.csv"
 
         runner = CliRunner()
-        outcome = runner.invoke(parse_report, [
-            "--config", str(config_path),
-            "spreadsheet",
-            "--sample", str(sample_path),
-            "--result", str(result_path),
-        ])
+        outcome = runner.invoke(
+            parse_report,
+            [
+                "--config",
+                str(config_path),
+                "spreadsheet",
+                "--sample",
+                str(sample_path),
+                "--result",
+                str(result_path),
+            ],
+        )
 
         assert outcome.exit_code == 0, outcome.output
         result_df = pd.read_csv(result_path)

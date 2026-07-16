@@ -8,6 +8,7 @@ same flags commands/philter.py passes, and copy input .txt files to the
 output directory — to exercise the split -> subprocess -> repackage wiring
 end-to-end without needing the real tool installed.
 """
+
 import argparse
 import shutil
 from pathlib import Path

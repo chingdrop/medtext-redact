@@ -30,7 +30,7 @@ class PhiSanitizer:
             (?:19|20)\d{2}               # year 1900–2099
             \b
             """,
-        re.VERBOSE
+        re.VERBOSE,
     )
 
     # ‣ Restrict age to 0–150
@@ -47,57 +47,53 @@ class PhiSanitizer:
             (?:[\s\-]*old)?               # optional “old”
             \b
             """,
-        re.IGNORECASE | re.VERBOSE
+        re.IGNORECASE | re.VERBOSE,
     )
 
     def __init__(self, text: Optional[str], title_case: bool = False) -> None:
         self.title_case = title_case
-        self._text = '' if pd.isna(text) else text.strip()
+        self._text = "" if pd.isna(text) else text.strip()
         self._format_text()
 
     def _format_text(self) -> None:
-        text = re.sub(r'\s+', ' ', self._text)
-        text = re.sub(r'\s*,\s*', ', ', text)
+        text = re.sub(r"\s+", " ", self._text)
+        text = re.sub(r"\s*,\s*", ", ", text)
         if self.title_case:
             # Only uppercase first letter of sentence, if needed, rather than each word
-            text = '. '.join(s.capitalize() for s in text.split('. '))
+            text = ". ".join(s.capitalize() for s in text.split(". "))
         self._text = text.strip()
 
     @property
     def text(self) -> str:
         return self._text
 
-    def sanitize_keywords(self, keywords: List[str]) -> 'PhiSanitizer':
+    def sanitize_keywords(self, keywords: List[str]) -> "PhiSanitizer":
         """Mask out any occurrences of the provided keywords."""
         self._text = mask_keywords(self._text, keywords)
         return self
 
-    def sanitize_names(self) -> 'PhiSanitizer':
+    def sanitize_names(self) -> "PhiSanitizer":
         """Load census names and mask any occurrences."""
         names = load_census_names()
         nm = NameMasker(names)
         self._text = nm.mask(self._text)
         return self
 
-    def sanitize_dates(self) -> 'PhiSanitizer':
+    def sanitize_dates(self) -> "PhiSanitizer":
         """Mask all dates matching MM/DD/YYYY or M/D/YYYY."""
         self._text = mask_regex_pattern(self._DATE_PATTERN, self._text)
         return self
 
-    def sanitize_age(self) -> 'PhiSanitizer':
+    def sanitize_age(self) -> "PhiSanitizer":
         """Mask age expressions like '34 years old' or '100-yrs-old'."""
         self._text = mask_regex_pattern(self._AGE_PATTERN, self._text)
         return self
 
-    def sanitize_gender(self) -> 'PhiSanitizer':
+    def sanitize_gender(self) -> "PhiSanitizer":
         """Mask simple gender terms."""
-        return self.sanitize_keywords(['male', 'female'])
+        return self.sanitize_keywords(["male", "female"])
 
-    def sanitize_all(
-            self,
-            config: ConfigLoader,
-            full: bool = False
-    ) -> 'PhiSanitizer':
+    def sanitize_all(self, config: ConfigLoader, full: bool = False) -> "PhiSanitizer":
         """
         De‐identify PHI using the provided ConfigLoader.
 
@@ -110,8 +106,8 @@ class PhiSanitizer:
         if full:
             self.sanitize_gender().sanitize_age()
 
-        manufacturers = config.get('Masking.Manufacturers')
-        locations = config.get('Masking.Locations')
+        manufacturers = config.get("Masking.Manufacturers")
+        locations = config.get("Masking.Locations")
 
         if manufacturers:
             self.sanitize_keywords(manufacturers)
@@ -121,11 +117,7 @@ class PhiSanitizer:
         return self
 
 
-def _highlight_text(
-        text: str,
-        pattern: Pattern[str],
-        style: str = "bold yellow"
-) -> Text:
+def _highlight_text(text: str, pattern: Pattern[str], style: str = "bold yellow") -> Text:
     """
     Return a Rich Text object with every regex match styled.
     """
@@ -136,12 +128,12 @@ def _highlight_text(
 
 
 def print_lines_with_keywords(
-        keywords: List[str],
-        text: str,
-        *,
-        boundary: bool = True,
-        style: str = "bold yellow",
-        console: Optional[Console] = None
+    keywords: List[str],
+    text: str,
+    *,
+    boundary: bool = True,
+    style: str = "bold yellow",
+    console: Optional[Console] = None,
 ) -> None:
     """
     Split `text` into sentences (on .?!), find lines containing any keyword,
@@ -150,7 +142,7 @@ def print_lines_with_keywords(
     console = console or Console()
     pattern = compile_keywords_pattern(keywords, boundary=boundary)
 
-    sentences = re.split(r'(?<=[.?!])\s+', text)
+    sentences = re.split(r"(?<=[.?!])\s+", text)
     for sentence in sentences:
         if pattern.search(sentence):
             highlighted = _highlight_text(sentence.strip(), pattern, style)
@@ -158,11 +150,7 @@ def print_lines_with_keywords(
 
 
 def print_text_with_keywords(
-        keywords: List[str],
-        text: str,
-        *,
-        boundary: bool = True,
-        style: str = "bold yellow"
+    keywords: List[str], text: str, *, boundary: bool = True, style: str = "bold yellow"
 ) -> None:
     """Highlight all occurrences of `keywords` in the full `text` and page it via the system pager (using PyDoc)."""
     import pydoc
@@ -188,5 +176,5 @@ def white_rabbit_parse_report(text: str) -> str:
     Returns:
         str: The report text with Penrad masked.
     """
-    penrad_pattern = r'[a-zA-Z]{2,3}/Penrad'
+    penrad_pattern = r"[a-zA-Z]{2,3}/Penrad"
     return mask_regex_pattern(penrad_pattern, text)

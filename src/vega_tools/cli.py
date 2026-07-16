@@ -12,7 +12,7 @@ from vega_tools.paths import DATA_DIRECTORY
 @click.group()
 def cli():
     """Command Line Interface for custom use cases in data analysis."""
-    pd.set_option('future.no_silent_downcasting', True)
+    pd.set_option("future.no_silent_downcasting", True)
 
 
 cli.add_command(audit_series_by_study)
@@ -28,5 +28,5 @@ def main():
     cli()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

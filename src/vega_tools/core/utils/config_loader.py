@@ -22,11 +22,11 @@ class ConfigLoader(MutableMapping):
     """
 
     def __init__(
-            self,
-            filepath: Union[Path, str],
-            *,
-            env_expand: bool = False,
-            logger: Optional[logging.Logger] = None,
+        self,
+        filepath: Union[Path, str],
+        *,
+        env_expand: bool = False,
+        logger: Optional[logging.Logger] = None,
     ) -> None:
         self.filepath = Path(filepath)
         self.env_expand = env_expand
@@ -43,10 +43,11 @@ class ConfigLoader(MutableMapping):
             raise ConfigError(f"Configuration file not found: {self.filepath}")
         text = self.filepath.read_text(encoding="utf-8")
         try:
-            if self.filepath.suffix.lower() in ['.yaml', '.yml']:
+            if self.filepath.suffix.lower() in [".yaml", ".yml"]:
                 import yaml
+
                 data = yaml.safe_load(text)
-            elif self.filepath.suffix.lower() == '.json':
+            elif self.filepath.suffix.lower() == ".json":
                 data = json.loads(text)
             else:
                 raise ConfigError("Configuration root must be a JSON/YAML object")
@@ -66,7 +67,7 @@ class ConfigLoader(MutableMapping):
         Supports dot notation for nested dictionaries.
         Expands environment variables if env_expand=True and value is a string.
         """
-        parts = key.split('.')
+        parts = key.split(".")
         current: Any = self._data
         for part in parts:
             if isinstance(current, dict) and part in current:
@@ -75,6 +76,7 @@ class ConfigLoader(MutableMapping):
                 return default
         if self.env_expand and isinstance(current, str):
             from os import path
+
             # expand ${VAR} and ~ for homedir
             return path.expanduser(path.expandvars(current))
         return current
@@ -95,7 +97,7 @@ class ConfigLoader(MutableMapping):
     def __len__(self) -> int:
         return len(self._data)
 
-    def copy(self) -> 'ConfigLoader':
+    def copy(self) -> "ConfigLoader":
         """
         Return a shallow, in-memory copy that still supports dot-notation .get().
 
