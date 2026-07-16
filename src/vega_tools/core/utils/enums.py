@@ -1,11 +1,9 @@
-from typing import List
-
 import pandas as pd
 
 from vega_tools.core.api_tools import CensusNamesApi
 
 
-def load_census_names(year: str = "2010") -> List[str]:
+def load_census_names(year: str = "2010") -> list[str]:
     api = CensusNamesApi(year=year)
     file_path = api.save_file
     if not file_path.exists():

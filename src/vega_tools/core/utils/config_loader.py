@@ -1,8 +1,8 @@
 import json
 import logging
-from collections.abc import MutableMapping
+from collections.abc import Iterator, MutableMapping
 from pathlib import Path
-from typing import Any, Dict, Iterator, Union, Optional
+from typing import Any
 
 
 class ConfigError(Exception):
@@ -23,15 +23,15 @@ class ConfigLoader(MutableMapping):
 
     def __init__(
         self,
-        filepath: Union[Path, str],
+        filepath: Path | str,
         *,
         env_expand: bool = False,
-        logger: Optional[logging.Logger] = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         self.filepath = Path(filepath)
         self.env_expand = env_expand
         self.logger = logger or logging.getLogger(__name__)
-        self._data: Dict[str, Any] = {}
+        self._data: dict[str, Any] = {}
         self.reload()
 
     def reload(self) -> None:
@@ -55,11 +55,11 @@ class ConfigLoader(MutableMapping):
             self._data = data
             self.logger.debug(f"Loaded config from {self.filepath}")
         except json.JSONDecodeError as e:
-            raise ConfigError(f"JSON syntax error in {self.filepath}: {e}")
+            raise ConfigError(f"JSON syntax error in {self.filepath}: {e}") from e
         except Exception as e:
             if isinstance(e, ConfigError):
                 raise
-            raise ConfigError(f"Error loading config: {e}")
+            raise ConfigError(f"Error loading config: {e}") from e
 
     def get(self, key: str, default: Any = None) -> Any:
         """

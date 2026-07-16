@@ -1,15 +1,16 @@
 import re
+from collections.abc import Callable
 from pathlib import Path
-from typing import Set, List, Any, Union, Optional, Callable, Dict
+from typing import Any
 
 import numpy as np
 import pandas as pd
-from pandas import Series, DataFrame
+from pandas import DataFrame, Series
 
 from vega_tools.core.utils.regex_utils import compile_keywords_pattern, parse_project_name
 
 Reader = Callable[..., pd.DataFrame]
-READERS: Dict[str, Reader] = {
+READERS: dict[str, Reader] = {
     "csv": pd.read_csv,
     "txt": pd.read_csv,
     "xls": pd.read_excel,
@@ -20,9 +21,7 @@ READERS: Dict[str, Reader] = {
 }
 
 
-def read_structured_file(
-    file_path: Union[str, Path], file_type: Optional[str] = None, **kwargs
-) -> Optional[pd.DataFrame]:
+def read_structured_file(file_path: str | Path, file_type: str | None = None, **kwargs) -> pd.DataFrame | None:
     """
     Reads a structured data file (CSV, Excel, JSON, Parquet, etc.) into a DataFrame.
 
@@ -52,7 +51,7 @@ def read_structured_file(
 
 
 Writer = Callable[..., None]
-WRITERS: Dict[str, Writer] = {
+WRITERS: dict[str, Writer] = {
     "csv": lambda df, path, **kw: df.to_csv(path, **kw),
     "txt": lambda df, path, **kw: df.to_csv(path, **kw),
     "xls": lambda df, path, **kw: df.to_excel(path, **kw),
@@ -63,9 +62,7 @@ WRITERS: Dict[str, Writer] = {
 }
 
 
-def write_structured_file(
-    df: pd.DataFrame, file_path: Union[str, Path], file_type: Optional[str] = None, **kwargs
-) -> bool:
+def write_structured_file(df: pd.DataFrame, file_path: str | Path, file_type: str | None = None, **kwargs) -> bool:
     """
     Writes a DataFrame to a structured-data file (CSV, Excel, JSON, Parquet, etc.).
 
@@ -98,7 +95,7 @@ def write_structured_file(
         return False
 
 
-def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
+def search_column_for_keywords(series: Series, keywords: list[str]) -> Series:
     """
     Search a Pandas Series for keywords and extracts the keywords from the value.
 
@@ -116,7 +113,7 @@ def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
     return series.str.extract(capturing_pattern, expand=False)
 
 
-def search_report_text(df: DataFrame, config: Dict[str, Any]) -> DataFrame:
+def search_report_text(df: DataFrame, config: dict[str, Any]) -> DataFrame:
     """
     Use client configuration file to search report text and create subsequent columns.
 
@@ -135,7 +132,7 @@ def search_report_text(df: DataFrame, config: Dict[str, Any]) -> DataFrame:
 
 
 def check_series_by_study(
-    df: pd.DataFrame, accession_col: str, series_col: str, descriptions: Set[str]
+    df: pd.DataFrame, accession_col: str, series_col: str, descriptions: set[str]
 ) -> pd.DataFrame:
     """
     Summarize which required series are present or missing per study.
@@ -176,7 +173,7 @@ def check_series_by_study(
 def audit_images(
     df: pd.DataFrame,
     img_type: str,
-    descriptions: Set[str],
+    descriptions: set[str],
     slice_thickness: int = 1,
     accession_col: str = "Accession",
     series_col: str = "Series Description",
@@ -313,7 +310,7 @@ def create_project_comparison(data_df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def split_csv_to_txt(csv_path: Union[str, Path], output_path: Path) -> None:
+def split_csv_to_txt(csv_path: str | Path, output_path: Path) -> None:
     """
     Read a CSV and write each 'Reports' field to a separate text file
     named <Accession>.txt under output_path.
@@ -327,7 +324,7 @@ def split_csv_to_txt(csv_path: Union[str, Path], output_path: Path) -> None:
         outfile.write_text(report, encoding="utf-8")
 
 
-def repackage_txts_to_csv(input_path: Path, csv_path: Union[str, Path]) -> None:
+def repackage_txts_to_csv(input_path: Path, csv_path: str | Path) -> None:
     """
     Read every .txt file in input_path and write out a CSV at csv_path
     with columns: Filename (no .txt) and Contents.

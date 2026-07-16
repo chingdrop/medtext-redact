@@ -1,5 +1,5 @@
 import re
-from typing import List, Optional, Pattern
+from re import Pattern
 
 import pandas as pd
 from rich.console import Console
@@ -7,7 +7,7 @@ from rich.text import Text
 
 from vega_tools.core.utils.config_loader import ConfigLoader
 from vega_tools.core.utils.enums import load_census_names
-from vega_tools.core.utils.regex_utils import compile_keywords_pattern, mask_regex_pattern, mask_keywords, NameMasker
+from vega_tools.core.utils.regex_utils import NameMasker, compile_keywords_pattern, mask_keywords, mask_regex_pattern
 
 
 class PhiSanitizer:
@@ -50,7 +50,7 @@ class PhiSanitizer:
         re.IGNORECASE | re.VERBOSE,
     )
 
-    def __init__(self, text: Optional[str], title_case: bool = False) -> None:
+    def __init__(self, text: str | None, title_case: bool = False) -> None:
         self.title_case = title_case
         self._text = "" if pd.isna(text) else text.strip()
         self._format_text()
@@ -67,7 +67,7 @@ class PhiSanitizer:
     def text(self) -> str:
         return self._text
 
-    def sanitize_keywords(self, keywords: List[str]) -> "PhiSanitizer":
+    def sanitize_keywords(self, keywords: list[str]) -> "PhiSanitizer":
         """Mask out any occurrences of the provided keywords."""
         self._text = mask_keywords(self._text, keywords)
         return self
@@ -128,12 +128,12 @@ def _highlight_text(text: str, pattern: Pattern[str], style: str = "bold yellow"
 
 
 def print_lines_with_keywords(
-    keywords: List[str],
+    keywords: list[str],
     text: str,
     *,
     boundary: bool = True,
     style: str = "bold yellow",
-    console: Optional[Console] = None,
+    console: Console | None = None,
 ) -> None:
     """
     Split `text` into sentences (on .?!), find lines containing any keyword,
@@ -150,7 +150,7 @@ def print_lines_with_keywords(
 
 
 def print_text_with_keywords(
-    keywords: List[str], text: str, *, boundary: bool = True, style: str = "bold yellow"
+    keywords: list[str], text: str, *, boundary: bool = True, style: str = "bold yellow"
 ) -> None:
     """Highlight all occurrences of `keywords` in the full `text` and page it via the system pager (using PyDoc)."""
     import pydoc

@@ -1,8 +1,8 @@
 import re
-from typing import List, Union, Pattern, Match
+from re import Match, Pattern
 
 
-def compile_keywords_pattern(keywords: List[str], *, boundary: bool = True, flags: int = re.IGNORECASE) -> Pattern[str]:
+def compile_keywords_pattern(keywords: list[str], *, boundary: bool = True, flags: int = re.IGNORECASE) -> Pattern[str]:
     """
     Build a regex that matches any of the given keywords.
 
@@ -28,18 +28,13 @@ def compile_keywords_pattern(keywords: List[str], *, boundary: bool = True, flag
     escaped = [re.escape(k) for k in unique]
     group = "|".join(escaped)
 
-    if boundary:
-        # (?<!\w) and (?!\w) are more robust than \b when keywords contain underscores, etc.
-        pattern = rf"(?<!\w)(?:{group})(?!\w)"
-    else:
-        pattern = rf"(?:{group})"
+    # (?<!\w) and (?!\w) are more robust than \b when keywords contain underscores, etc.
+    pattern = rf"(?<!\w)(?:{group})(?!\w)" if boundary else rf"(?:{group})"
 
     return re.compile(pattern, flags)
 
 
-def mask_regex_pattern(
-    pattern: Union[str, Pattern[str]], text: str, *, mask_char: str = "*", char_class: str = r"\w"
-) -> str:
+def mask_regex_pattern(pattern: str | Pattern[str], text: str, *, mask_char: str = "*", char_class: str = r"\w") -> str:
     """
     Mask all matches of `pattern` in `text`, replacing each alphanumeric
     character with `mask_char` (default '*').
@@ -65,7 +60,7 @@ def mask_regex_pattern(
     return pattern.sub(repl, text)
 
 
-def mask_keywords(text: str, keywords: List[str], *, boundary: bool = True, mask_char: str = "*") -> str:
+def mask_keywords(text: str, keywords: list[str], *, boundary: bool = True, mask_char: str = "*") -> str:
     """
     Shortcut for masking a list of keywords in `text`.
 
@@ -93,7 +88,7 @@ class NameMasker:
         automaton (Automation): Aho-Corasick automaton object.
     """
 
-    def __init__(self, names: List[str]):
+    def __init__(self, names: list[str]):
         import ahocorasick
 
         self.automaton = ahocorasick.Automaton()
@@ -146,11 +141,8 @@ def parse_project_name(s: str) -> tuple[int, int]:
     rev_letter = m.group(2).lower()  # may be '' if no revision letter
 
     base_num = int(base_num_str)
-    if rev_letter == "":
-        rev_rank = 0
-    else:
-        # Map 'a'→1, 'b'→2, 'c'→3, …S
-        rev_rank = ord(rev_letter) - ord("a") + 1
+    # rev_rank: 0 for no revision letter; 'a'→1, 'b'→2, 'c'→3, …
+    rev_rank = 0 if rev_letter == "" else ord(rev_letter) - ord("a") + 1
 
     return base_num, rev_rank
 

@@ -1,13 +1,10 @@
 import logging
 from pathlib import Path
-from typing import Union
 
 logger = logging.getLogger(__name__)
 
 
-def write_text_to_file(
-    text: str, filepath: Union[Path, str], *, encoding: str = "utf-8", overwrite: bool = True
-) -> Path:
+def write_text_to_file(text: str, filepath: Path | str, *, encoding: str = "utf-8", overwrite: bool = True) -> Path:
     """
     Write a string to a file, creating parent directories as needed.
 
@@ -42,7 +39,7 @@ def write_text_to_file(
         raise
 
 
-def read_text_from_file(filepath: Union[Path, str], *, encoding: str = "utf-8") -> str:
+def read_text_from_file(filepath: Path | str, *, encoding: str = "utf-8") -> str:
     """
     Read an entire text file into a string.
 
@@ -68,7 +65,7 @@ def read_text_from_file(filepath: Union[Path, str], *, encoding: str = "utf-8") 
         raise
 
 
-def create_directory(dirpath: Union[Path, str], *, exist_ok: bool = True) -> Path:
+def create_directory(dirpath: Path | str, *, exist_ok: bool = True) -> Path:
     """
     Ensure a directory exists, creating it (and parents) if necessary.
 

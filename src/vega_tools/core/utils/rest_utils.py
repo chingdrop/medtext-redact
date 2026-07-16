@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional, Union
+from typing import Any
 from urllib.parse import urljoin
 
 import certifi
@@ -12,11 +12,11 @@ from urllib3.util.retry import Retry
 @dataclass
 class RestAdapterConfig:
     base_url: str
-    headers: Dict[str, str] = field(default_factory=dict)
-    auth: Optional[Any] = None
-    proxies: Dict[str, str] = field(default_factory=dict)
-    timeout: Optional[float] = None
-    verify: Union[bool, str] = True
+    headers: dict[str, str] = field(default_factory=dict)
+    auth: Any | None = None
+    proxies: dict[str, str] = field(default_factory=dict)
+    timeout: float | None = None
+    verify: bool | str = True
     retries: int = 3
     backoff_factor: float = 0.3
 
@@ -30,7 +30,7 @@ class RestAdapter:
       - optional verbose logging
     """
 
-    def __init__(self, config: RestAdapterConfig, logger: Optional[logging.Logger] = None):
+    def __init__(self, config: RestAdapterConfig, logger: logging.Logger | None = None):
         self.config = config
         self.logger = logger or logging.getLogger(__name__)
 
@@ -56,14 +56,14 @@ class RestAdapter:
         method: str,
         endpoint: str,
         *,
-        params: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict[str, Any]] = None,
-        json: Optional[Any] = None,
-        headers: Optional[Dict[str, str]] = None,
-        cookies: Optional[Dict[str, str]] = None,
-        timeout: Optional[float] = None,
+        params: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+        json: Any | None = None,
+        headers: dict[str, str] | None = None,
+        cookies: dict[str, str] | None = None,
+        timeout: float | None = None,
         allow_redirects: bool = True,
-    ) -> Union[Dict[str, Any], str, bytes]:
+    ) -> dict[str, Any] | str | bytes:
         """
         Make an HTTP request and return parsed JSON, text, or raw bytes.
 

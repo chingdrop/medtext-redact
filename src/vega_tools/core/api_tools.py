@@ -2,12 +2,12 @@ import io
 import logging
 import zipfile
 from pathlib import Path
-from typing import Optional, Union, Dict, Any
+from typing import Any
 
 import pandas as pd
 
-from vega_tools.paths import DATA_DIRECTORY
 from vega_tools.core.utils.rest_utils import RestAdapter, RestAdapterConfig
+from vega_tools.paths import DATA_DIRECTORY
 
 
 class CensusNamesApi:
@@ -33,9 +33,9 @@ class CensusNamesApi:
     def __init__(
         self,
         year: str,
-        save_file: Optional[Union[Path, str]] = None,
-        rest_adapter: Optional[RestAdapter] = None,
-        adapter_config: Optional[Dict[str, Any]] = None,
+        save_file: Path | str | None = None,
+        rest_adapter: RestAdapter | None = None,
+        adapter_config: dict[str, Any] | None = None,
     ):
         if year not in self.VALID_YEARS:
             raise ValueError(f"Year must be one of {sorted(self.VALID_YEARS)}, got '{year}'")

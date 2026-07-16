@@ -3,12 +3,12 @@ import numpy as np
 import pandas as pd
 
 from vega_tools.core.pandas_tools import (
-    read_structured_file,
-    write_structured_file,
     audit_images,
+    create_project_comparison,
     find_column_for_value,
     merge_on_matched_column,
-    create_project_comparison,
+    read_structured_file,
+    write_structured_file,
 )
 from vega_tools.core.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
 from vega_tools.paths import DATA_DIRECTORY
