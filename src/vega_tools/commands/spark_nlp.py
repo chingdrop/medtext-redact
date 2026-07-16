@@ -4,7 +4,7 @@ from pathlib import Path
 
 import click
 
-SPARK_NLP_DIR = Path(__file__).resolve().parent.parent.parent.parent / 'spark-nlp'
+SPARK_NLP_DIR = Path(__file__).resolve().parent.parent.parent.parent / 'integrations' / 'spark-nlp'
 
 
 @click.command(context_settings={'ignore_unknown_options': True})

@@ -1,3 +1,3 @@
 [submodule "philter-ucsf"]
-	path = philter/philter-ucsf
+	path = integrations/philter/philter-ucsf
 	url = https://github.com/BCHSI/philter-ucsf.git

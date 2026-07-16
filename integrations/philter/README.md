@@ -7,7 +7,7 @@ As far as Git is concerned, philter-ucsf is being treated as sub-module. This al
 
 ## How to Use
 
-This workflow is run through the `vega-tools` CLI, not as a standalone script — see the root [README](../README.md#process) for the `philter` command. In short:
+This workflow is run through the `vega-tools` CLI, not as a standalone script — see the root [README](../../README.md#process) for the `philter` command. In short:
 
 1. Create a reference CSV with `Accession` and `Reports` columns.
 2. Set up a separate Python environment with `philter-ucsf`'s own dependencies installed (see `philter-ucsf/requirements.txt` — these versions conflict with Vega-Tools' own, so this must not be the same environment `vega-tools` itself runs in).
