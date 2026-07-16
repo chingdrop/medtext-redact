@@ -522,6 +522,16 @@ wheels = [
 ]
 
 [[package]]
+name = "py-shared-tools"
+version = "1.2.0"
+source = { git = "https://github.com/chingdrop/py-shared-tools?rev=v1.2.0#88083dd2f55772b9baf8fb7afe376be3bc71ae83" }
+dependencies = [
+    { name = "certifi" },
+    { name = "requests" },
+    { name = "urllib3" },
+]
+
+[[package]]
 name = "pyahocorasick"
 version = "2.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -873,6 +883,7 @@ dependencies = [
     { name = "numpy" },
     { name = "openpyxl" },
     { name = "pandas" },
+    { name = "py-shared-tools" },
     { name = "pyahocorasick" },
     { name = "requests" },
     { name = "rich" },
@@ -896,6 +907,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.24.3,<2.0.0" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = ">=2.0.3,<3.0.0" },
+    { name = "py-shared-tools", git = "https://github.com/chingdrop/py-shared-tools?rev=v1.2.0" },
     { name = "pyahocorasick", specifier = ">=2.1.0" },
     { name = "requests", specifier = ">=2.23.3" },
     { name = "rich", specifier = ">=14.0.0" },

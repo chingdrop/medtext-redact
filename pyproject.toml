@@ -19,6 +19,7 @@ dependencies = [
     "pyahocorasick>=2.1.0",
     "openpyxl>=3.1.5",
     "nltk>=3.9.1",
+    "py-shared-tools",
 ]
 
 [project.urls]
@@ -26,6 +27,9 @@ Repository = "https://github.com/churley-vega/vega-tools"
 
 [project.scripts]
 vega-tools = "vega_tools.cli:main"
+
+[tool.uv.sources]
+py-shared-tools = { git = "https://github.com/chingdrop/py-shared-tools", rev = "v1.2.0" }
 
 [dependency-groups]
 dev = [
