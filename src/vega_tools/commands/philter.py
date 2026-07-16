@@ -7,6 +7,7 @@ from pathlib import Path
 
 import click
 import nltk
+from shared_tools.logging_setup import setup_logging
 
 from vega_tools.core.pandas_tools import repackage_txts_to_csv, split_csv_to_txt
 
@@ -35,7 +36,7 @@ PHILTER_UCSF_DIR = Path(__file__).resolve().parent.parent.parent.parent / "integ
 )
 def philter(sample, result, python_executable):
     """De-identify a reports spreadsheet using Philter-UCSF."""
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]: %(message)s")
+    setup_logging(level=logging.INFO)
 
     nltk.download("averaged_perceptron_tagger", quiet=True)
     nltk.download("averaged_perceptron_tagger_eng", quiet=True)
