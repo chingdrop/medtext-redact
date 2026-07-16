@@ -76,6 +76,8 @@ class CensusNamesApi:
         try:
             self.logger.info(f"Downloading census names ZIP for year {self.year}")
             raw = self._rest.get(self.ZIP_ENDPOINT)
+            if isinstance(raw, dict):
+                raise RuntimeError(f"Expected a binary ZIP response, got a JSON object: {raw!r}")
             zip_buf = io.BytesIO(raw if isinstance(raw, (bytes, bytearray)) else raw.encode())
         except Exception as e:
             self.logger.error("Failed to download ZIP", exc_info=e)

@@ -29,7 +29,7 @@ Repository = "https://github.com/churley-vega/vega-tools"
 vega-tools = "vega_tools.cli:main"
 
 [tool.uv.sources]
-py-shared-tools = { git = "https://github.com/chingdrop/py-shared-tools", rev = "v1.2.0" }
+py-shared-tools = { git = "https://github.com/chingdrop/py-shared-tools", rev = "v1.3.1" }
 
 [dependency-groups]
 dev = [
@@ -72,10 +72,4 @@ warn_unused_ignores = true
 
 [[tool.mypy.overrides]]
 module = ["ahocorasick", "nltk"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-# py-shared-tools has full inline type hints but no py.typed marker (PEP
-# 561), so mypy can't trust them from an installed package as-is.
-module = ["shared_tools.*"]
 ignore_missing_imports = true
