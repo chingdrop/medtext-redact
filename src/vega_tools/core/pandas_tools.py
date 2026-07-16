@@ -1,5 +1,4 @@
 import re
-from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -8,91 +7,6 @@ import pandas as pd
 from pandas import DataFrame, Series
 
 from vega_tools.core.utils.regex_utils import compile_keywords_pattern, parse_project_name
-
-Reader = Callable[..., pd.DataFrame]
-READERS: dict[str, Reader] = {
-    "csv": pd.read_csv,
-    "txt": pd.read_csv,
-    "xls": pd.read_excel,
-    "xlsx": pd.read_excel,
-    "json": pd.read_json,
-    "html": lambda path, **kw: pd.read_html(path, **kw)[0],
-    "htm": lambda path, **kw: pd.read_html(path, **kw)[0],
-}
-
-
-def read_structured_file(file_path: str | Path, file_type: str | None = None, **kwargs) -> pd.DataFrame | None:
-    """
-    Reads a structured data file (CSV, Excel, JSON, Parquet, etc.) into a DataFrame.
-
-    Args:
-        file_path (Union[str, Path]): Structured data file to read.
-        file_type (Optional[str]): Override the extension detection; e.g. "csv", "json".
-        **kwargs: Passed verbatim to the underlying pandas' reader.
-
-    Returns:
-        A DataFrame, or None if the file type is unsupported or an error occurs.
-    """
-    path = Path(file_path)
-    ext = (file_type or path.suffix.lstrip(".")).lower()
-
-    reader = READERS.get(ext)
-    if reader is None:
-        print(f"Unsupported file type: .{ext}")
-        return None
-
-    try:
-        if ext in ("xls", "xlsx") and "engine" not in kwargs:
-            kwargs.setdefault("engine", "openpyxl")
-        return reader(path, **kwargs)
-    except Exception as e:
-        print(f"Error reading .{ext} file at {path!r}: {e}")
-        return None
-
-
-Writer = Callable[..., None]
-WRITERS: dict[str, Writer] = {
-    "csv": lambda df, path, **kw: df.to_csv(path, **kw),
-    "txt": lambda df, path, **kw: df.to_csv(path, **kw),
-    "xls": lambda df, path, **kw: df.to_excel(path, **kw),
-    "xlsx": lambda df, path, **kw: df.to_excel(path, **kw),
-    "json": lambda df, path, **kw: df.to_json(path, **kw),
-    "html": lambda df, path, **kw: df.to_html(path, **kw),
-    "htm": lambda df, path, **kw: df.to_html(path, **kw),
-}
-
-
-def write_structured_file(df: pd.DataFrame, file_path: str | Path, file_type: str | None = None, **kwargs) -> bool:
-    """
-    Writes a DataFrame to a structured-data file (CSV, Excel, JSON, Parquet, etc.).
-
-    Args:
-        df (DataFrame): The DataFrame you want to write.
-        file_path (Union[str, Path]): Output file path.
-        file_type (Optional[str]): Override the extension detection; e.g. "csv", "json".
-        **kwargs: Passed along to the underlying pandas writer
-            (e.g. index=False, sheet_name="Data", orient="records").
-
-    Returns:
-        True if write succeeds; False on unsupported type or error.
-    """
-    path = Path(file_path)
-    ext = (file_type or path.suffix.lstrip(".")).lower()
-
-    writer = WRITERS.get(ext)
-    if writer is None:
-        print(f"Unsupported file type for writing: .{ext}")
-        return False
-
-    try:
-        if ext in ("xls", "xlsx") and "engine" not in kwargs:
-            kwargs.setdefault("engine", "openpyxl")
-
-        writer(df, path, **kwargs)
-        return True
-    except Exception as e:
-        print(f"Error writing .{ext} file to {path!r}: {e}")
-        return False
 
 
 def search_column_for_keywords(series: Series, keywords: list[str]) -> Series:

@@ -19,7 +19,7 @@ dependencies = [
     "pyahocorasick>=2.1.0",
     "openpyxl>=3.1.5",
     "nltk>=3.9.1",
-    "py-shared-tools",
+    "py-shared-tools[tabular]",
 ]
 
 [project.urls]

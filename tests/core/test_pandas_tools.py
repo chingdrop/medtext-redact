@@ -7,66 +7,11 @@ from vega_tools.core.pandas_tools import (
     create_project_comparison,
     find_column_for_value,
     merge_on_matched_column,
-    read_structured_file,
     repackage_txts_to_csv,
     search_column_for_keywords,
     search_report_text,
     split_csv_to_txt,
-    write_structured_file,
 )
-
-
-class TestReadStructuredFile:
-    def test_reads_csv(self, tmp_path):
-        path = tmp_path / "data.csv"
-        pd.DataFrame({"a": [1, 2]}).to_csv(path, index=False)
-        df = read_structured_file(path)
-        assert list(df["a"]) == [1, 2]
-
-    def test_reads_xlsx(self, tmp_path):
-        path = tmp_path / "data.xlsx"
-        pd.DataFrame({"a": [1, 2]}).to_excel(path, index=False, engine="openpyxl")
-        df = read_structured_file(path)
-        assert list(df["a"]) == [1, 2]
-
-    def test_reads_json(self, tmp_path):
-        path = tmp_path / "data.json"
-        pd.DataFrame({"a": [1, 2]}).to_json(path)
-        df = read_structured_file(path)
-        assert list(df["a"]) == [1, 2]
-
-    def test_unsupported_extension_returns_none(self, tmp_path):
-        path = tmp_path / "data.parquet"
-        path.write_text("irrelevant")
-        assert read_structured_file(path) is None
-
-    def test_file_type_override(self, tmp_path):
-        path = tmp_path / "data.weird"
-        pd.DataFrame({"a": [1]}).to_csv(path, index=False)
-        df = read_structured_file(path, file_type="csv")
-        assert list(df["a"]) == [1]
-
-    def test_missing_file_returns_none_instead_of_raising(self, tmp_path):
-        assert read_structured_file(tmp_path / "missing.csv") is None
-
-
-class TestWriteStructuredFile:
-    def test_writes_csv(self, tmp_path):
-        path = tmp_path / "out.csv"
-        ok = write_structured_file(pd.DataFrame({"a": [1, 2]}), path, index=False)
-        assert ok is True
-        assert path.exists()
-
-    def test_unsupported_extension_returns_false(self, tmp_path):
-        path = tmp_path / "out.parquet"
-        assert write_structured_file(pd.DataFrame({"a": [1]}), path) is False
-        assert not path.exists()
-
-    def test_write_error_returns_false(self, tmp_path):
-        # Directory as the target path is not a writable file location.
-        bad_path = tmp_path / "adir.csv"
-        bad_path.mkdir()
-        assert write_structured_file(pd.DataFrame({"a": [1]}), bad_path) is False
 
 
 class TestSearchColumnForKeywords:

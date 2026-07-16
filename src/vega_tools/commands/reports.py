@@ -4,8 +4,9 @@ import click
 import numpy as np
 from click import Context
 from shared_tools.config_loader import ConfigLoader
+from shared_tools.tabular_io import TabularIOError, read_structured_file, write_structured_file
 
-from vega_tools.core.pandas_tools import read_structured_file, search_report_text, write_structured_file
+from vega_tools.core.pandas_tools import search_report_text
 from vega_tools.core.text_tools import (
     PhiSanitizer,
     print_lines_with_keywords,
@@ -64,9 +65,10 @@ def single(ctx: Context, text, keywords, keywords_file, verbose):
 @click.pass_context
 def spreadsheet(ctx: Context, sample, result):
     config = ctx.obj.copy()
-    df = read_structured_file(sample)
-    if df is None:
-        click.echo(f"Could not read sample spreadsheet: {sample}", err=True)
+    try:
+        df = read_structured_file(sample)
+    except TabularIOError as exc:
+        click.echo(f"Could not read sample spreadsheet: {sample} ({exc})", err=True)
         sys.exit(1)
     result_df = df[["Accession", "ReportText"]]
     result_df.replace("<NONE>", np.nan, inplace=True)
