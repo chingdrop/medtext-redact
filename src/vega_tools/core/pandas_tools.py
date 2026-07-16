@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import Set, List, Any, Union, Optional, Callable, Dict
 
@@ -114,7 +115,10 @@ def search_column_for_keywords(series: Series, keywords: List[str]) -> Series:
         Series: The series containing the keywords.
     """
     pattern = compile_keywords_pattern(keywords)
-    return series.str.extract(pattern)
+    # str.extract() requires a capturing group; compile_keywords_pattern's
+    # groups are all non-capturing, so wrap the whole pattern in one.
+    capturing_pattern = re.compile(f"({pattern.pattern})", pattern.flags)
+    return series.str.extract(capturing_pattern, expand=False)
 
 
 def search_report_text(df: DataFrame, config: Dict[str, Any]) -> DataFrame:
