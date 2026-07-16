@@ -9,7 +9,13 @@ git submodule update --init  # needed for the philter command
 uv sync
 ```
 
-This installs `vega-tools` in editable mode along with its dev dependencies (currently `pytest`).
+This installs `vega-tools` in editable mode along with its dev dependencies (`pytest`, `ruff`, `mypy`, `pre-commit`, plus type stubs for `pandas`/`PyYAML`).
+
+Then install the git hook so linting/formatting/type-checking run automatically on each commit:
+
+```bash
+uv run pre-commit install
+```
 
 ## Project layout
 
@@ -36,6 +42,16 @@ uv run pytest
 Tests are organized to mirror `src/vega_tools/`. `tests/core/` covers the library layer directly; `tests/commands/` and `tests/test_cli.py` drive the actual CLI commands end-to-end through `click.testing.CliRunner`, mocking only genuine external boundaries (Docker, the separate `philter-ucsf` interpreter, the census name API) rather than internal collaborators.
 
 If you add a new function or command, add tests alongside it in the mirrored location.
+
+## Code quality
+
+```bash
+uv run ruff check --fix src/ tests/   # lint
+uv run ruff format src/ tests/        # format
+uv run mypy src/vega_tools            # type-check
+```
+
+`pre-commit` (installed via `uv run pre-commit install`, see Setup) runs all three automatically on `git commit`, scoped to `src/` and `tests/` — `integrations/` is intentionally excluded, since it holds vendored/third-party code (a git submodule, a notebook written in John Snow Labs' own idioms) that isn't ours to lint.
 
 ## Commit style
 

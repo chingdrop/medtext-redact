@@ -46,6 +46,9 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 120
 target-version = "py312"
+# integrations/ holds vendored/third-party code (a git submodule, a
+# notebook full of John Snow Labs' own idioms) that isn't ours to lint.
+extend-exclude = ["integrations/"]
 
 [tool.ruff.lint]
 select = [
