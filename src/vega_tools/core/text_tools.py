@@ -4,8 +4,8 @@ from re import Pattern
 import pandas as pd
 from rich.console import Console
 from rich.text import Text
+from shared_tools.config_loader import ConfigLoader
 
-from vega_tools.core.utils.config_loader import ConfigLoader
 from vega_tools.core.utils.enums import load_census_names
 from vega_tools.core.utils.regex_utils import NameMasker, compile_keywords_pattern, mask_keywords, mask_regex_pattern
 

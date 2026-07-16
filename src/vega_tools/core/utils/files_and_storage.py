@@ -1,6 +1,8 @@
 import logging
 from pathlib import Path
 
+from shared_tools.atomic_io import ensure_dir
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,7 +25,7 @@ def write_text_to_file(text: str, filepath: Path | str, *, encoding: str = "utf-
     """
     path = Path(filepath)
     try:
-        path.parent.mkdir(parents=True, exist_ok=True)
+        ensure_dir(path.parent)
 
         if not overwrite and path.exists():
             msg = f"File already exists and overwrite is False: {path}"
@@ -62,30 +64,4 @@ def read_text_from_file(filepath: Path | str, *, encoding: str = "utf-8") -> str
 
     except Exception as e:
         logger.exception(f"Failed to read text from {path}: {e}")
-        raise
-
-
-def create_directory(dirpath: Path | str, *, exist_ok: bool = True) -> Path:
-    """
-    Ensure a directory exists, creating it (and parents) if necessary.
-
-    Args:
-        dirpath:   Directory to create.
-        exist_ok:  If False and dir exists, raises FileExistsError.
-
-    Returns:
-        The Path of the directory.
-
-    Raises:
-        FileExistsError
-        OSError
-    """
-    path = Path(dirpath)
-    try:
-        path.mkdir(parents=True, exist_ok=exist_ok)
-        logger.debug(f"Created directory {path}, exist_ok is {exist_ok}")
-        return path
-
-    except Exception as e:
-        logger.exception(f"Failed to create directory {path}: {e}")
         raise

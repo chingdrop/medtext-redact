@@ -1,6 +1,6 @@
 import pytest
 
-from vega_tools.core.utils.files_and_storage import create_directory, read_text_from_file, write_text_to_file
+from vega_tools.core.utils.files_and_storage import read_text_from_file, write_text_to_file
 
 
 class TestWriteTextToFile:
@@ -47,28 +47,3 @@ class TestReadTextFromFile:
         target = tmp_path / "in.txt"
         target.write_text("content")
         assert read_text_from_file(str(target)) == "content"
-
-
-class TestCreateDirectory:
-    def test_creates_directory(self, tmp_path):
-        target = tmp_path / "newdir"
-        result = create_directory(target)
-        assert result == target
-        assert target.is_dir()
-
-    def test_creates_nested_parents(self, tmp_path):
-        target = tmp_path / "a" / "b" / "c"
-        create_directory(target)
-        assert target.is_dir()
-
-    def test_exist_ok_true_is_idempotent(self, tmp_path):
-        target = tmp_path / "newdir"
-        create_directory(target)
-        create_directory(target, exist_ok=True)
-        assert target.is_dir()
-
-    def test_exist_ok_false_raises_if_exists(self, tmp_path):
-        target = tmp_path / "newdir"
-        create_directory(target)
-        with pytest.raises(FileExistsError):
-            create_directory(target, exist_ok=False)

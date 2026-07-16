@@ -3,6 +3,7 @@ import sys
 import click
 import numpy as np
 from click import Context
+from shared_tools.config_loader import ConfigLoader
 
 from vega_tools.core.pandas_tools import read_structured_file, search_report_text, write_structured_file
 from vega_tools.core.text_tools import (
@@ -11,7 +12,6 @@ from vega_tools.core.text_tools import (
     print_text_with_keywords,
     white_rabbit_parse_report,
 )
-from vega_tools.core.utils.config_loader import ConfigLoader
 from vega_tools.core.utils.files_and_storage import read_text_from_file
 
 

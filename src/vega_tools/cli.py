@@ -1,11 +1,11 @@
 import click
 import pandas as pd
+from shared_tools.atomic_io import ensure_dir
 
 from vega_tools.commands.philter import philter
 from vega_tools.commands.reports import parse_report
 from vega_tools.commands.spark_nlp import spark_nlp
 from vega_tools.commands.studies import audit_series_by_study, compare_projects, validate_studies
-from vega_tools.core.utils.files_and_storage import create_directory
 from vega_tools.paths import DATA_DIRECTORY
 
 
@@ -24,7 +24,7 @@ cli.add_command(validate_studies)
 
 
 def main():
-    create_directory(DATA_DIRECTORY)
+    ensure_dir(DATA_DIRECTORY)
     cli()
 
 

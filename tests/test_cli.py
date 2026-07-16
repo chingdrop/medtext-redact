@@ -42,12 +42,12 @@ class TestCliGroup:
 
 class TestMain:
     def test_creates_data_directory_before_running_cli(self, monkeypatch):
-        mock_create_directory = MagicMock()
+        mock_ensure_dir = MagicMock()
         mock_cli = MagicMock()
-        monkeypatch.setattr(cli_module, "create_directory", mock_create_directory)
+        monkeypatch.setattr(cli_module, "ensure_dir", mock_ensure_dir)
         monkeypatch.setattr(cli_module, "cli", mock_cli)
 
         main()
 
-        mock_create_directory.assert_called_once_with(cli_module.DATA_DIRECTORY)
+        mock_ensure_dir.assert_called_once_with(cli_module.DATA_DIRECTORY)
         mock_cli.assert_called_once()
