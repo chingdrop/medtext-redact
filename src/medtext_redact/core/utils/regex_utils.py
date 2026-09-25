@@ -3,7 +3,7 @@ from re import Match, Pattern
 
 
 def compile_keywords_pattern(keywords: list[str], *, boundary: bool = True, flags: int = re.IGNORECASE) -> Pattern[str]:
-    """
+    r"""
     Build a regex that matches any of the given keywords.
 
     Args:
@@ -100,6 +100,9 @@ class NameMasker:
         """
         Walk the text once, replacing any matched key with its associated mask.
 
+        Matches that fall inside a longer word (e.g. "Ann" inside "Announced")
+        are skipped, since they're substring hits rather than the name itself.
+
         Args:
             text (str): The text to mask.
 
@@ -111,6 +114,12 @@ class NameMasker:
 
         for end_idx, mask in self.automaton.iter(text):
             start_idx = end_idx - len(mask) + 1
+            if start_idx < last_idx:
+                continue
+            before = text[start_idx - 1] if start_idx > 0 else ""
+            after = text[end_idx + 1] if end_idx + 1 < len(text) else ""
+            if before.isalnum() or after.isalnum():
+                continue
             result.append(text[last_idx:start_idx])
             result.append(mask)
             last_idx = end_idx + 1

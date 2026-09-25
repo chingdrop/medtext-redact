@@ -29,7 +29,7 @@ class PhiSanitizer:
     _DATE_PATTERN = re.compile(
         r"""\b
             (?:0?[1-9]|1[0-2])           # month 1–9 or 01–09 or 10–12
-            (?P<sep>[/\-.\s])          # separator: slash, dash, dot or space
+            (?P<sep>[/\-.])              # separator: slash, dash, or dot
             (?:0?[1-9]|[12][0-9]|3[01])  # day 1–9, 01–09, 10–29, 30, 31
             (?P=sep)                     # same sep as before
             (?:19|20)\d{2}               # year 1900–2099
@@ -39,7 +39,7 @@ class PhiSanitizer:
     )
 
     # ‣ Restrict age to 0–150
-    # ‣ Allow “34”, “34 yrs”, “34-yrs-old”, “34 years old”, case‐insensitive
+    # ‣ Allow "34", "34 yrs", "34-yrs-old", "34 years old", "34yo", case‐insensitive
     _AGE_PATTERN = re.compile(
         r"""\b
             (?:                           # whole age number
@@ -47,7 +47,7 @@ class PhiSanitizer:
             )
             (?:                           # optional unit + “old”
               [\s\-]*                     # space or hyphen
-              (?:years?|yrs?|y|yr)        # year(s) variants
+              (?:years?|yrs?|yo|y|yr)     # year(s) variants, incl. "yo" shorthand
             )?
             (?:[\s\-]*old)?               # optional “old”
             \b
@@ -96,7 +96,7 @@ class PhiSanitizer:
 
     def sanitize_gender(self) -> "PhiSanitizer":
         """Mask simple gender terms."""
-        return self.sanitize_keywords(["male", "female"])
+        return self.sanitize_keywords(["male", "female", "males", "females"])
 
     def sanitize_all(self, config: ConfigLoader, full: bool = False) -> "PhiSanitizer":
         """

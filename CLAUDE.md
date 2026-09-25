@@ -30,12 +30,12 @@ uv run pytest tests/core/test_pandas_tools.py  # one file
 uv run pytest tests/core/test_pandas_tools.py::TestAuditImages::test_2d_filters_single_frame_series  # one test
 ```
 
-Lint / format / type-check (all scoped to `src/` and `tests/` — `integrations/` is vendored/third-party code and is excluded):
+Lint / format / type-check (scoped to `src/`, `tests/`, and `tools/` — `integrations/` is vendored/third-party code and is excluded):
 
 ```bash
-uv run ruff check --fix src/ tests/
-uv run ruff format src/ tests/
-uv run mypy src/medtext_redact
+uv run ruff check --fix src/ tests/ tools/
+uv run ruff format src/ tests/ tools/
+uv run mypy src/medtext_redact tools/gen_fixtures.py
 ```
 
 ## Architecture

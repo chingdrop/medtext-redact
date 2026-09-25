@@ -89,6 +89,22 @@ class TestNameMasker:
         masker = NameMasker(["Ann"])
         assert masker.mask("Ann") == "***"
 
+    def test_does_not_mask_substring_inside_longer_word(self):
+        # Regression: "Ann" is a strict prefix of "Announced" -- masking it
+        # used to leak a mangled "***ounced" with no word-boundary check.
+        masker = NameMasker(["Ann"])
+        assert masker.mask("Announced the biopsy results to the family") == "Announced the biopsy results to the family"
+
+    def test_still_masks_name_adjacent_to_punctuation(self):
+        masker = NameMasker(["Ann"])
+        assert masker.mask("Ann, please call back.") == "***, please call back."
+
+    def test_masks_name_at_start_and_end_of_string(self):
+        masker = NameMasker(["Ann"])
+        assert masker.mask("Ann") == "***"
+        assert masker.mask("call Ann") == "call ***"
+        assert masker.mask("Ann called") == "*** called"
+
 
 class TestParseProjectName:
     def test_parses_base_number_with_no_revision(self):

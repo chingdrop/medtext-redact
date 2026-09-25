@@ -46,9 +46,9 @@ If you add a new function or command, add tests alongside it in the mirrored loc
 ## Code quality
 
 ```bash
-uv run ruff check --fix src/ tests/   # lint
-uv run ruff format src/ tests/        # format
-uv run mypy src/medtext_redact        # type-check
+uv run ruff check --fix src/ tests/ tools/   # lint
+uv run ruff format src/ tests/ tools/        # format
+uv run mypy src/medtext_redact tools/gen_fixtures.py  # type-check
 ```
 
 `pre-commit` (installed via `uv run pre-commit install`, see Setup) runs all three automatically on `git commit`, scoped to `src/` and `tests/` — `integrations/` is intentionally excluded, since it holds vendored/third-party code (a git submodule, a notebook written in John Snow Labs' own idioms) that isn't ours to lint.
