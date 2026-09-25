@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from vega_tools.paths import DATA_DIRECTORY, PROJECT_DIRECTORY
+from medtext_redact.paths import DATA_DIRECTORY, PROJECT_DIRECTORY
 
 
 def test_project_directory_is_repo_root():
     assert (PROJECT_DIRECTORY / "pyproject.toml").is_file()
-    assert (PROJECT_DIRECTORY / "src" / "vega_tools").is_dir()
+    assert (PROJECT_DIRECTORY / "src" / "medtext_redact").is_dir()
 
 
 def test_data_directory_is_under_project_directory():

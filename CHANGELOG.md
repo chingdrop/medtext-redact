@@ -29,4 +29,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `parse-report spreadsheet` discarded all PHI sanitization (names, dates, gender, age, manufacturers, locations) before writing its output, silently writing un-redacted PHI to the result file.
 - `parse-report single`'s `--text` flag was unreachable outside a literal interactive terminal session, because the stdin check ran before the `--text` check.
 
-[Unreleased]: https://github.com/chingdrop/vega-tools/commits/main
+[Unreleased]: https://github.com/chingdrop/medtext-redact/commits/main

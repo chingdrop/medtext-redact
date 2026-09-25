@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 
-from vega_tools.core.utils.regex_utils import compile_keywords_pattern, parse_project_name
+from medtext_redact.core.utils.regex_utils import compile_keywords_pattern, parse_project_name
 
 
 def search_column_for_keywords(series: Series, keywords: list[str]) -> Series:

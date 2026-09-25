@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-from vega_tools.core import text_tools
-from vega_tools.core.text_tools import PhiSanitizer, white_rabbit_parse_report
+from medtext_redact.core import text_tools
+from medtext_redact.core.text_tools import PhiSanitizer, white_rabbit_parse_report
 
 
 @pytest.fixture(autouse=True)

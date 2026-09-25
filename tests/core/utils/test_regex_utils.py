@@ -2,7 +2,7 @@ import re
 
 import pytest
 
-from vega_tools.core.utils.regex_utils import (
+from medtext_redact.core.utils.regex_utils import (
     NameMasker,
     compile_keywords_pattern,
     mask_keywords,

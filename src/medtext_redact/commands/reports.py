@@ -6,14 +6,14 @@ from click import Context
 from shared_tools.config_loader import ConfigLoader
 from shared_tools.tabular_io import TabularIOError, read_structured_file, write_structured_file
 
-from vega_tools.core.pandas_tools import search_report_text
-from vega_tools.core.text_tools import (
+from medtext_redact.core.pandas_tools import search_report_text
+from medtext_redact.core.text_tools import (
     PhiSanitizer,
     print_lines_with_keywords,
     print_text_with_keywords,
     white_rabbit_parse_report,
 )
-from vega_tools.core.utils.files_and_storage import read_text_from_file
+from medtext_redact.core.utils.files_and_storage import read_text_from_file
 
 
 # ToDo - Optimize the commands in parse_report, they are too slow.

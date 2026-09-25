@@ -1,6 +1,6 @@
 import pandas as pd
 
-from vega_tools.core.api_tools import CensusNamesApi
+from medtext_redact.core.api_tools import CensusNamesApi
 
 
 def load_census_names(year: str = "2010") -> list[str]:

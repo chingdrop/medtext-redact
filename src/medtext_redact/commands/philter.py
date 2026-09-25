@@ -9,7 +9,7 @@ import click
 import nltk
 from shared_tools.logging_setup import setup_logging
 
-from vega_tools.core.pandas_tools import repackage_txts_to_csv, split_csv_to_txt
+from medtext_redact.core.pandas_tools import repackage_txts_to_csv, split_csv_to_txt
 
 PHILTER_UCSF_DIR = Path(__file__).resolve().parent.parent.parent.parent / "integrations" / "philter" / "philter-ucsf"
 
@@ -30,7 +30,7 @@ PHILTER_UCSF_DIR = Path(__file__).resolve().parent.parent.parent.parent / "integ
     default="python",
     show_default=True,
     help="Python interpreter with philter-ucsf's own dependencies installed. "
-    "philter-ucsf pins pandas/numpy versions that conflict with vega-tools' own, "
+    "philter-ucsf pins pandas/numpy versions that conflict with medtext-redact's own, "
     "so it must run in a separate environment from this CLI. Can also be set via "
     "the PHILTER_PYTHON environment variable.",
 )
@@ -41,7 +41,7 @@ def philter(sample, result, python_executable):
     nltk.download("averaged_perceptron_tagger", quiet=True)
     nltk.download("averaged_perceptron_tagger_eng", quiet=True)
 
-    tmp_dir = Path(tempfile.mkdtemp(prefix="vega_tools_philter_"))
+    tmp_dir = Path(tempfile.mkdtemp(prefix="medtext_redact_philter_"))
     input_path = tmp_dir / "input"
     output_path = tmp_dir / "output"
     input_path.mkdir()

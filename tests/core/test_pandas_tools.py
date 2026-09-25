@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from vega_tools.core.pandas_tools import (
+from medtext_redact.core.pandas_tools import (
     audit_images,
     check_series_by_study,
     create_project_comparison,

@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "vega-tools"
+name = "medtext-redact"
 description = "Python-based solution designed to provide tools for extracting, transforming, and loading data."
 authors = [{ name = "Craig Hurley", email = "chingdorp@pm.me" }]
 version = "2.1.0"
@@ -23,10 +23,10 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/churley-vega/vega-tools"
+Repository = "https://github.com/chingdrop/medtext-redact"
 
 [project.scripts]
-vega-tools = "vega_tools.cli:main"
+medtext-redact = "medtext_redact.cli:main"
 
 [tool.uv.sources]
 py-shared-tools = { git = "https://github.com/chingdrop/py-shared-tools", rev = "v1.3.1" }
@@ -42,7 +42,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/vega_tools"]
+packages = ["src/medtext_redact"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -4,7 +4,7 @@ import zipfile
 import pandas as pd
 import pytest
 
-from vega_tools.core.api_tools import CensusNamesApi
+from medtext_redact.core.api_tools import CensusNamesApi
 
 
 class FakeRestAdapter:
@@ -35,7 +35,7 @@ class TestInit:
         CensusNamesApi(year="2010", rest_adapter=FakeRestAdapter(b""))
 
     def test_default_save_file_under_data_directory(self):
-        from vega_tools.paths import DATA_DIRECTORY
+        from medtext_redact.paths import DATA_DIRECTORY
 
         api = CensusNamesApi(year="2010", rest_adapter=FakeRestAdapter(b""))
         assert api.save_file == DATA_DIRECTORY / "census_2010_names.txt"

@@ -5,8 +5,8 @@ from pathlib import Path
 import pandas as pd
 from click.testing import CliRunner
 
-from vega_tools.commands import philter as philter_module
-from vega_tools.commands.philter import philter
+from medtext_redact.commands import philter as philter_module
+from medtext_redact.commands.philter import philter
 
 FIXTURES_DIR = Path(__file__).resolve().parent.parent / "fixtures"
 

@@ -4,8 +4,8 @@ import pandas as pd
 import pytest
 from click.testing import CliRunner
 
-from vega_tools.commands.reports import parse_report
-from vega_tools.core import text_tools
+from medtext_redact.commands.reports import parse_report
+from medtext_redact.core import text_tools
 
 
 @pytest.fixture(autouse=True)

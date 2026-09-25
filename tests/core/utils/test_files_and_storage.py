@@ -1,6 +1,6 @@
 import pytest
 
-from vega_tools.core.utils.files_and_storage import read_text_from_file, write_text_to_file
+from medtext_redact.core.utils.files_and_storage import read_text_from_file, write_text_to_file
 
 
 class TestWriteTextToFile:

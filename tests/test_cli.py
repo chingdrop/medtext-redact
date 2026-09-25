@@ -2,8 +2,8 @@ from unittest.mock import MagicMock
 
 from click.testing import CliRunner
 
-import vega_tools.cli as cli_module
-from vega_tools.cli import cli, main
+import medtext_redact.cli as cli_module
+from medtext_redact.cli import cli, main
 
 
 class TestCliGroup:

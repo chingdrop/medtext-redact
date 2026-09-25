@@ -6,8 +6,13 @@ from rich.console import Console
 from rich.text import Text
 from shared_tools.config_loader import ConfigLoader
 
-from vega_tools.core.utils.enums import load_census_names
-from vega_tools.core.utils.regex_utils import NameMasker, compile_keywords_pattern, mask_keywords, mask_regex_pattern
+from medtext_redact.core.utils.enums import load_census_names
+from medtext_redact.core.utils.regex_utils import (
+    NameMasker,
+    compile_keywords_pattern,
+    mask_keywords,
+    mask_regex_pattern,
+)
 
 
 class PhiSanitizer:

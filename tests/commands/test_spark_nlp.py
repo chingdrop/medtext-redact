@@ -3,8 +3,8 @@ from unittest.mock import MagicMock
 
 from click.testing import CliRunner
 
-from vega_tools.commands import spark_nlp as spark_nlp_module
-from vega_tools.commands.spark_nlp import spark_nlp
+from medtext_redact.commands import spark_nlp as spark_nlp_module
+from medtext_redact.commands.spark_nlp import spark_nlp
 
 
 class TestSparkNlpCommand:

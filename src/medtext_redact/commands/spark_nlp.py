@@ -14,8 +14,8 @@ def spark_nlp(compose_args):
     Launch the Spark NLP / OCR Jupyter environment via Docker Compose.
 
     Passes any arguments straight through to `docker compose` (run from the
-    spark-nlp/ directory), e.g. `vega-tools spark-nlp down` or
-    `vega-tools spark-nlp logs -f`. Defaults to `up --build`.
+    spark-nlp/ directory), e.g. `medtext-redact spark-nlp down` or
+    `medtext-redact spark-nlp logs -f`. Defaults to `up --build`.
     """
     args = list(compose_args) or ["up", "--build"]
     try:

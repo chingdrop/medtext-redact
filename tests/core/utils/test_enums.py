@@ -1,5 +1,9 @@
-from vega_tools.core.utils import enums
-from vega_tools.core.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS, load_census_names
+from medtext_redact.core.utils import enums
+from medtext_redact.core.utils.enums import (
+    DICOM_2D_SERIES_DESCRIPTIONS,
+    DICOM_3D_SERIES_DESCRIPTIONS,
+    load_census_names,
+)
 
 
 class TestDicomSeriesDescriptions:

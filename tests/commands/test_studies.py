@@ -1,8 +1,8 @@
 import pandas as pd
 from click.testing import CliRunner
 
-from vega_tools.commands import studies
-from vega_tools.commands.studies import audit_series_by_study, compare_projects, validate_studies
+from medtext_redact.commands import studies
+from medtext_redact.commands.studies import audit_series_by_study, compare_projects, validate_studies
 
 
 class TestValidateStudies:

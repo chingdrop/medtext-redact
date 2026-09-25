@@ -31,7 +31,7 @@ jobs:
         run: uv run ruff format --check src/ tests/
 
       - name: mypy
-        run: uv run mypy src/vega_tools
+        run: uv run mypy src/medtext_redact
 
   test:
     runs-on: ubuntu-latest

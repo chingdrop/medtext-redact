@@ -2,7 +2,7 @@
 Stand-in for philter-ucsf/main.py's CLI contract, used only in tests.
 
 The real Philter-UCSF can't run in this environment (it pins pandas/numpy
-versions incompatible with vega-tools' own, and imports the long-removed
+versions incompatible with medtext-redact's own, and imports the long-removed
 distutils module), so this fakes just enough of its interface — accept the
 same flags commands/philter.py passes, and copy input .txt files to the
 output directory — to exercise the split -> subprocess -> repackage wiring
