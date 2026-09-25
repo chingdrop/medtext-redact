@@ -4,7 +4,6 @@ from re import Pattern
 import pandas as pd
 from rich.console import Console
 from rich.text import Text
-from shared_tools.config_loader import ConfigLoader
 
 from medtext_redact.core.utils.enums import load_census_names
 from medtext_redact.core.utils.regex_utils import (
@@ -13,6 +12,7 @@ from medtext_redact.core.utils.regex_utils import (
     mask_keywords,
     mask_regex_pattern,
 )
+from medtext_redact.vendor.config_loader import ConfigLoader
 
 #   USPS street-suffix vocabulary (the standard "C1 Street Suffix
 #   Abbreviations" list), used to recognize a street address without any

@@ -1,7 +1,6 @@
 import click
 import numpy as np
 import pandas as pd
-from shared_tools.tabular_io import read_structured_file, write_structured_file
 
 from medtext_redact.core.pandas_tools import (
     audit_images,
@@ -11,6 +10,7 @@ from medtext_redact.core.pandas_tools import (
 )
 from medtext_redact.core.utils.enums import DICOM_2D_SERIES_DESCRIPTIONS, DICOM_3D_SERIES_DESCRIPTIONS
 from medtext_redact.paths import DATA_DIRECTORY
+from medtext_redact.vendor.tabular_io import read_structured_file, write_structured_file
 
 
 @click.command()

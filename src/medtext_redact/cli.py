@@ -1,12 +1,12 @@
 import click
 import pandas as pd
-from shared_tools.atomic_io import ensure_dir
 
 from medtext_redact.commands.philter import philter
 from medtext_redact.commands.reports import parse_report
 from medtext_redact.commands.spark_nlp import spark_nlp
 from medtext_redact.commands.studies import audit_series_by_study, compare_projects, validate_studies
 from medtext_redact.paths import DATA_DIRECTORY
+from medtext_redact.vendor.atomic_io import ensure_dir
 
 
 @click.group()

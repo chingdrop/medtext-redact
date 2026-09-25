@@ -3,8 +3,6 @@ import sys
 import click
 import numpy as np
 from click import Context
-from shared_tools.config_loader import ConfigLoader
-from shared_tools.tabular_io import TabularIOError, read_structured_file, write_structured_file
 
 from medtext_redact.core.pandas_tools import search_report_text
 from medtext_redact.core.text_tools import (
@@ -14,6 +12,8 @@ from medtext_redact.core.text_tools import (
     white_rabbit_parse_report,
 )
 from medtext_redact.core.utils.files_and_storage import read_text_from_file
+from medtext_redact.vendor.config_loader import ConfigLoader
+from medtext_redact.vendor.tabular_io import TabularIOError, read_structured_file, write_structured_file
 
 
 # ToDo - Optimize the commands in parse_report, they are too slow.

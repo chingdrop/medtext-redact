@@ -13,13 +13,14 @@ dependencies = [
     "pandas>=2.0.3,<3.0.0",
     "numpy>=1.24.3,<2.0.0",
     "click>=7.1.2",
-    "requests>=2.23.3",
+    "requests>=2.32",
+    "certifi>=2024.7.4",
+    "urllib3>=2.0",
     "charset-normalizer>=3.0.1",
     "rich>=14.0.0",
     "pyahocorasick>=2.1.0",
     "openpyxl>=3.1.5",
     "nltk>=3.9.1",
-    "py-shared-tools[tabular]",
 ]
 
 [project.urls]
@@ -27,9 +28,6 @@ Repository = "https://github.com/chingdrop/medtext-redact"
 
 [project.scripts]
 medtext-redact = "medtext_redact.cli:main"
-
-[tool.uv.sources]
-py-shared-tools = { git = "https://github.com/chingdrop/py-shared-tools", rev = "v1.3.1" }
 
 [dependency-groups]
 dev = [

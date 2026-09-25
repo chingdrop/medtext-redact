@@ -7,9 +7,9 @@ from pathlib import Path
 
 import click
 import nltk
-from shared_tools.logging_setup import setup_logging
 
 from medtext_redact.core.pandas_tools import repackage_txts_to_csv, split_csv_to_txt
+from medtext_redact.vendor.logging_setup import setup_logging
 
 PHILTER_UCSF_DIR = Path(__file__).resolve().parent.parent.parent.parent / "integrations" / "philter" / "philter-ucsf"
 

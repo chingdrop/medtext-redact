@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from shared_tools.atomic_io import ensure_dir
+from medtext_redact.vendor.atomic_io import ensure_dir
 
 logger = logging.getLogger(__name__)
 

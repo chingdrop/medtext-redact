@@ -5,9 +5,9 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
-from shared_tools.rest_adapter import RestAdapter, RestAdapterConfig
 
 from medtext_redact.paths import DATA_DIRECTORY
+from medtext_redact.vendor.rest_adapter import RestAdapter, RestAdapterConfig
 
 
 class CensusNamesApi:
