@@ -135,6 +135,95 @@ class TestSanitizeAge:
         result = PhiSanitizer("reading of 150 units").sanitize_age().text
         assert "150" not in result
 
+    def test_does_not_mask_staging_or_grading_numbers(self):
+        # Regression: the bare-number match used to also catch clinical
+        # staging/grading numbers, silently corrupting the diagnosis term
+        # itself ("type 2 diabetes mellitus" -> "type * diabetes mellitus"),
+        # which in turn broke --keywords highlighting for that term.
+        for text in ["type 2 diabetes mellitus", "stage 3 cancer", "grade 2 lesion", "class 4 recall"]:
+            assert PhiSanitizer(text).sanitize_age().text == text
+
+    def test_masks_shorthand_yo(self):
+        result = PhiSanitizer("34yo female presents").sanitize_age().text
+        assert "34" not in result
+
+
+class TestSanitizeMrn:
+    def test_masks_hyphenated_mrn(self):
+        result = PhiSanitizer("Chart MRN-6001338 for review").sanitize_mrn().text
+        assert "6001338" not in result
+
+    def test_masks_labeled_mrn_with_colon(self):
+        result = PhiSanitizer("MRN: 6001338").sanitize_mrn().text
+        assert "6001338" not in result
+
+    def test_masks_mrn_with_no_separator(self):
+        result = PhiSanitizer("chart MRN123456 today").sanitize_mrn().text
+        assert "123456" not in result
+
+    def test_does_not_mask_unlabeled_number(self):
+        result = PhiSanitizer("accession number 1234567").sanitize_mrn().text
+        assert result == "accession number 1234567"
+
+    def test_does_not_mask_bare_word_mrn(self):
+        result = PhiSanitizer("the acronym MRN stands for medical record number").sanitize_mrn().text
+        assert result == "the acronym MRN stands for medical record number"
+
+
+class TestSanitizePhone:
+    def test_masks_parenthesized_phone(self):
+        result = PhiSanitizer("call (281) 699-3976 now").sanitize_phone().text
+        assert "699" not in result and "3976" not in result
+
+    def test_masks_dash_separated_phone(self):
+        result = PhiSanitizer("call 281-699-3976 now").sanitize_phone().text
+        assert "281-699-3976" not in result
+
+    def test_masks_phone_with_country_code(self):
+        result = PhiSanitizer("reach us at +1 281-699-3976").sanitize_phone().text
+        assert "699" not in result
+
+    def test_does_not_mask_short_numbers(self):
+        result = PhiSanitizer("room 281, bed 6").sanitize_phone().text
+        assert result == "room 281, bed 6"
+
+    def test_does_not_mask_mrn_shaped_number(self):
+        # A bare 7-digit MRN body has too few digits to look like a phone
+        # number (which needs 10); this only holds once MRNs are masked
+        # first in the sanitize_all() pipeline.
+        result = PhiSanitizer("6001338").sanitize_phone().text
+        assert result == "6001338"
+
+
+class TestSanitizeAddress:
+    def test_masks_simple_street_address(self):
+        result = PhiSanitizer("lives at 386 Shane Harbors").sanitize_address().text
+        assert "Shane" not in result
+
+    def test_masks_address_with_unit(self):
+        result = PhiSanitizer("53993 Aguilar Avenue Apt. 384").sanitize_address().text
+        assert "Aguilar" not in result
+
+    def test_masks_address_with_full_word_suffix(self):
+        result = PhiSanitizer("facility located at 4821 Meadowbrook Boulevard").sanitize_address().text
+        assert "Meadowbrook" not in result
+
+    def test_does_not_mask_plain_number_and_word(self):
+        result = PhiSanitizer("patient reports 3 years of symptoms").sanitize_address().text
+        assert result == "patient reports 3 years of symptoms"
+
+    def test_does_not_mask_dosage_or_lab_value(self):
+        result = PhiSanitizer("prescribed 10 mg twice daily").sanitize_address().text
+        assert result == "prescribed 10 mg twice daily"
+
+    def test_does_not_mask_the_word_via(self):
+        # "Via" is a real USPS street suffix but also an ordinary English
+        # preposition common in clinical text -- deliberately excluded to
+        # avoid mangling sentences like this one.
+        result = PhiSanitizer("123 patients were treated via telehealth").sanitize_address().text
+        assert "telehealth" in result
+        assert "treated" in result
+
 
 class TestSanitizeGender:
     def test_masks_male_and_female(self):

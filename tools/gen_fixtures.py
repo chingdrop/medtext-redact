@@ -168,22 +168,13 @@ def make_generators(fake: Faker, rng: random.Random) -> dict:
         return term, "gender", True, ""
 
     def phone_valid(_):
-        # expected_redacted=True: this is real PHI a redaction tool should
-        # catch. PhiSanitizer has no phone detector at all, so this is
-        # expected to show up as a genuine, reportable recall gap -- not a
-        # true negative to quietly absorb.
-        return (
-            fake.numerify("(###) ###-####"),
-            "phone",
-            True,
-            "no phone detector exists in PhiSanitizer -- documented gap",
-        )
+        return fake.numerify("(###) ###-####"), "phone", True, ""
 
     def address_valid(_):
-        return fake.street_address(), "address", True, "no address detector exists in PhiSanitizer -- documented gap"
+        return fake.street_address(), "address", True, ""
 
     def mrn_valid(rng_):
-        return _mrn(rng_), "mrn", True, "no MRN detector exists in PhiSanitizer -- documented gap"
+        return _mrn(rng_), "mrn", True, ""
 
     def symptom(_):
         return rng.choice(CLINICAL_VOCAB["symptom"]), "highlight_symptom", True, ""

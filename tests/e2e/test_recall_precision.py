@@ -6,10 +6,7 @@ the generator's independent ground-truth manifest.
 
 Recall is the metric that matters most for a redaction tool -- a missed
 identifier is the dangerous failure mode -- so this file never tunes
-thresholds or trims hard cases to make a number look better. Categories the
-tool has no detector for (phone/address/mrn) are asserted at their real,
-documented 0% recall rather than skipped, so the gap stays visible and any
-future detector addition is caught by the assertion needing an update.
+thresholds or trims hard cases to make a number look better.
 """
 
 import importlib.util
@@ -208,25 +205,26 @@ def test_recall_and_precision_by_category(config_path, capsys):
 
     # --- Stable, documented expectations -----------------------------------
     # Categories with a real detector, exercised with unambiguous positive
-    # phrasing: recall and precision must both be perfect.
-    for cat in ["name", "date", "age", "gender", "highlight_symptom", "highlight_medication"]:
+    # phrasing: recall and precision must both be perfect. Phone/address/MRN
+    # detectors were added after an E2E-driven finding that PhiSanitizer had
+    # no coverage for them at all; a fixed, negative-lookbehind guard on the
+    # age pattern (skip "type"/"stage"/"grade"/"class" + number) is what
+    # brought highlight_diagnosis to 100% too -- see text_tools.py history
+    # for the "type 2 diabetes mellitus" case that motivated it.
+    for cat in [
+        "name",
+        "date",
+        "age",
+        "gender",
+        "phone",
+        "address",
+        "mrn",
+        "highlight_symptom",
+        "highlight_medication",
+        "highlight_diagnosis",
+    ]:
         assert results[cat]["recall"] == 1.0, f"{cat}: {results}"
         assert results[cat]["precision"] == 1.0, f"{cat}: {results}"
-
-    # "highlight_diagnosis" is deliberately NOT held to 100% here: a
-    # diagnosis term containing a small number (e.g. "type 2 diabetes
-    # mellitus") can have that digit masked out by the (documented,
-    # intentional) bare-number age detector before highlighting ever runs,
-    # silently breaking the keyword match. This is a real cross-feature
-    # interaction the E2E test surfaced, not a fixture artifact -- reported
-    # in full below, not hidden behind a loosened assertion.
-    assert results["highlight_diagnosis"]["precision"] == 1.0, results
-
-    # Categories with NO detector at all in PhiSanitizer: recall is exactly
-    # 0% by construction, not a regression -- asserted so this stays visible
-    # and any future detector addition here has to update this assertion.
-    for cat in ["phone", "address", "mrn"]:
-        assert results[cat]["recall"] == 0.0, f"expected documented gap for {cat}: {results}"
 
     # Negative/near-miss categories: the tool must not be tripped by these.
     for cat in [
