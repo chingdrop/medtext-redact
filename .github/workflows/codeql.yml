@@ -19,7 +19,7 @@ jobs:
       security-events: write # required to upload CodeQL results to code scanning
       actions: read # required by the analyze step to query workflow-run info
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Pinned to the full commit SHA for the v3.38.2 tag, verified against
       # https://github.com/github/codeql-action/releases/tag/v3.38.2
