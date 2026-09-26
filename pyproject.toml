@@ -35,7 +35,7 @@ dev = [
     "ruff>=0.8",
     "mypy>=1.13",
     "pre-commit>=4.0",
-    "pandas-stubs>=2.0.3,<3.0.0",
+    "pandas-stubs>=2.0.3,<4.0.0",
     "types-pyyaml>=6.0.12.20260518",
     "faker>=30.0.0",
 ]
