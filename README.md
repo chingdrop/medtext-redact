@@ -88,6 +88,12 @@ Run `medtext-redact --help` or `medtext-redact parse-report --help` for the full
 
 ---
 
+## Design decisions
+
+Why rule-based detection instead of NER, the gazetteer's documented recall/precision limits, the synthetic-only testing strategy, and other load-bearing choices are recorded as lightweight ADRs in [`docs/decisions/`](docs/decisions/README.md).
+
+---
+
 ## Scope
 
 Medtext-Redact is a Python-based command-line utility developed to assist with the secure preprocessing of unstructured medical text. Its primary aim is to enable the automated redaction of Protected Health Information (PHI) in compliance with HIPAA, and the semantic highlighting of domain-relevant keywords to support clinical review and downstream text analytics.
