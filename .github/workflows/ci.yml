@@ -103,7 +103,12 @@ jobs:
         run: uv sync --locked
 
       - name: pip-audit (locked dependencies)
-        run: uv export --no-dev --format requirements-txt | uvx pip-audit -r /dev/stdin
+        # --no-emit-project: without it, uv export emits an "-e ." line for
+        # this package itself, which pip-audit's internal pip invocation
+        # can't install under --require-hashes ("no single file to hash"),
+        # failing before it audits anything. Third-party dependencies are
+        # all pip-audit needs to check; the local package isn't on PyPI.
+        run: uv export --no-dev --no-emit-project --format requirements-txt | uvx pip-audit -r /dev/stdin
 
       # Pinned to the full commit SHA for the v3.0.0 tag, verified against
       # https://github.com/gitleaks/gitleaks-action/releases/tag/v3.0.0
