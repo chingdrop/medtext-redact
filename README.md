@@ -100,6 +100,12 @@ Vulnerability reporting: [`SECURITY.md`](SECURITY.md). What this tool actually d
 
 ---
 
+## Limitations, roadmap, and changelog
+
+What this tool measurably doesn't cover yet, and directions noted (not committed to) for closing those gaps, are in [`docs/limitations-and-roadmap.md`](docs/limitations-and-roadmap.md). Released and in-progress changes are tracked in [`CHANGELOG.md`](CHANGELOG.md).
+
+---
+
 ## Scope
 
 Medtext-Redact is a Python-based command-line utility developed to assist with the secure preprocessing of unstructured medical text. Its primary aim is to enable the automated redaction of Protected Health Information (PHI) in compliance with HIPAA, and the semantic highlighting of domain-relevant keywords to support clinical review and downstream text analytics.
