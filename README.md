@@ -94,6 +94,12 @@ Why rule-based detection instead of NER, the gazetteer's documented recall/preci
 
 ---
 
+## Security
+
+Vulnerability reporting: [`SECURITY.md`](SECURITY.md). What this tool actually does and doesn't do with the text you give it — network activity, disk writes, and its measured detection limits stated plainly — is in [`docs/threat-model.md`](docs/threat-model.md).
+
+---
+
 ## Scope
 
 Medtext-Redact is a Python-based command-line utility developed to assist with the secure preprocessing of unstructured medical text. Its primary aim is to enable the automated redaction of Protected Health Information (PHI) in compliance with HIPAA, and the semantic highlighting of domain-relevant keywords to support clinical review and downstream text analytics.
