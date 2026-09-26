@@ -88,7 +88,6 @@ jobs:
       contents: read
       pull-requests: write # gitleaks-action posts a PR comment on findings
     steps:
-      # v6, matching gitleaks-action v3's stated Node 24 compatibility guidance
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # full history: this repo's history is original and preserved, not reinitialized
