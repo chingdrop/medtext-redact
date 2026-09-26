@@ -28,7 +28,11 @@ class CensusNamesApi:
     """
 
     VALID_YEARS = {"2000", "2010"}
-    ZIP_ENDPOINT = "/names.zip"
+    # No leading slash: RestAdapter.request() joins this against base_url with
+    # urljoin(), and a leading "/" makes urljoin treat it as domain-absolute,
+    # discarding base_url's own path (https://www2.census.gov/names.zip --
+    # always 404s -- instead of .../2010surnames/names.zip).
+    ZIP_ENDPOINT = "names.zip"
 
     def __init__(
         self,
@@ -52,10 +56,14 @@ class CensusNamesApi:
         if rest_adapter is not None:
             self._rest = rest_adapter
         else:
+            # Trailing slash required: RestAdapter.request() joins ZIP_ENDPOINT
+            # against this with urljoin(), which treats a base URL with no
+            # trailing slash as ending in a "file" to be replaced rather than
+            # a directory to append to.
             base_url = (
-                "https://www2.census.gov/topics/genealogy/2000surnames"
+                "https://www2.census.gov/topics/genealogy/2000surnames/"
                 if year == "2000"
-                else "https://www2.census.gov/topics/genealogy/2010surnames"
+                else "https://www2.census.gov/topics/genealogy/2010surnames/"
             )
             config = adapter_config or {}
             rest_config = RestAdapterConfig(base_url=base_url, **config)

@@ -1,6 +1,10 @@
 # Medtext-Redact
 
-A Command-Line Interface for HIPAA Redaction and Semantic Highlighting in Medical Text
+Rule-based redaction of identifying information from unstructured clinical text, aligned to HIPAA Safe Harbor's identifier categories, plus keyword highlighting.
+
+[![CI](https://github.com/chingdrop/medtext-redact/actions/workflows/ci.yml/badge.svg)](https://github.com/chingdrop/medtext-redact/actions/workflows/ci.yml)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 ---
 
@@ -13,6 +17,74 @@ This repository's full git history is being audited for PHI, credentials, and an
 **This is a reference implementation of rule-based redaction aligned to HIPAA Safe Harbor's identifier categories. It is NOT a validated or certified de-identification tool.** Using any tool like this against real patient data requires separate compliance review, authorization, and handling appropriate to that data.
 
 See [`docs/provenance-and-data-boundary.md`](docs/provenance-and-data-boundary.md) for the full provenance statement, data-handling boundary, and scope disclaimer.
+
+---
+
+## Try it in 60 seconds
+
+```bash
+git clone https://github.com/chingdrop/medtext-redact.git
+cd medtext-redact
+uv sync
+```
+
+Generate a couple of synthetic clinical notes — fake names, dates, phone numbers ([`tools/gen_fixtures.py`](tools/gen_fixtures.py), Faker-based, no real patient data anywhere in this repository):
+
+```bash
+uv run python tools/gen_fixtures.py --seed 7 --count 2 --out-dir /tmp/demo
+cat /tmp/demo/notes/note_0001.txt
+```
+
+```
+Contacted Delacroix at (260) 181-5908 regarding the community-acquired pneumonia diagnosis noted on 2.16.1951.
+```
+
+Redact it, highlighting a diagnosis term along the way:
+
+```bash
+echo '{"Masking": {"Manufacturers": [], "Locations": []}}' > config.json
+uv run medtext-redact parse-report --config config.json single \
+  --text "$(cat /tmp/demo/notes/note_0001.txt)" \
+  --keywords "community-acquired pneumonia" --verbose
+```
+
+```ansi
+--------------------------------------------------------------------------------------------------------
+
+Verbose mode is on.
+Contacted ********* at (***) ***-**** regarding the [1;33mcommunity-acquired pneumonia[0m
+diagnosis noted on *.**.****.
+```
+
+The name, phone number, and date are gone; the diagnosis term is highlighted, not redacted, since it was passed via `--keywords` rather than matched as an identifier.
+
+---
+
+## Results
+
+Recall/precision from the synthetic test suite ([`tests/e2e/test_recall_precision.py`](tests/e2e/test_recall_precision.py)), re-run fresh for this commit:
+
+| Category | Recall | Precision |
+|---|---|---|
+| Names | 100% | 100% |
+| Dates | 100% | 100% |
+| Ages | 100% | 100% |
+| Gender terms | 100% | 100% |
+| Phone numbers | 100% | 100% |
+| Street addresses | 100% | 100% |
+| Medical record numbers | 100% | 100% |
+| Highlighted keywords (symptoms, diagnoses, medications) | 100% | 100% |
+
+Stated plainly rather than rounded up or omitted: one measured case is below 100%. A gazetteer surname used as an ordinary English word (e.g. "Grace period") still gets masked — **0% precision** on that specific case (4 of 4 occurrences in the fixture set were false positives). This is inherent to exact-match gazetteer masking with no surrounding-context model, not a bug. See [`docs/provenance-and-data-boundary.md`](docs/provenance-and-data-boundary.md) for the full scope disclaimer, including identifier categories (SSNs, email addresses, device/vehicle identifiers, biometric identifiers, and others) this tool has no detector for at all.
+
+---
+
+## Commands
+
+- **Redact** — `medtext-redact parse-report single --config <config.json> --text "..."` masks names, dates, ages, gender terms, phone numbers, addresses, and MRNs in the given text.
+- **Highlight** — add `--keywords "term"` (repeatable) and `--verbose` to also highlight matching keywords in the result, without redacting them.
+
+Run `medtext-redact --help` or `medtext-redact parse-report --help` for the full command reference, including spreadsheet batch mode (`parse-report spreadsheet`) and the imaging-reconciliation commands described below.
 
 ---
 
@@ -38,12 +110,12 @@ uv run medtext-redact --help
 
 ## Process
 
-Medtext-Redact is implemented as a modular CLI using the Click framework and currently supports the following core commands:
+Medtext-Redact is implemented as a modular CLI using the Click framework. Redaction and highlighting are both delivered through `parse-report single` (one report) and `parse-report spreadsheet` (batch, via a CSV of reports) — there's no separate `redact`/`highlight` subcommand; redaction always runs, and passing `--keywords` additionally highlights matches in the result rather than masking them:
 
-- **`redact`**: Applies rule-based and pattern-matching techniques (e.g., regex, named entity recognition) to identify and redact personally identifiable information, including names, dates, addresses, phone numbers, and other HIPAA-defined identifiers.
-- **`highlight`**: Scans medical text for pre-defined clinical or operational keywords (e.g., symptom terms, diagnosis codes, drug names), applying color-coded or markup-based emphasis for improved readability and interpretation.
+- **Redaction**: Rule-based pattern matching (regex and a loaded surname gazetteer, not named-entity recognition) identifies and masks names, dates, ages, gender terms, phone numbers, addresses, and MRNs.
+- **Highlighting**: Scans the (already redacted) text for keywords supplied via `--keywords`/`--keywords-file`, applying color-coded emphasis for improved readability and interpretation.
 
-Both commands are accessible via a simple and extensible CLI interface designed for integration into larger preprocessing pipelines or standalone usage by analysts.
+Both are accessible via a simple and extensible CLI interface designed for integration into larger preprocessing pipelines or standalone usage by analysts.
 
 In addition to text redaction and highlighting, Medtext-Redact includes commands for reconciling imaging studies across projects:
 

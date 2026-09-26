@@ -10,7 +10,10 @@ def load_census_names(year: str = "2010") -> list[str]:
         api.download_and_save()
 
     df = pd.read_csv(file_path, header=None, names=["name"])
-    return [n.title() for n in df["name"]]
+    # The real Census surnames file has at least one genuinely blank row,
+    # which pandas parses as NaN (a float) rather than an empty string --
+    # .title() on that crashes, so drop non-string rows before masking.
+    return [n.title() for n in df["name"] if isinstance(n, str)]
 
 
 DICOM_2D_SERIES_DESCRIPTIONS = {"V-Preview RCC", "V-Preview LCC", "V-Preview LMLO", "V-Preview RMLO"}
