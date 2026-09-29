@@ -4,9 +4,9 @@
 
 Medtext-Redact was originally developed independently for real professional use — a tool built to assist with redacting identifying information from unstructured clinical text, in support of HIPAA-compliant handling of patient records. This repository's git history reflects that original development.
 
-Ahead of public release, this repository's full git history — every commit, not just the current tree — is being audited for PHI, credentials, and client-identifying material. Where that audit finds content requiring removal, git history is rewritten to strip it at the source, rather than papering over it with a new commit on top. The audit's specific findings aren't detailed here; what's relevant to anyone evaluating this repository is its current state and the data boundary described below, not a catalog of what used to be wrong with it.
+Ahead of public release, this repository's full git history — every commit, not just the current tree — was audited for PHI, credentials, and client-identifying material. Where that audit found content requiring removal, git history was rewritten to strip it at the source, rather than papering over it with a new commit on top. The audit's specific findings aren't detailed here; what's relevant to anyone evaluating this repository is its current state and the data boundary described below, not a catalog of what used to be wrong with it.
 
-This audit and cleanup work is ongoing. <!-- TODO(craig): update this section to past tense once the audit is complete, including a completion date -->
+This audit and cleanup work is complete as of 2026-09-29, combining manual review with automated `gitleaks` and TruffleHog scans over full history.
 
 ## Data boundary going forward
 

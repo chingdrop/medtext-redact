@@ -50,7 +50,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
-- This repository's own git history was audited for PHI, credentials, and client-identifying material, and rewritten to remove what that audit found — see [`docs/provenance-and-data-boundary.md`](docs/provenance-and-data-boundary.md) for what that covers and its limits. This work is ongoing.
+- This repository's own git history was audited for PHI, credentials, and client-identifying material (manual review plus `gitleaks` and TruffleHog scans, completed 2026-09-29), and rewritten to remove what that audit found — see [`docs/provenance-and-data-boundary.md`](docs/provenance-and-data-boundary.md) for what that covers and its limits.
 - Added automated, standing supplements to that manual audit: `gitleaks` over full git history in CI (weekly and on every push/PR), `pip-audit` against locked dependencies, CodeQL analysis, and Dependabot version updates.
 
 [Unreleased]: https://github.com/chingdrop/medtext-redact/commits/main
