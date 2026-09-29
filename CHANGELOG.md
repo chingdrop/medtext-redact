@@ -14,8 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `spark-nlp` command: a thin `docker compose` wrapper for the Spark NLP / Spark OCR de-identification environment (`integrations/spark-nlp/`).
 - `philter` command: runs the Philter-UCSF de-identification pipeline (`integrations/philter/philter-ucsf`, vendored as a git submodule) as a subprocess in a separate interpreter, since its pinned dependencies conflict with this project's own.
 - `compare-projects` and `validate-studies` commands (from the `vt-console` merge).
-- A unit and integration test suite (154 tests) covering the `core/` library layer and every CLI command, using `pytest` and Click's `CliRunner`.
-- This changelog, plus `LICENSE` (GPL-3.0) and `CONTRIBUTING.md`.
+- A unit and integration test suite (209 tests) covering the `core/` library layer and every CLI command, using `pytest` and Click's `CliRunner`.
+- This changelog, plus `LICENSE` (MIT) and `CONTRIBUTING.md`.
 - Phone number, street address, and medical-record-number redaction (`sanitize_phone`, `sanitize_address`, `sanitize_mrn` on `PhiSanitizer`) — categories the tool previously had no detector for at all.
 - `tools/gen_fixtures.py`, a deterministic, Faker-based synthetic clinical-note generator with a construction-time ground-truth manifest, and `tests/e2e/test_recall_precision.py`, an end-to-end recall/precision test suite that runs the actual CLI against it. Current measured numbers: names, dates, ages, gender terms, phone numbers, addresses, and MRNs are each at 100% recall / 100% precision; the one measured shortfall in the whole suite is a false-positive case — 0% precision when a gazetteer surname is used as an ordinary English word. See [`docs/threat-model.md`](docs/threat-model.md) for the full picture, including identifier categories with no detector at all.
 - `src/medtext_redact/vendor/`, inlining the five shared-infrastructure modules this project actually imports (`RestAdapter`, `ConfigLoader`, `tabular_io`, `atomic_io`, `logging_setup`) — see [`docs/decisions/0005-vendor-inlined-shared-infrastructure.md`](docs/decisions/0005-vendor-inlined-shared-infrastructure.md).

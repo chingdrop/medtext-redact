@@ -32,7 +32,7 @@ Detection is rule-based (regex and a loaded surname gazetteer), not NER, not mac
 
 ## Residual risk: this repository's own history
 
-This repository's git history predates its current synthetic-only data policy (see [`docs/provenance-and-data-boundary.md`](provenance-and-data-boundary.md)) and was manually audited and cleaned before public release. That audit is a **point-in-time human review, not an automated guarantee**. This repository's CI now runs `gitleaks` against full history (`fetch-depth: 0`) on every push, PR, and weekly, as a standing, automated supplement to that manual review — not a replacement for it. **Result of that scan as run for this document: 390 commits scanned, no leaks found.** If a future automated or manual review finds something this one didn't, that finding takes precedence over this statement.
+This repository's git history predates its current synthetic-only data policy (see [`docs/provenance-and-data-boundary.md`](provenance-and-data-boundary.md)) and was manually audited and cleaned before public release. That audit is a **point-in-time human review, not an automated guarantee**. This repository's CI now runs `gitleaks` against full history (`fetch-depth: 0`) on every push, PR, and weekly, as a standing, automated supplement to that manual review — not a replacement for it. **Result of that scan as run for this document: 408 commits scanned, no leaks found.** If a future automated or manual review finds something this one didn't, that finding takes precedence over this statement.
 
 ## Scope
 

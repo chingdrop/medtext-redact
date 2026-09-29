@@ -4,7 +4,7 @@ Rule-based redaction of identifying information from unstructured clinical text,
 
 [![CI](https://github.com/chingdrop/medtext-redact/actions/workflows/ci.yml/badge.svg)](https://github.com/chingdrop/medtext-redact/actions/workflows/ci.yml)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
 
