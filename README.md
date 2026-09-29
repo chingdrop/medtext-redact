@@ -36,7 +36,7 @@ cat /tmp/demo/notes/note_0001.txt
 ```
 
 ```
-Contacted Delacroix at (260) 181-5908 regarding the community-acquired pneumonia diagnosis noted on 2.16.1951.
+Contacted Delacroix at (260) 181-5908 regarding the community-acquired pneumonia diagnosis noted on 2.19.1951.
 ```
 
 Redact it, highlighting a diagnosis term along the way:

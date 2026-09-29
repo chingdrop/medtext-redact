@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "medtext-redact"
-description = "Python-based solution designed to provide tools for extracting, transforming, and loading data."
+description = "A Command-Line Interface for HIPAA Redaction and Semantic Highlighting in Medical Text"
 authors = [{ name = "Craig Hurley", email = "chingdorp@pm.me" }]
 license = { file = "LICENSE" }
 version = "2.1.0"

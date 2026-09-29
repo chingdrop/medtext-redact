@@ -11,7 +11,7 @@ from medtext_redact.vendor.atomic_io import ensure_dir
 
 @click.group()
 def cli():
-    """Command Line Interface for custom use cases in data analysis."""
+    """A Command-Line Interface for HIPAA Redaction and Semantic Highlighting in Medical Text."""
     pd.set_option("future.no_silent_downcasting", True)
 
 

@@ -8,11 +8,11 @@ Prior to public release, this repository's name and installable package name ref
 
 ## Decision
 
-The repository name was changed prior to public release to remove an identifying reference. The installable package was renamed `src/vega_tools` → `src/medtext_redact`, along with the `pyproject.toml` package/CLI name and every import, path, and user-facing string that referenced the old name (README, CONTRIBUTING.md, CLAUDE.md, `--help` text, docstrings).
+The repository name was changed prior to public release to remove the original client company's name. The installable package was renamed `src/vega_tools` → `src/medtext_redact`, along with the `pyproject.toml` package/CLI name and every import, path, and user-facing string that referenced the old name (README, CONTRIBUTING.md, CLAUDE.md, `--help` text, docstrings).
 
 ## Alternatives considered
 
-<!-- TODO(craig): confirm there's nothing more specific you want recorded here beyond the generic framing above. -->
+None: keeping any reference to the client's name in a public repository wasn't an option, given this project's confidentiality constraints — see [`docs/provenance-and-data-boundary.md`](../provenance-and-data-boundary.md).
 
 ## Consequences
 
