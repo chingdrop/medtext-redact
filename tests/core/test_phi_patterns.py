@@ -1,7 +1,7 @@
 """
 Behavior of the PHI regex patterns, which the Presidio rule recognizers
 are built on. Each test masks with mask_regex_pattern(), the same
-word-character masking the anonymizer applies to every detected entity.
+word-character masking presidio_redact() applies to every detected entity.
 """
 
 from medtext_redact.core.phi_patterns import ADDRESS_PATTERN, AGE_PATTERN, DATE_PATTERN, MRN_PATTERN, PHONE_PATTERN

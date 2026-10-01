@@ -10,11 +10,11 @@ The repository also wrapped two other de-identification systems — Philter-UCSF
 
 ## Decision
 
-Detect PHI with [Microsoft Presidio](https://microsoft.github.io/presidio/) (`presidio-analyzer`/`presidio-anonymizer`), using spaCy's `en_core_web_lg` NER model, Presidio's built-in recognizers, and the old regex rules ported in as custom recognizers (`src/medtext_redact/core/presidio_recognizers.py`):
+Detect PHI with [Microsoft Presidio](https://microsoft.github.io/presidio/) (`presidio-analyzer`), using spaCy's `en_core_web_lg` NER model, Presidio's built-in recognizers, and the old regex rules ported in as custom recognizers (`src/medtext_redact/core/presidio_recognizers.py`):
 
 - Each regex in `src/medtext_redact/core/phi_patterns.py` (dates, unvalidated US phone numbers, labeled MRNs, street addresses, ages) becomes a `PatternRecognizer`; gender terms become a deny list.
 - The census surname gazetteer becomes `SurnameGazetteerRecognizer`, reusing `NameMasker`'s Aho-Corasick matching.
-- Masking keeps the old format — every word character replaced with `*`, length preserved — so keyword highlighting and the test suite's span offsets are unaffected.
+- Masking keeps the old format — every word character replaced with `*`, length preserved — so keyword highlighting and the test suite's span offsets are unaffected. It's applied directly to the analyzer's spans rather than through `presidio-anonymizer`, which would add nothing for an idempotent mask and pins a `cryptography` version with open advisories.
 
 ## Alternatives considered
 
