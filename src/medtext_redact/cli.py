@@ -1,5 +1,4 @@
 import click
-import pandas as pd
 
 from medtext_redact.commands.philter import philter
 from medtext_redact.commands.reports import parse_report
@@ -12,7 +11,6 @@ from medtext_redact.vendor.atomic_io import ensure_dir
 @click.group()
 def cli():
     """A Command-Line Interface for HIPAA Redaction and Semantic Highlighting in Medical Text."""
-    pd.set_option("future.no_silent_downcasting", True)
 
 
 cli.add_command(audit_series_by_study)
