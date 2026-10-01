@@ -11,23 +11,29 @@ Confirmed by reading the code, not assumed:
 
 ## The detection boundary, with real numbers
 
-Detection is rule-based (regex and a loaded surname gazetteer), not NER, not machine learning — see [`docs/decisions/0001-rule-based-detection-not-ner.md`](decisions/0001-rule-based-detection-not-ner.md). Current measured recall/precision, from `tests/e2e/test_recall_precision.py`, run fresh for this document:
+`parse-report` has two detection engines. `--engine rules` (the default) is regex and a loaded surname gazetteer, with no NER — see [`docs/decisions/0001-rule-based-detection-not-ner.md`](decisions/0001-rule-based-detection-not-ner.md). `--engine presidio` uses Microsoft Presidio's built-in recognizers with spaCy's `en_core_web_lg` NER model, running entirely locally: the model ships as an installed package, and the domain lookups in Presidio's email recognizer are pinned to `tldextract`'s bundled Public Suffix List snapshot so they never fetch it over the network. Current measured recall/precision, from `tests/e2e/test_recall_precision.py`, run fresh for this document:
 
-| Category | Recall | Precision |
-|---|---|---|
-| Names (surname in gazetteer) | 100% | 100% |
-| Dates | 100% | 100% |
-| Ages | 100% | 100% |
-| Gender terms | 100% | 100% |
-| Phone numbers | 100% | 100% |
-| Street addresses | 100% | 100% |
-| Medical record numbers | 100% | 100% |
+| Category | `rules` recall | `rules` precision | `presidio` recall | `presidio` precision |
+|---|---|---|---|---|
+| Names (surname in the loaded gazetteer) | 100% | 100% | 85% | 100% |
+| Names (surname *not* in the gazetteer) | **0%** | n/a | 100% | 100% |
+| Bare first names | **0%** | n/a | 75% | 100% |
+| Dates (MM/DD/YYYY family, 1900–2099) | 100% | 100% | 95% | 100% |
+| Dates (mismatched separators, pre-1900) | **0%** | n/a | 100% | 100% |
+| Ages | 100% | 100% | **40%** | 100% |
+| Gender terms | 100% | 100% | **0%** | n/a |
+| Phone numbers | 100% | 100% | 60% | 100% |
+| Street addresses | 100% | 100% | **20%** | 100% |
+| Medical record numbers | 100% | 100% | **20%** | 100% |
+| Highlighted keywords (symptoms, diagnoses, medications) | 100% | 100% | 100% | 100% |
 
-**Identifier categories with no detector at all**: fax numbers, email addresses, Social Security numbers, health plan beneficiary numbers, account numbers, certificate/license numbers, vehicle identifiers (including license plates), device identifiers, web URLs, IP addresses, biometric identifiers, and full-face photographs (this tool processes text only). Anything in this list, present in real text, passes through unredacted. Anything requiring NER — an identifier this tool's patterns or gazetteer don't happen to match — is missed regardless of how obvious it would be to a human reader.
+False positives on non-PHI decoys: a gazetteer surname used as an ordinary word ("Grace period") is masked by `rules` in 4 of 4 cases and by `presidio` in 0 of 4; a space-separated number triplet that reads as a count is masked by `presidio` in 1 of 4 cases and by `rules` in none.
+
+**Identifier categories with no detector in `rules`**: fax numbers, email addresses, Social Security numbers, health plan beneficiary numbers, account numbers, certificate/license numbers, vehicle identifiers (including license plates), device identifiers, web URLs, IP addresses, biometric identifiers, and full-face photographs (this tool processes text only). `presidio` has built-in recognizers for several of these (email addresses, URLs, IP addresses, US SSNs, US bank account numbers, US driver's license and passport numbers, medical license numbers), but **none of them is measured by this repository's test suite yet** — treat them as unverified. Neither engine detects biometric identifiers, device identifiers, vehicle identifiers, or health plan beneficiary numbers.
 
 ## The single most important sentence in this document
 
-**This tool's recall is not 100% on real clinical text, stated plainly and not softened by the clean table above: that table measures 100% recall only for the categories and identifiers this tool actually attempts, and whole real-world categories — a real name outside its loaded surname gazetteer, any bare first name, and every "not covered at all" category listed above — are structural misses this measurement never counts as failures because they're out of scope by design, not because they're rare.** The one number in the whole suite that is measured below 100% is a precision failure, not a recall one — **0% precision on a gazetteer surname used as an ordinary English word** (4 of 4 occurrences in the fixture set were false positives) — but a real miss on real text means PHI remains in the "redacted" output regardless of which metric moves. Anyone using this tool against real patient data must treat its output as **assistive, not authoritative**, and follow it with manual or clinically-validated review before relying on it for any compliance purpose.
+**This tool's recall is not 100% on real clinical text, under either engine.** The table above shows each engine missing whole categories the other catches: `rules` misses every name outside its surname gazetteer, every bare first name, and every date outside its pattern; `presidio` misses every gender term and most ages, MRNs, and street addresses. And the table only measures the categories this repository's synthetic fixtures contain — identifiers no fixture exercises are unmeasured, not safe. A real miss on real text means PHI remains in the "redacted" output. Anyone using this tool against real patient data must treat its output as **assistive, not authoritative**, and follow it with manual or clinically-validated review before relying on it for any compliance purpose.
 
 ## Residual risk: this repository's own history
 

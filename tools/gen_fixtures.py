@@ -109,14 +109,14 @@ def make_generators(fake: Faker, rng: random.Random) -> dict:
 
     def name_ungazetteered(_):
         # Faker's full last-name pool is effectively disjoint from our small
-        # fixed gazetteer; a real miss here documents a *data coverage* gap
-        # (the tool only masks surnames it's been given), not a mechanism bug.
+        # fixed gazetteer. Still a real name, so still PHI: a gazetteer-only
+        # detector missing it is a recall gap, counted as one.
         surname = fake.last_name()
-        return surname, "name_ungazetteered", False, "surname NOT in the loaded gazetteer (coverage gap, not a bug)"
+        return surname, "name_ungazetteered", True, "surname NOT in the loaded gazetteer -- still PHI"
 
     def name_firstname_only(_):
         first = fake.first_name()
-        return first, "name_firstname_only", False, "bare first name -- sanitize_names() only ever loads surnames"
+        return first, "name_firstname_only", True, "bare first name -- still PHI, though the gazetteer is surnames only"
 
     def name_common_word(_):
         # Used in a template where it reads as an ordinary word, not a name.
@@ -133,8 +133,8 @@ def make_generators(fake: Faker, rng: random.Random) -> dict:
         return (
             f"{d.month}/{d.day}-{d.year}",
             "date_mismatched_sep",
-            False,
-            "mismatched separators, per the code's own doc comment",
+            True,
+            "mismatched separators -- still a date, so still PHI",
         )
 
     def date_space_sep(_):
@@ -147,7 +147,7 @@ def make_generators(fake: Faker, rng: random.Random) -> dict:
         )
 
     def date_out_of_range_year(_):
-        return "5/6/1850", "date_out_of_range", False, "year outside the 1900-2099 window the pattern allows"
+        return "5/6/1850", "date_out_of_range", True, "year outside the 1900-2099 window -- still a date, so still PHI"
 
     def age_valid(_):
         n = rng.randint(1, 99)
@@ -227,9 +227,8 @@ TEMPLATES = [
     "Dr. <<name_other>> examined <<firstname>>, who reported <<symptom>> and <<symptom2>>.",
     # The gazetteer surname used as an ordinary word, not as a patient name.
     "The <<common_word_name>> period for this <<diagnosis>> follow-up ends in two weeks.",
-    # Edge cases the code's own comments flag: mismatched separator, a
-    # space-separated non-date triplet, and an out-of-range year -- none of
-    # these should be masked.
+    # Date edge cases: a mismatched separator and an out-of-range year are
+    # still dates (PHI); the space-separated triplet is a count, not a date.
     "Prior note dated <<date_bad_sep>> was amended; rechecked <<date_space>> times, old record <<date_oor>>.",
     # Age boundary: a plausible in-range bare number (masked by design) next
     # to a clearly out-of-range one (should not be masked).

@@ -62,26 +62,31 @@ The name, phone number, and date are gone; the diagnosis term is highlighted, no
 
 ## Results
 
-Recall/precision from the synthetic test suite ([`tests/e2e/test_recall_precision.py`](tests/e2e/test_recall_precision.py)), re-run fresh for this commit:
+Recall/precision from the synthetic test suite ([`tests/e2e/test_recall_precision.py`](tests/e2e/test_recall_precision.py)), for both detection engines (`--engine rules`, the default, and `--engine presidio`), re-run fresh for this commit:
 
-| Category | Recall | Precision |
-|---|---|---|
-| Names | 100% | 100% |
-| Dates | 100% | 100% |
-| Ages | 100% | 100% |
-| Gender terms | 100% | 100% |
-| Phone numbers | 100% | 100% |
-| Street addresses | 100% | 100% |
-| Medical record numbers | 100% | 100% |
-| Highlighted keywords (symptoms, diagnoses, medications) | 100% | 100% |
+| Category | `rules` recall | `rules` precision | `presidio` recall | `presidio` precision |
+|---|---|---|---|---|
+| Names (surname in the loaded gazetteer) | 100% | 100% | 85% | 100% |
+| Names (surname *not* in the gazetteer) | **0%** | n/a | 100% | 100% |
+| Bare first names | **0%** | n/a | 75% | 100% |
+| Dates (MM/DD/YYYY family, 1900–2099) | 100% | 100% | 95% | 100% |
+| Dates (mismatched separators, pre-1900) | **0%** | n/a | 100% | 100% |
+| Ages | 100% | 100% | **40%** | 100% |
+| Gender terms | 100% | 100% | **0%** | n/a |
+| Phone numbers | 100% | 100% | 60% | 100% |
+| Street addresses | 100% | 100% | **20%** | 100% |
+| Medical record numbers | 100% | 100% | **20%** | 100% |
+| Highlighted keywords (symptoms, diagnoses, medications) | 100% | 100% | 100% | 100% |
 
-Stated plainly rather than rounded up or omitted: one measured case is below 100%. A gazetteer surname used as an ordinary English word (e.g. "Grace period") still gets masked — **0% precision** on that specific case (4 of 4 occurrences in the fixture set were false positives). This is inherent to exact-match gazetteer masking with no surrounding-context model, not a bug. See [`docs/provenance-and-data-boundary.md`](docs/provenance-and-data-boundary.md) for the full scope disclaimer, including identifier categories (SSNs, email addresses, device/vehicle identifiers, biometric identifiers, and others) this tool has no detector for at all.
+False positives on non-PHI decoys: a gazetteer surname used as an ordinary word ("Grace period") is masked by `rules` in 4 of 4 cases and by `presidio` in 0 of 4; a space-separated number triplet that reads as a count is masked by `presidio` in 1 of 4 cases and by `rules` in none.
+
+The two engines fail in opposite places. `rules` is exact on the categories it has a pattern or gazetteer entry for and blind to everything else — any name not in its surname list, any bare first name, any date outside its pattern. `presidio` (Microsoft Presidio with spaCy's `en_core_web_lg` NER model) catches those, but its built-in recognizers have no gender detector and weak coverage of ages, MRNs, and street addresses; its phone recognizer also rejects numbers with invalid area codes. Porting the `rules` patterns into Presidio as custom recognizers, so one engine covers both, is the next planned step — see [`docs/limitations-and-roadmap.md`](docs/limitations-and-roadmap.md). See [`docs/provenance-and-data-boundary.md`](docs/provenance-and-data-boundary.md) for the full scope disclaimer.
 
 ---
 
 ## Commands
 
-- **Redact** — `medtext-redact parse-report single --config <config.json> --text "..."` masks names, dates, ages, gender terms, phone numbers, addresses, and MRNs in the given text.
+- **Redact** — `medtext-redact parse-report single --config <config.json> --text "..."` masks names, dates, ages, gender terms, phone numbers, addresses, and MRNs in the given text. Pass `parse-report --engine presidio` to detect with Microsoft Presidio instead of the regex/gazetteer rules (see Results above for how the two compare).
 - **Highlight** — add `--keywords "term"` (repeatable) and `--verbose` to also highlight matching keywords in the result, without redacting them.
 
 Run `medtext-redact --help` or `medtext-redact parse-report --help` for the full command reference, including spreadsheet batch mode (`parse-report spreadsheet`) and the imaging-reconciliation commands described below.

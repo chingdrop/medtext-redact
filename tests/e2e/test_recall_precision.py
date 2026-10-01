@@ -86,8 +86,8 @@ def extract_highlights(raw: str) -> tuple[str, list[tuple[int, int]]]:
     return plain_text, [(s, e) for s, e in merged]
 
 
-def run_single(runner: CliRunner, config_path: str, text: str, keywords: list[str]) -> str:
-    args = ["--config", config_path, "single", "--text", text, "--verbose"]
+def run_single(runner: CliRunner, config_path: str, engine: str, text: str, keywords: list[str]) -> str:
+    args = ["--config", config_path, "--engine", engine, "single", "--text", text, "--verbose"]
     for kw in keywords:
         args += ["--keywords", kw]
     outcome = runner.invoke(parse_report, args)
@@ -131,7 +131,8 @@ def all_vocab_keywords() -> list[str]:
     return [*vocab["symptom"], *vocab["diagnosis"], *vocab["medication"]]
 
 
-def test_recall_and_precision_by_category(config_path, capsys):
+@pytest.mark.parametrize("engine", ["rules", "presidio"])
+def test_recall_and_precision_by_category(engine, config_path, capsys):
     runner = CliRunner()
     notes = gen_fixtures.generate_notes(seed=SEED, count=NOTE_COUNT)
     keywords = all_vocab_keywords()
@@ -145,7 +146,7 @@ def test_recall_and_precision_by_category(config_path, capsys):
     false_positives: list[str] = []
 
     for note in notes:
-        output = run_single(runner, config_path, note["text"], keywords)
+        output = run_single(runner, config_path, engine, note["text"], keywords)
         # Strip the fixed CLI preamble and the single trailing newline
         # console.print adds, isolating exactly the rendered note content.
         preamble = ("-" * 104) + "\n\n" + "Verbose mode is on.\n"
@@ -201,8 +202,32 @@ def test_recall_and_precision_by_category(config_path, capsys):
 
     report = "\n".join(report_lines)
     with capsys.disabled():
-        print("\n" + report)
+        print(f"\n[{engine}]\n" + report)
 
+    if engine == "presidio":
+        assert_presidio_expectations(results)
+    else:
+        assert_rules_expectations(results)
+
+
+def assert_presidio_expectations(results: dict) -> None:
+    # What NER adds over the rules: names regardless of gazetteer coverage,
+    # dates in any format, and context to tell "Grace period" from a name.
+    for cat in ["name_ungazetteered", "date_mismatched_sep", "date_out_of_range"]:
+        assert results[cat]["recall"] == 1.0, f"{cat}: {results}"
+    for cat in ["name_common_word", "age_out_of_range"]:
+        assert results[cat]["fp"] == 0, f"unexpected false positive for {cat}: {results}"
+    # Masking must not damage the clinical terms highlighting runs on.
+    for cat in ["highlight_symptom", "highlight_medication", "highlight_diagnosis"]:
+        assert results[cat]["recall"] == 1.0, f"{cat}: {results}"
+        assert results[cat]["precision"] == 1.0, f"{cat}: {results}"
+    # Presidio's built-in recognizers have no gender or bare-age detection,
+    # and only partial coverage of ages, MRNs, addresses, and (unvalidated)
+    # phone numbers -- the categories the custom rules exist for. Reported,
+    # not gated, until those rules are ported into Presidio recognizers.
+
+
+def assert_rules_expectations(results: dict) -> None:
     # --- Stable, documented expectations -----------------------------------
     # Categories with a real detector, exercised with unambiguous positive
     # phrasing: recall and precision must both be perfect. Phone/address/MRN
@@ -227,15 +252,14 @@ def test_recall_and_precision_by_category(config_path, capsys):
         assert results[cat]["precision"] == 1.0, f"{cat}: {results}"
 
     # Negative/near-miss categories: the tool must not be tripped by these.
-    for cat in [
-        "name_ungazetteered",
-        "name_firstname_only",
-        "date_mismatched_sep",
-        "date_space_sep",
-        "date_out_of_range",
-        "age_out_of_range",
-    ]:
+    for cat in ["date_space_sep", "age_out_of_range"]:
         assert results[cat]["fp"] == 0, f"unexpected false positive for {cat}: {results}"
+
+    # Real PHI outside what the rules can detect: a surname missing from the
+    # gazetteer, a bare first name, and dates the date pattern doesn't
+    # accept. Reported, not gated -- these are known recall gaps.
+    for cat in ["name_ungazetteered", "name_firstname_only", "date_mismatched_sep", "date_out_of_range"]:
+        assert results[cat]["tp"] + results[cat]["fn"] > 0
 
     # "age_bare_number": masked by the code's own documented design (a bare
     # in-range number is treated as a possible age), not a bug -- reported,

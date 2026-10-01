@@ -15,14 +15,35 @@ from medtext_redact.core.utils.files_and_storage import read_text_from_file
 from medtext_redact.vendor.config_loader import ConfigLoader
 from medtext_redact.vendor.tabular_io import TabularIOError, read_structured_file, write_structured_file
 
+ENGINE_KEY = "medtext_redact.engine"
+
+
+def redact(text: str | None, config: ConfigLoader, engine: str) -> str:
+    """Redact PHI from one report with the chosen engine, then apply the config's keyword masks."""
+    sanitizer = PhiSanitizer(text)
+    if engine == "presidio":
+        sanitizer.sanitize_presidio().sanitize_configured_keywords(config)
+    else:
+        sanitizer.sanitize_all(config, full=True)
+    return sanitizer.text
+
 
 # ToDo - Optimize the commands in parse_report, they are too slow.
 @click.group()
 @click.option("--config", "-c", type=click.Path(exists=True), required=True, help="Path to JSON config file.")
+@click.option(
+    "--engine",
+    "-e",
+    type=click.Choice(["rules", "presidio"], case_sensitive=False),
+    default="rules",
+    show_default=True,
+    help="PHI detection engine: regex/gazetteer rules, or Microsoft Presidio (NER + pattern recognizers).",
+)
 @click.pass_context
-def parse_report(ctx: Context, config):
+def parse_report(ctx: Context, config, engine):
     """Parse medical reports."""
     ctx.obj = ConfigLoader(config)
+    ctx.meta[ENGINE_KEY] = engine.lower()
 
 
 @parse_report.command()
@@ -47,7 +68,7 @@ def single(ctx: Context, text, keywords, keywords_file, verbose):
         keywords = read_text_from_file(keywords_file)
         keywords = keywords.splitlines()
 
-    result_text = PhiSanitizer(input_text).sanitize_all(config, full=True).text
+    result_text = redact(input_text, config, ctx.meta[ENGINE_KEY])
     result_text = white_rabbit_parse_report(result_text)
     click.echo(("-" * 104) + "\n")
     if verbose:
@@ -72,9 +93,8 @@ def spreadsheet(ctx: Context, sample, result):
         sys.exit(1)
     result_df = df[["Accession", "ReportText"]]
     result_df.replace("<NONE>", np.nan, inplace=True)
-    result_df["ReportText"] = result_df["ReportText"].apply(
-        lambda x: PhiSanitizer(x).sanitize_all(config, full=True).text
-    )
+    engine = ctx.meta[ENGINE_KEY]
+    result_df["ReportText"] = result_df["ReportText"].apply(lambda x: redact(x, config, engine))
     result_df["ReportText"] = result_df["ReportText"].apply(white_rabbit_parse_report)
     result_df = search_report_text(result_df, config=config)
     write_structured_file(result_df, result, index=False)
