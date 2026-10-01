@@ -10,8 +10,6 @@ Please report security issues privately via GitHub's [private vulnerability repo
 
 This is a solo-maintained portfolio project: reports are handled best-effort, with no guaranteed response-time SLA.
 
-<!-- TODO(craig): backup contact email, if wanted -->
-
 ## Scope
 
 This tool processes text the user provides on the command line or in a file they point it at. Specifically, confirmed by reading the code, not assumed:

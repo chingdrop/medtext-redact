@@ -17,7 +17,7 @@ None documented other than keeping the git dependency as-is, which was rejected 
 ## Consequences
 
 - A fresh clone has zero dependency on `py-shared-tools` and needs no submodule step for it — verified by resolving `pyproject.toml` and running the full test suite from a clean clone with no access to that repo.
-- `py-shared-tools` is GPLv3, same license and author as this repository, so inlining raised no licensing concern.
+- `py-shared-tools` is the author's own original, sole-authored work, so inlining and relicensing these five modules under this repository's license (MIT) raised no licensing concern.
 - This repository's copy of these five modules will not receive future fixes made upstream in `py-shared-tools`; it now owns them independently.
 
 ## Evidence
