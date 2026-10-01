@@ -13,7 +13,14 @@ from re import Pattern as RePattern
 from presidio_analyzer import EntityRecognizer, Pattern, PatternRecognizer, RecognizerResult
 from presidio_analyzer.nlp_engine import NlpArtifacts
 
-from medtext_redact.core.phi_patterns import ADDRESS_PATTERN, AGE_PATTERN, DATE_PATTERN, MRN_PATTERN, PHONE_PATTERN
+from medtext_redact.core.phi_patterns import (
+    ADDRESS_PATTERN,
+    AGE_PATTERN,
+    DATE_PATTERN,
+    MRN_PATTERN,
+    PHONE_PATTERN,
+    URL_PATTERN,
+)
 from medtext_redact.core.utils.regex_utils import NameMasker
 
 #   Every match is masked regardless of score (no threshold is applied), so
@@ -45,6 +52,7 @@ def rule_recognizers() -> list[EntityRecognizer]:
         _from_rule("MEDICAL_RECORD_NUMBER", "RuleMrnRecognizer", MRN_PATTERN),
         _from_rule("STREET_ADDRESS", "RuleAddressRecognizer", ADDRESS_PATTERN),
         _from_rule("AGE", "RuleAgeRecognizer", AGE_PATTERN),
+        _from_rule("URL", "RuleUrlRecognizer", URL_PATTERN),
         PatternRecognizer(
             supported_entity="GENDER", name="RuleGenderRecognizer", deny_list=GENDER_TERMS, deny_list_score=RULE_SCORE
         ),

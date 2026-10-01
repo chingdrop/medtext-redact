@@ -21,17 +21,21 @@ This is a reference implementation of redaction aligned to HIPAA Safe Harbor's i
 | Category | Recall | Precision | Notes |
 |---|---|---|---|
 | Names | 100% | 100% | Surnames are caught by the gazetteer and by NER; surnames outside the gazetteer by NER alone. |
-| Bare first names | 75% | 100% | NER only — the gazetteer holds surnames only. |
+| Bare first names | 100% | 100% | NER only, so it varies with the names drawn: 4 of 4 in the current fixture set, 3 of 4 in the previous one. The gazetteer holds surnames only. |
 | Dates | 100% | 100% | Numeric formats with matching or mismatched separators, any year. |
 | Ages | 100% | 100% | Including bare in-range numbers (0–150) by design — this trades precision for recall on plausible ages. |
 | Gender terms | 100% | 100% | A small literal keyword list, not general demographic language. |
 | Phone numbers | 100% | 100% | Standard US formats, validated or not. |
 | Street addresses | 100% | 100% | Heuristic (house number + street name + USPS suffix) — addresses have no fixed format, so this is not exhaustive. |
 | Medical record numbers | 100% | 100% | Requires the literal "MRN" label; an unlabeled record number is not distinguishable from any other number. |
+| Email addresses | 100% | 100% | Presidio's built-in recognizer. |
+| US Social Security numbers | 100% | 100% | Presidio's built-in recognizer; rejects numbers in ranges the SSA never issues. |
+| URLs | 100% | 100% | Presidio's recognizer plus `URL_PATTERN`, which catches `http(s)://` and `www.` URLs whole. |
+| IP addresses | 100% | 100% | IPv4 and IPv6, Presidio's built-in recognizer. |
 
 Two measured, present limitations worth stating plainly: a gazetteer surname used as an ordinary English word (e.g. "Grace period") is still masked (4 of 4 such cases in the fixture set), and so is a space-separated number triplet that reads as a count (4 of 4), because bare in-range numbers are treated as possible ages.
 
-**Not measured**: Presidio's built-in recognizers for email addresses, URLs, IP addresses, US SSNs, bank account, driver's license and passport numbers, and medical license numbers. They exist, but no fixture exercises them yet.
+**Not measured**: Presidio's built-in recognizers for US bank account, driver's license, passport, ITIN, and medical license numbers, and credit card numbers. They exist, but no fixture exercises them yet.
 
 **Not covered at all** — categories from HIPAA Safe Harbor's 18 identifier types (and adjacent categories) with no detector in this tool:
 

@@ -306,3 +306,17 @@ AGE_PATTERN = re.compile(
         """,
     re.IGNORECASE | re.VERBOSE,
 )
+
+# ‣ Anything starting "http(s)://" or "www." up to whitespace, quotes, or
+#   angle brackets, minus trailing sentence punctuation
+# ‣ Backstops Presidio's own URL recognizer, whose TLD alternation has no
+#   end boundary: it matches "miller.biz" as "miller.bi" (Burundi's TLD)
+#   and leaves the final "z" unmasked.
+URL_PATTERN = re.compile(
+    r"""\b
+        (?:https?://|www\.)
+        [^\s<>"']*                    # host, path, query
+        [^\s<>"'.,;:!?)]              # don't end on punctuation
+        """,
+    re.IGNORECASE | re.VERBOSE,
+)

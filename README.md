@@ -68,7 +68,7 @@ Recall/precision from the synthetic test suite ([`tests/e2e/test_recall_precisio
 |---|---|---|
 | Names (surname in the loaded gazetteer) | 100% | 100% |
 | Names (surname *not* in the gazetteer) | 100% | 100% |
-| Bare first names | **75%** | 100% |
+| Bare first names | 100%* | 100% |
 | Dates (MM/DD/YYYY family) | 100% | 100% |
 | Dates (mismatched separators, pre-1900 years) | 100% | 100% |
 | Ages | 100% | 100% |
@@ -76,7 +76,13 @@ Recall/precision from the synthetic test suite ([`tests/e2e/test_recall_precisio
 | Phone numbers | 100% | 100% |
 | Street addresses | 100% | 100% |
 | Medical record numbers | 100% | 100% |
+| Email addresses | 100% | 100% |
+| US Social Security numbers | 100% | 100% |
+| URLs | 100% | 100% |
+| IP addresses (IPv4 and IPv6) | 100% | 100% |
 | Highlighted keywords (symptoms, diagnoses, medications) | 100% | 100% |
+
+\* Bare first names are caught by NER alone; NER only, so it varies with the names drawn: 4 of 4 in the current fixture set, 3 of 4 in the previous one.
 
 Two measured false positives, stated plainly: a gazetteer surname used as an ordinary word ("Grace period") is masked in 4 of 4 cases, and a space-separated number triplet that reads as a count ("rechecked 9 28 1952 times") is masked in 4 of 4 cases. The first comes from the surname gazetteer, which has no way to tell a surname from the same word used ordinarily; the second from treating any bare number from 0 to 150 as a possible age, a deliberate recall-over-precision choice. See [`docs/threat-model.md`](docs/threat-model.md) for what these numbers do and don't measure, and [`docs/provenance-and-data-boundary.md`](docs/provenance-and-data-boundary.md) for the full scope disclaimer.
 
@@ -132,7 +138,7 @@ uv run medtext-redact --help
 
 Medtext-Redact is implemented as a modular CLI using the Click framework. Redaction and highlighting are both delivered through `parse-report single` (one report) and `parse-report spreadsheet` (batch, via a CSV of reports) — there's no separate `redact`/`highlight` subcommand; redaction always runs, and passing `--keywords` additionally highlights matches in the result rather than masking them:
 
-- **Redaction**: [Microsoft Presidio](https://microsoft.github.io/presidio/) detects identifiers with spaCy's `en_core_web_lg` named-entity recognition model, its built-in recognizers (email addresses, URLs, IP addresses, SSNs, and others), and custom recognizers for clinical-text patterns it doesn't cover on its own: ages, gender terms, labeled MRNs, street addresses, US phone numbers, and a US Census surname gazetteer. Every match is masked character-for-character with `*`.
+- **Redaction**: [Microsoft Presidio](https://microsoft.github.io/presidio/) detects identifiers with spaCy's `en_core_web_lg` named-entity recognition model, its built-in recognizers (email addresses, URLs, IP addresses, SSNs, and others), and custom recognizers for clinical-text patterns it doesn't cover on its own: ages, gender terms, labeled MRNs, street addresses, US phone numbers, complete URLs, and a US Census surname gazetteer. Every match is masked character-for-character with `*`.
 - **Highlighting**: Scans the (already redacted) text for keywords supplied via `--keywords`/`--keywords-file`, applying color-coded emphasis for improved readability and interpretation.
 
 Both are accessible via a simple and extensible CLI interface designed for integration into larger preprocessing pipelines or standalone usage by analysts.
