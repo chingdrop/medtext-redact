@@ -3,11 +3,16 @@ import logging
 import zipfile
 from pathlib import Path
 from typing import Any
+from urllib.parse import urljoin
 
 import pandas as pd
 
 from medtext_redact.paths import DATA_DIRECTORY
 from medtext_redact.vendor.rest_adapter import RestAdapter, RestAdapterConfig
+
+
+class CensusDownloadError(RuntimeError):
+    """The census surname list couldn't be downloaded or read."""
 
 
 class CensusNamesApi:
@@ -33,6 +38,8 @@ class CensusNamesApi:
     # discarding base_url's own path (https://www2.census.gov/names.zip --
     # always 404s -- instead of .../2010surnames/names.zip).
     ZIP_ENDPOINT = "names.zip"
+    # Every zip archive starts with this local-file-header signature.
+    _ZIP_MAGIC = b"PK\x03\x04"
 
     def __init__(
         self,
@@ -71,6 +78,19 @@ class CensusNamesApi:
 
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
+    @property
+    def zip_url(self) -> str:
+        """The full URL of the names archive, for error messages."""
+        config = getattr(self._rest, "config", None)
+        return urljoin(config.base_url, self.ZIP_ENDPOINT) if config else self.ZIP_ENDPOINT
+
+    def _manual_install_hint(self) -> str:
+        return (
+            f"To work around it, download {self.zip_url} in a web browser, open the CSV inside, "
+            f"and save the surnames from its first column (without the header row), one per line, "
+            f"to {self.save_file}. Redaction will use that file instead of downloading."
+        )
+
     def download_names(self) -> pd.DataFrame:
         """
         Fetches the census name ZIP, extracts the first CSV found, and returns a DataFrame.
@@ -79,17 +99,31 @@ class CensusNamesApi:
             pd.DataFrame: DataFrame of the census names data.
 
         Raises:
-            RuntimeError: If download or extraction fails.
+            CensusDownloadError: If the download fails, isn't a zip archive, or has no readable CSV.
         """
         try:
             self.logger.info(f"Downloading census names ZIP for year {self.year}")
             raw = self._rest.get(self.ZIP_ENDPOINT)
             if isinstance(raw, dict):
                 raise RuntimeError(f"Expected a binary ZIP response, got a JSON object: {raw!r}")
-            zip_buf = io.BytesIO(raw if isinstance(raw, (bytes, bytearray)) else raw.encode())
+            payload = raw if isinstance(raw, (bytes, bytearray)) else raw.encode()
         except Exception as e:
             self.logger.error("Failed to download ZIP", exc_info=e)
-            raise RuntimeError("Could not retrieve census names archive") from e
+            raise CensusDownloadError(
+                f"Could not retrieve the census names archive from {self.zip_url} ({e}). {self._manual_install_hint()}"
+            ) from e
+
+        # census.gov's firewall sometimes answers automated requests with a
+        # 200 OK "Request Rejected" HTML page instead of the archive. Say so,
+        # rather than failing later with a confusing "not a zip file".
+        if not payload.startswith(self._ZIP_MAGIC):
+            excerpt = payload[:200].decode("utf-8", errors="replace")
+            raise CensusDownloadError(
+                f"The census names download from {self.zip_url} did not return a zip archive; "
+                f"the server may have rejected the automated request. Response began: {excerpt!r}\n"
+                f"{self._manual_install_hint()}"
+            )
+        zip_buf = io.BytesIO(payload)
 
         try:
             with zipfile.ZipFile(zip_buf) as z:
@@ -103,7 +137,9 @@ class CensusNamesApi:
                     df = pd.read_csv(csvfile)
         except Exception as e:
             self.logger.error("Failed to extract or parse CSV", exc_info=e)
-            raise RuntimeError("Could not extract census names CSV") from e
+            raise CensusDownloadError(
+                f"Could not extract the census names CSV from {self.zip_url} ({e}). {self._manual_install_hint()}"
+            ) from e
 
         return df
 

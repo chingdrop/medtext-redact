@@ -44,6 +44,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- When census.gov rejected the surname-list download with an HTML page instead of the zip archive, the tool failed with a misleading "Could not extract census names CSV" traceback. `CensusNamesApi` now checks for a zip archive and raises `CensusDownloadError` naming the URL, the start of the response, and how to save the list manually, and `parse-report` prints that as a one-line error instead of a traceback. Redaction still stops rather than running without the surname list.
 - `PROJECT_DIRECTORY` was computed from the current working directory at runtime instead of the install location, so running the CLI from anywhere but one specific directory silently pointed `DATA_DIRECTORY` at the wrong place.
 - `ConfigLoader` had no `.copy()` method, so `parse-report single` and `parse-report spreadsheet` crashed with `AttributeError` on every invocation.
 - `search_column_for_keywords` raised `ValueError: pattern contains no capture groups` on every call, which also broke `search_report_text` and therefore `parse-report spreadsheet`.

@@ -4,6 +4,7 @@ import click
 import numpy as np
 from click import Context
 
+from medtext_redact.core.api_tools import CensusDownloadError
 from medtext_redact.core.pandas_tools import search_report_text
 from medtext_redact.core.text_tools import (
     PhiSanitizer,
@@ -52,7 +53,10 @@ def single(ctx: Context, text, keywords, keywords_file, verbose):
         keywords = read_text_from_file(keywords_file)
         keywords = keywords.splitlines()
 
-    result_text = redact(input_text, config)
+    try:
+        result_text = redact(input_text, config)
+    except CensusDownloadError as exc:
+        raise click.ClickException(str(exc)) from exc
     result_text = white_rabbit_parse_report(result_text)
     click.echo(("-" * 104) + "\n")
     if verbose:
@@ -77,7 +81,10 @@ def spreadsheet(ctx: Context, sample, result):
         sys.exit(1)
     result_df = df[["Accession", "ReportText"]]
     result_df.replace("<NONE>", np.nan, inplace=True)
-    result_df["ReportText"] = result_df["ReportText"].apply(lambda x: redact(x, config))
+    try:
+        result_df["ReportText"] = result_df["ReportText"].apply(lambda x: redact(x, config))
+    except CensusDownloadError as exc:
+        raise click.ClickException(str(exc)) from exc
     result_df["ReportText"] = result_df["ReportText"].apply(white_rabbit_parse_report)
     result_df = search_report_text(result_df, config=config)
     write_structured_file(result_df, result, index=False)
