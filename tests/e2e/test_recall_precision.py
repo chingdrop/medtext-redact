@@ -218,6 +218,10 @@ def test_recall_and_precision_by_category(config_path, capsys):
         "phone",
         "address",
         "mrn",
+        "email",
+        "ssn",
+        "url",
+        "ip_address",
         "highlight_symptom",
         "highlight_medication",
         "highlight_diagnosis",
@@ -227,7 +231,8 @@ def test_recall_and_precision_by_category(config_path, capsys):
     assert results["age_out_of_range"]["fp"] == 0, f"unexpected false positive for age_out_of_range: {results}"
 
     # Reported, not gated:
-    # - "name_firstname_only": NER catches most bare first names, not all.
+    # - "name_firstname_only": caught by NER alone (the gazetteer is
+    #   surnames only), so it varies with which names the generator draws.
     # - "name_common_word": the surname gazetteer masks "Grace period", as
     #   the old rules-only engine did. spaCy's parse could filter it ("Grace" modifies a
     #   noun there), but the same filter would drop real names in phrases

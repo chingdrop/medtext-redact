@@ -176,6 +176,22 @@ def make_generators(fake: Faker, rng: random.Random) -> dict:
     def mrn_valid(rng_):
         return _mrn(rng_), "mrn", True, ""
 
+    def email_valid(_):
+        return fake.email(), "email", True, ""
+
+    def ssn_valid(_):
+        # Faker only generates SSNs in ranges the SSA actually issues (no
+        # 000/666/9xx area numbers), matching what Presidio's SSN recognizer
+        # accepts as plausible.
+        return fake.ssn(), "ssn", True, ""
+
+    def url_valid(_):
+        return fake.url(), "url", True, ""
+
+    def ip_valid(_):
+        address = fake.ipv4_public() if rng.random() < 0.5 else fake.ipv6()
+        return address, "ip_address", True, "IPv4 or IPv6"
+
     def symptom(_):
         return rng.choice(CLINICAL_VOCAB["symptom"]), "highlight_symptom", True, ""
 
@@ -202,6 +218,10 @@ def make_generators(fake: Faker, rng: random.Random) -> dict:
         "phone": phone_valid,
         "address": address_valid,
         "mrn": mrn_valid,
+        "email": email_valid,
+        "ssn": ssn_valid,
+        "url": url_valid,
+        "ip": ip_valid,
         "symptom": symptom,
         "symptom2": symptom,
         "diagnosis": diagnosis,
@@ -233,6 +253,10 @@ TEMPLATES = [
     # Age boundary: a plausible in-range bare number (masked by design) next
     # to a clearly out-of-range one (should not be masked).
     "Lab value of <<age_bare>> was recorded; unrelated tracking id <<age_oor>> was not a patient age.",
+    # Electronic and government identifiers, as they'd appear in a portal or
+    # intake note.
+    "Patient portal account <<email>> (SSN <<ssn>>) last signed in from <<ip>>; "
+    "records shared via <<url>> for <<diagnosis>>.",
     # A note with no identifiers at all.
     "Routine follow-up visit. Patient reports improvement in <<symptom>>. Continue management for <<diagnosis>>.",
 ]

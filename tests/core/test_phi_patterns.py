@@ -4,7 +4,14 @@ are built on. Each test masks with mask_regex_pattern(), the same
 word-character masking presidio_redact() applies to every detected entity.
 """
 
-from medtext_redact.core.phi_patterns import ADDRESS_PATTERN, AGE_PATTERN, DATE_PATTERN, MRN_PATTERN, PHONE_PATTERN
+from medtext_redact.core.phi_patterns import (
+    ADDRESS_PATTERN,
+    AGE_PATTERN,
+    DATE_PATTERN,
+    MRN_PATTERN,
+    PHONE_PATTERN,
+    URL_PATTERN,
+)
 from medtext_redact.core.utils.regex_utils import mask_regex_pattern
 
 
@@ -155,3 +162,22 @@ class TestAddressPattern:
         result = mask_regex_pattern(ADDRESS_PATTERN, "123 patients were treated via telehealth")
         assert "telehealth" in result
         assert "treated" in result
+
+
+class TestUrlPattern:
+    def test_masks_whole_url_including_tld(self):
+        # Regression: Presidio's own URL recognizer matches "miller.biz" as
+        # "miller.bi" and leaves the "z" visible.
+        assert (
+            mask_regex_pattern(URL_PATTERN, "shared via http://miller.biz/ today")
+            == "shared via ****://******.***/ today"
+        )
+
+    def test_masks_www_url_without_scheme(self):
+        assert mask_regex_pattern(URL_PATTERN, "see www.example.org/a?b=1 now") == "see ***.*******.***/*?*=* now"
+
+    def test_leaves_trailing_sentence_punctuation(self):
+        assert mask_regex_pattern(URL_PATTERN, "Visit https://gray.biz.") == "Visit *****://****.***."
+
+    def test_does_not_mask_bare_domain_words(self):
+        assert mask_regex_pattern(URL_PATTERN, "the example.com domain") == "the example.com domain"
