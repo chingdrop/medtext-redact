@@ -397,7 +397,10 @@ class PhiSanitizer:
         self.sanitize_names().sanitize_mrn().sanitize_phone().sanitize_address().sanitize_dates()
         if full:
             self.sanitize_gender().sanitize_age()
+        return self.sanitize_configured_keywords(config)
 
+    def sanitize_configured_keywords(self, config: ConfigLoader) -> "PhiSanitizer":
+        """Mask the config's 'Masking.Manufacturers' and 'Masking.Locations' keyword lists."""
         manufacturers = config.get("Masking.Manufacturers")
         locations = config.get("Masking.Locations")
 
@@ -406,6 +409,14 @@ class PhiSanitizer:
         if locations:
             self.sanitize_keywords(locations)
 
+        return self
+
+    def sanitize_presidio(self) -> "PhiSanitizer":
+        """Mask every entity Microsoft Presidio detects, instead of the regex/gazetteer rules."""
+        # Imported here so the rules engine doesn't pay for loading spaCy.
+        from medtext_redact.core.presidio_tools import presidio_redact
+
+        self._text = presidio_redact(self._text)
         return self
 
 

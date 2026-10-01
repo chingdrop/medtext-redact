@@ -21,6 +21,9 @@ dependencies = [
     "rich>=14.0.0",
     "pyahocorasick>=2.1.0",
     "openpyxl>=3.1.5",
+    "presidio-analyzer>=2.2.360,<3",
+    "presidio-anonymizer>=2.2.360,<3",
+    "en-core-web-lg>=3.8.0,<3.9",
 ]
 
 [project.urls]
@@ -39,6 +42,10 @@ dev = [
     "types-pyyaml>=6.0.12.20260518",
     "faker>=30.0.0",
 ]
+
+# spaCy models aren't published to PyPI; pin the official release wheel.
+[tool.uv.sources]
+en-core-web-lg = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/medtext_redact"]

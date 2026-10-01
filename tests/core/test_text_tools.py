@@ -263,6 +263,18 @@ class TestSanitizeAll:
         assert result == "scanned on GE in Boston"
 
 
+class TestSanitizePresidio:
+    def test_masks_names_without_the_gazetteer(self):
+        result = PhiSanitizer("Dr. Novak examined Elena").sanitize_presidio().text
+        assert "Novak" not in result
+        assert "Elena" not in result
+
+    def test_configured_keywords_still_apply_after_presidio(self):
+        config = FakeConfig({"Masking": {"Manufacturers": ["GE"], "Locations": []}})
+        result = PhiSanitizer("scanned on GE").sanitize_presidio().sanitize_configured_keywords(config).text
+        assert "GE" not in result
+
+
 class TestWhiteRabbitParseReport:
     def test_masks_penrad_signature(self):
         result = white_rabbit_parse_report("Signed, XY/Penrad")

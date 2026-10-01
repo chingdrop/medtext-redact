@@ -64,6 +64,35 @@ class TestSingle:
         assert "Smith" not in outcome.output
         assert "carcinoma" in outcome.output
 
+    def test_presidio_engine_masks_names_outside_the_gazetteer(self, config_path):
+        runner = CliRunner()
+        outcome = runner.invoke(
+            parse_report,
+            [
+                "--config",
+                str(config_path),
+                "--engine",
+                "presidio",
+                "single",
+                "--text",
+                "Dr. Novak examined Elena for left breast carcinoma",
+                "--keywords",
+                "carcinoma",
+            ],
+        )
+        assert outcome.exit_code == 0, outcome.output
+        assert "Novak" not in outcome.output
+        assert "Elena" not in outcome.output
+        assert "carcinoma" in outcome.output
+
+    def test_unknown_engine_is_rejected(self, config_path):
+        runner = CliRunner()
+        outcome = runner.invoke(
+            parse_report, ["--config", str(config_path), "--engine", "spacy", "single", "--text", "x"]
+        )
+        assert outcome.exit_code != 0
+        assert "spacy" in outcome.output
+
 
 class TestSpreadsheet:
     def test_output_keeps_sanitized_text_and_search_columns(self, tmp_path, config_path):
@@ -99,6 +128,40 @@ class TestSpreadsheet:
         assert row["FoundBiopsySide"] == "left"
         assert row["FoundBiopsyResult"] == "benign"
         assert row["FoundPathologyType"] == "carcinoma"
+
+    def test_presidio_engine_redacts_and_keeps_search_columns(self, tmp_path, config_path):
+        sample_path = tmp_path / "sample.csv"
+        pd.DataFrame(
+            {
+                "Accession": ["A1", "A2"],
+                "ReportText": ["Novak has left breast carcinoma, benign result", "<NONE>"],
+            }
+        ).to_csv(sample_path, index=False)
+        result_path = tmp_path / "result.csv"
+
+        runner = CliRunner()
+        outcome = runner.invoke(
+            parse_report,
+            [
+                "--config",
+                str(config_path),
+                "--engine",
+                "presidio",
+                "spreadsheet",
+                "--sample",
+                str(sample_path),
+                "--result",
+                str(result_path),
+            ],
+        )
+
+        assert outcome.exit_code == 0, outcome.output
+        result_df = pd.read_csv(result_path)
+        row = result_df.iloc[0]
+        assert "Novak" not in row["ReportText"]
+        assert row["FoundBiopsySide"] == "left"
+        assert row["FoundPathologyType"] == "carcinoma"
+        assert pd.isna(result_df.iloc[1]["ReportText"])
 
     def test_none_placeholder_replaced(self, tmp_path, config_path):
         sample_path = tmp_path / "sample.csv"

@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- `parse-report --engine presidio`: an alternative PHI detection engine built on Microsoft Presidio and spaCy's `en_core_web_lg` NER model (`core/presidio_tools.py`), measured side by side with the rule-based engine in the recall/precision suite. `--engine rules` remains the default.
 - Consolidated `vt-console`, `vega-spark-nlp`, and `vega-philter` into this repo, preserving each repo's full commit history.
 - `spark-nlp` command: a thin `docker compose` wrapper for the Spark NLP / Spark OCR de-identification environment (`integrations/spark-nlp/`).
 - `philter` command: runs the Philter-UCSF de-identification pipeline (`integrations/philter/philter-ucsf`, vendored as a git submodule) as a subprocess in a separate interpreter, since its pinned dependencies conflict with this project's own.
@@ -27,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- The recall/precision ground truth now labels surnames outside the gazetteer, bare first names, and dates with mismatched separators or pre-1900 years as PHI. They were previously labeled non-PHI because the rule-based engine was never designed to catch them, which hid those misses from its recall numbers.
 - Switched dependency management and packaging from `setuptools`/`pip` to `uv`, with `hatchling` as the build backend.
 - Restructured the package for clarity: `commands.py` (one 258-line file) split into `commands/` (one module per command domain); `common/` renamed to `core/`; `config/settings.py` flattened to a top-level `paths.py` module.
 - Grouped `spark-nlp/` and `philter/` under `integrations/`, separating the installable package from the adjacent infrastructure it wraps.
