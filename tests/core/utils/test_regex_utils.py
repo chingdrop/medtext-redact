@@ -139,3 +139,15 @@ class TestToSnakeCase:
 
     def test_strips_leading_and_trailing_underscores(self):
         assert to_snake_case("-leading and trailing-") == "leading_and_trailing"
+
+
+class TestNameMaskerSpans:
+    def test_returns_whole_word_offsets(self):
+        text = "Smith saw Jones"
+        assert NameMasker(["Smith", "Jones"]).spans(text) == [(0, 5), (10, 15)]
+
+    def test_skips_matches_inside_longer_words(self):
+        assert NameMasker(["Ann"]).spans("Announced by Ann") == [(13, 16)]
+
+    def test_empty_name_list_finds_nothing(self):
+        assert NameMasker([]).spans("Smith") == []

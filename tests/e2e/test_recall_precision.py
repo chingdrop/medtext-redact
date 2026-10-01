@@ -211,20 +211,39 @@ def test_recall_and_precision_by_category(engine, config_path, capsys):
 
 
 def assert_presidio_expectations(results: dict) -> None:
-    # What NER adds over the rules: names regardless of gazetteer coverage,
-    # dates in any format, and context to tell "Grace period" from a name.
-    for cat in ["name_ungazetteered", "date_mismatched_sep", "date_out_of_range"]:
-        assert results[cat]["recall"] == 1.0, f"{cat}: {results}"
-    for cat in ["name_common_word", "age_out_of_range"]:
-        assert results[cat]["fp"] == 0, f"unexpected false positive for {cat}: {results}"
-    # Masking must not damage the clinical terms highlighting runs on.
-    for cat in ["highlight_symptom", "highlight_medication", "highlight_diagnosis"]:
+    # Presidio plus the ported rule recognizers must match the rules on
+    # every category they cover, and keep what NER adds on top: names
+    # regardless of gazetteer coverage and dates in any format.
+    for cat in [
+        "name",
+        "name_ungazetteered",
+        "date",
+        "date_mismatched_sep",
+        "date_out_of_range",
+        "age",
+        "gender",
+        "phone",
+        "address",
+        "mrn",
+        "highlight_symptom",
+        "highlight_medication",
+        "highlight_diagnosis",
+    ]:
         assert results[cat]["recall"] == 1.0, f"{cat}: {results}"
         assert results[cat]["precision"] == 1.0, f"{cat}: {results}"
-    # Presidio's built-in recognizers have no gender or bare-age detection,
-    # and only partial coverage of ages, MRNs, addresses, and (unvalidated)
-    # phone numbers -- the categories the custom rules exist for. Reported,
-    # not gated, until those rules are ported into Presidio recognizers.
+    assert results["age_out_of_range"]["fp"] == 0, f"unexpected false positive for age_out_of_range: {results}"
+
+    # Reported, not gated:
+    # - "name_firstname_only": NER catches most bare first names, not all.
+    # - "name_common_word": the surname gazetteer masks "Grace period" just
+    #   as the rules do. spaCy's parse could filter it ("Grace" modifies a
+    #   noun there), but the same filter would drop real names in phrases
+    #   like "the Okafor family", and recall comes first.
+    # - "date_space_sep": the bare-number age pattern masks the small
+    #   numbers and spaCy's date entity takes the year, so the union covers
+    #   the whole triplet. The rules alone left the year visible.
+    for cat in ["name_firstname_only", "name_common_word", "date_space_sep"]:
+        assert cat in results
 
 
 def assert_rules_expectations(results: dict) -> None:

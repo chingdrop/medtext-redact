@@ -113,11 +113,11 @@ class PhiSanitizer:
         return self
 
     def sanitize_presidio(self) -> "PhiSanitizer":
-        """Mask every entity Microsoft Presidio detects, instead of the regex/gazetteer rules."""
+        """Mask every entity Microsoft Presidio detects: its NER and built-in recognizers plus the ported rules."""
         # Imported here so the rules engine doesn't pay for loading spaCy.
         from medtext_redact.core.presidio_tools import presidio_redact
 
-        self._text = presidio_redact(self._text)
+        self._text = presidio_redact(self._text, load_census_names())
         return self
 
 

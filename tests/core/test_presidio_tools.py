@@ -37,3 +37,14 @@ class TestPresidioRedact:
         result = presidio_redact("Contact elena.novak@example.com for records.")
         assert "elena.novak@example.com" not in result
         assert tldextract.tldextract.TLD_EXTRACTOR.suffix_list_urls == ()
+
+    def test_rule_recognizers_cover_what_built_ins_miss(self):
+        text = "Patient is a 52 yo female, MRN-5427721, at 765 Castro Skyway, phone (369) 033-2171."
+        result = presidio_redact(text)
+        for phi in ["52 yo", "female", "MRN-5427721", "765 Castro Skyway", "(369) 033-2171"]:
+            assert phi not in result
+
+    def test_masks_surnames_from_the_given_gazetteer(self):
+        text = "The chart for Hope was updated."
+        assert "Hope" in presidio_redact(text)
+        assert "Hope" not in presidio_redact(text, surnames=["Hope"])
