@@ -96,12 +96,33 @@ class NameMasker:
             self.automaton.add_word(name, "*" * len(name))
         self.automaton.make_automaton()
 
-    def mask(self, text: str) -> str:
+    def spans(self, text: str) -> list[tuple[int, int]]:
         """
-        Walk the text once, replacing any matched key with its associated mask.
+        Return the (start, end) offsets of every whole-word name in `text`.
 
         Matches that fall inside a longer word (e.g. "Ann" inside "Announced")
-        are skipped, since they're substring hits rather than the name itself.
+        are skipped, since they're substring hits rather than the name itself,
+        as are matches overlapping an earlier one.
+        """
+        if not len(self.automaton):
+            return []
+        spans: list[tuple[int, int]] = []
+        last_end = 0
+        for end_idx, mask in self.automaton.iter(text):
+            start_idx = end_idx - len(mask) + 1
+            if start_idx < last_end:
+                continue
+            before = text[start_idx - 1] if start_idx > 0 else ""
+            after = text[end_idx + 1] if end_idx + 1 < len(text) else ""
+            if before.isalnum() or after.isalnum():
+                continue
+            spans.append((start_idx, end_idx + 1))
+            last_end = end_idx + 1
+        return spans
+
+    def mask(self, text: str) -> str:
+        """
+        Walk the text once, replacing any whole-word name with "*"s.
 
         Args:
             text (str): The text to mask.
@@ -111,19 +132,10 @@ class NameMasker:
         """
         result = []
         last_idx = 0
-
-        for end_idx, mask in self.automaton.iter(text):
-            start_idx = end_idx - len(mask) + 1
-            if start_idx < last_idx:
-                continue
-            before = text[start_idx - 1] if start_idx > 0 else ""
-            after = text[end_idx + 1] if end_idx + 1 < len(text) else ""
-            if before.isalnum() or after.isalnum():
-                continue
-            result.append(text[last_idx:start_idx])
-            result.append(mask)
-            last_idx = end_idx + 1
-
+        for start, end in self.spans(text):
+            result.append(text[last_idx:start])
+            result.append("*" * (end - start))
+            last_idx = end
         result.append(text[last_idx:])
         return "".join(result)
 

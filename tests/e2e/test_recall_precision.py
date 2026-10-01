@@ -86,8 +86,8 @@ def extract_highlights(raw: str) -> tuple[str, list[tuple[int, int]]]:
     return plain_text, [(s, e) for s, e in merged]
 
 
-def run_single(runner: CliRunner, config_path: str, engine: str, text: str, keywords: list[str]) -> str:
-    args = ["--config", config_path, "--engine", engine, "single", "--text", text, "--verbose"]
+def run_single(runner: CliRunner, config_path: str, text: str, keywords: list[str]) -> str:
+    args = ["--config", config_path, "single", "--text", text, "--verbose"]
     for kw in keywords:
         args += ["--keywords", kw]
     outcome = runner.invoke(parse_report, args)
@@ -131,8 +131,7 @@ def all_vocab_keywords() -> list[str]:
     return [*vocab["symptom"], *vocab["diagnosis"], *vocab["medication"]]
 
 
-@pytest.mark.parametrize("engine", ["rules", "presidio"])
-def test_recall_and_precision_by_category(engine, config_path, capsys):
+def test_recall_and_precision_by_category(config_path, capsys):
     runner = CliRunner()
     notes = gen_fixtures.generate_notes(seed=SEED, count=NOTE_COUNT)
     keywords = all_vocab_keywords()
@@ -146,7 +145,7 @@ def test_recall_and_precision_by_category(engine, config_path, capsys):
     false_positives: list[str] = []
 
     for note in notes:
-        output = run_single(runner, config_path, engine, note["text"], keywords)
+        output = run_single(runner, config_path, note["text"], keywords)
         # Strip the fixed CLI preamble and the single trailing newline
         # console.print adds, isolating exactly the rendered note content.
         preamble = ("-" * 104) + "\n\n" + "Verbose mode is on.\n"
@@ -202,43 +201,18 @@ def test_recall_and_precision_by_category(engine, config_path, capsys):
 
     report = "\n".join(report_lines)
     with capsys.disabled():
-        print(f"\n[{engine}]\n" + report)
+        print("\n" + report)
 
-    if engine == "presidio":
-        assert_presidio_expectations(results)
-    else:
-        assert_rules_expectations(results)
-
-
-def assert_presidio_expectations(results: dict) -> None:
-    # What NER adds over the rules: names regardless of gazetteer coverage,
-    # dates in any format, and context to tell "Grace period" from a name.
-    for cat in ["name_ungazetteered", "date_mismatched_sep", "date_out_of_range"]:
-        assert results[cat]["recall"] == 1.0, f"{cat}: {results}"
-    for cat in ["name_common_word", "age_out_of_range"]:
-        assert results[cat]["fp"] == 0, f"unexpected false positive for {cat}: {results}"
-    # Masking must not damage the clinical terms highlighting runs on.
-    for cat in ["highlight_symptom", "highlight_medication", "highlight_diagnosis"]:
-        assert results[cat]["recall"] == 1.0, f"{cat}: {results}"
-        assert results[cat]["precision"] == 1.0, f"{cat}: {results}"
-    # Presidio's built-in recognizers have no gender or bare-age detection,
-    # and only partial coverage of ages, MRNs, addresses, and (unvalidated)
-    # phone numbers -- the categories the custom rules exist for. Reported,
-    # not gated, until those rules are ported into Presidio recognizers.
-
-
-def assert_rules_expectations(results: dict) -> None:
-    # --- Stable, documented expectations -----------------------------------
-    # Categories with a real detector, exercised with unambiguous positive
-    # phrasing: recall and precision must both be perfect. Phone/address/MRN
-    # detectors were added after an E2E-driven finding that PhiSanitizer had
-    # no coverage for them at all; a fixed, negative-lookbehind guard on the
-    # age pattern (skip "type"/"stage"/"grade"/"class" + number) is what
-    # brought highlight_diagnosis to 100% too -- see text_tools.py history
-    # for the "type 2 diabetes mellitus" case that motivated it.
+    # Presidio's NER plus the ported rule recognizers: perfect recall and
+    # precision on every category with a detector, including what NER adds
+    # over the old rules -- names regardless of gazetteer coverage and dates
+    # in any format.
     for cat in [
         "name",
+        "name_ungazetteered",
         "date",
+        "date_mismatched_sep",
+        "date_out_of_range",
         "age",
         "gender",
         "phone",
@@ -250,23 +224,18 @@ def assert_rules_expectations(results: dict) -> None:
     ]:
         assert results[cat]["recall"] == 1.0, f"{cat}: {results}"
         assert results[cat]["precision"] == 1.0, f"{cat}: {results}"
+    assert results["age_out_of_range"]["fp"] == 0, f"unexpected false positive for age_out_of_range: {results}"
 
-    # Negative/near-miss categories: the tool must not be tripped by these.
-    for cat in ["date_space_sep", "age_out_of_range"]:
-        assert results[cat]["fp"] == 0, f"unexpected false positive for {cat}: {results}"
-
-    # Real PHI outside what the rules can detect: a surname missing from the
-    # gazetteer, a bare first name, and dates the date pattern doesn't
-    # accept. Reported, not gated -- these are known recall gaps.
-    for cat in ["name_ungazetteered", "name_firstname_only", "date_mismatched_sep", "date_out_of_range"]:
-        assert results[cat]["tp"] + results[cat]["fn"] > 0
-
-    # "age_bare_number": masked by the code's own documented design (a bare
-    # in-range number is treated as a possible age), not a bug -- reported,
-    # not gated, since "fixing" it would mean overriding documented intent.
-    assert results["age_bare_number"]["tp"] + results["age_bare_number"]["fn"] > 0
-
-    # "name_common_word": a gazetteer surname used as an ordinary word. This
-    # is an inherent limitation of exact-match gazetteer masking with no
-    # surrounding-context model -- reported honestly, not asserted either way.
-    assert "name_common_word" in results
+    # Reported, not gated:
+    # - "name_firstname_only": NER catches most bare first names, not all.
+    # - "name_common_word": the surname gazetteer masks "Grace period", as
+    #   the old rules-only engine did. spaCy's parse could filter it ("Grace" modifies a
+    #   noun there), but the same filter would drop real names in phrases
+    #   like "the Okafor family", and recall comes first.
+    # - "date_space_sep": the bare-number age pattern masks the small
+    #   numbers and spaCy's date entity takes the year, so the union covers
+    #   the whole triplet. The old rules-only engine left the year visible.
+    # - "age_bare_number": masked by the age pattern's documented design (a
+    #   bare in-range number is treated as a possible age), not a bug.
+    for cat in ["name_firstname_only", "name_common_word", "date_space_sep", "age_bare_number"]:
+        assert cat in results

@@ -1,6 +1,6 @@
 # 0002. Gazetteer-based name detection, and its documented limits
 
-Status: Accepted (predates recorded reasoning in this repository's history; limits measured and documented 2026-09-25)
+Status: Accepted, amended by [0007](0007-presidio-detection-with-ported-rules.md) (predates recorded reasoning in this repository's history; limits measured and documented 2026-09-25). Since 0007, the gazetteer runs as a Presidio recognizer alongside spaCy NER, which catches names outside the list; the method names below describe the original implementation.
 
 ## Context
 

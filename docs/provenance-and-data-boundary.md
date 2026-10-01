@@ -14,28 +14,29 @@ All new sample, test, and demo data added to this repository must be synthetic �
 
 ## Scope disclaimer
 
-This is a reference implementation of rule-based (regex and gazetteer) redaction aligned to HIPAA Safe Harbor's identifier categories. It is not a validated or certified de-identification tool, and it does not use named-entity recognition (NER) or any machine-learning model — it will miss identifiers that don't match its patterns or its loaded name list, regardless of how obvious they'd be to a human reader.
+This is a reference implementation of redaction aligned to HIPAA Safe Harbor's identifier categories, built on Microsoft Presidio: spaCy's `en_core_web_lg` named-entity recognition model, Presidio's built-in recognizers, and custom pattern recognizers for clinical text. It is not a validated or certified de-identification tool. spaCy's model was trained on general English, not clinical notes, and the pattern recognizers only catch what their patterns describe — it will miss identifiers neither recognizes, regardless of how obvious they'd be to a human reader.
 
 **Covered**, with real, measured recall/precision from the synthetic test suite (`tests/e2e/test_recall_precision.py`, current as of this commit):
 
 | Category | Recall | Precision | Notes |
 |---|---|---|---|
-| Names | 100% | 100% | Surnames only, against a small loaded gazetteer. A first name alone, or any surname outside that gazetteer, is never caught — this is a real, structural limitation, not a rounding error. |
-| Dates | 100% | 100% | Numeric `MM/DD/YYYY`-style formats only, year 1900–2099. |
+| Names | 100% | 100% | Surnames are caught by the gazetteer and by NER; surnames outside the gazetteer by NER alone. |
+| Bare first names | 75% | 100% | NER only — the gazetteer holds surnames only. |
+| Dates | 100% | 100% | Numeric formats with matching or mismatched separators, any year. |
 | Ages | 100% | 100% | Including bare in-range numbers (0–150) by design — this trades precision for recall on plausible ages. |
 | Gender terms | 100% | 100% | A small literal keyword list, not general demographic language. |
-| Phone numbers | 100% | 100% | Standard US formats. |
+| Phone numbers | 100% | 100% | Standard US formats, validated or not. |
 | Street addresses | 100% | 100% | Heuristic (house number + street name + USPS suffix) — addresses have no fixed format, so this is not exhaustive. |
 | Medical record numbers | 100% | 100% | Requires the literal "MRN" label; an unlabeled record number is not distinguishable from any other number. |
 
-One measured, present limitation worth stating plainly: a gazetteer surname used as an ordinary English word (e.g. "Grace period") is still masked — 0% precision on that specific case in the test suite (4 of 4 such cases in the fixture set were false positives). This is inherent to exact-match gazetteer masking with no surrounding-context model, not a bug to be fixed by better regex.
+Two measured, present limitations worth stating plainly: a gazetteer surname used as an ordinary English word (e.g. "Grace period") is still masked (4 of 4 such cases in the fixture set), and so is a space-separated number triplet that reads as a count (4 of 4), because bare in-range numbers are treated as possible ages.
+
+**Not measured**: Presidio's built-in recognizers for email addresses, URLs, IP addresses, US SSNs, bank account, driver's license and passport numbers, and medical license numbers. They exist, but no fixture exercises them yet.
 
 **Not covered at all** — categories from HIPAA Safe Harbor's 18 identifier types (and adjacent categories) with no detector in this tool:
 
-- Fax numbers, email addresses
-- Social Security numbers, health plan beneficiary numbers, account numbers, certificate/license numbers
+- Fax numbers (unless written like a phone number), health plan beneficiary numbers, certificate numbers
 - Vehicle identifiers and serial numbers (including license plates), device identifiers and serial numbers
-- Web URLs, IP addresses
 - Biometric identifiers (e.g. finger/voiceprints)
 - Full-face photographs and comparable images (this tool processes text only)
 - Any other unique identifying number, characteristic, or code not explicitly listed above

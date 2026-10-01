@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- `parse-report --engine presidio`: an alternative PHI detection engine built on Microsoft Presidio and spaCy's `en_core_web_lg` NER model (`core/presidio_tools.py`), measured side by side with the rule-based engine in the recall/precision suite. `--engine rules` remains the default.
+- PHI detection with Microsoft Presidio and spaCy's `en_core_web_lg` NER model (`core/presidio_tools.py`), with the previous regex rules and surname gazetteer ported in as custom Presidio recognizers (`core/presidio_recognizers.py`). Catches names outside the gazetteer, bare first names (75% in the suite), and dates in formats the rules missed, and adds Presidio's built-in recognizers for email addresses, URLs, IP addresses, SSNs and more. See [`docs/decisions/0007-presidio-detection-with-ported-rules.md`](docs/decisions/0007-presidio-detection-with-ported-rules.md).
 - Consolidated `vt-console`, `vega-spark-nlp`, and `vega-philter` into this repo, preserving each repo's full commit history.
 - `spark-nlp` command: a thin `docker compose` wrapper for the Spark NLP / Spark OCR de-identification environment (`integrations/spark-nlp/`).
 - `philter` command: runs the Philter-UCSF de-identification pipeline (`integrations/philter/philter-ucsf`, vendored as a git submodule) as a subprocess in a separate interpreter, since its pinned dependencies conflict with this project's own.
@@ -37,6 +37,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Removed
 
+- The rule-based detection methods on `PhiSanitizer` (`sanitize_names`, `sanitize_dates`, `sanitize_all`, etc.), now superseded by the Presidio recognizers built from the same patterns. Their regex tests live on in `tests/core/test_phi_patterns.py`.
 - The `spark-nlp` and `philter` commands, along with `integrations/` (the Spark NLP Docker environment and the Philter-UCSF submodule) and the `nltk` dependency only `philter` used, to focus the project on a single de-identification engine. Microsoft Presidio is planned to take that role.
 - The `py-shared-tools` git dependency (a separate, private repository) — replaced by the vendored copy under `src/medtext_redact/vendor/` (see Added, above), so a fresh clone no longer needs access to it.
 
