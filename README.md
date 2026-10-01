@@ -132,6 +132,8 @@ uv sync
 uv run medtext-redact --help
 ```
 
+The first redaction downloads the 2010 US Census surname list from census.gov and caches it at `data/census_2010_names.txt`. census.gov sometimes rejects automated downloads, answering with a "Request Rejected" page instead of the archive; `parse-report` then stops with an error rather than redacting without the surname list. To work around it, download [the archive](https://www2.census.gov/topics/genealogy/2010surnames/names.zip) in a web browser, open the CSV inside, and save the surnames from its first column (without the header row), one per line, to `data/census_2010_names.txt`.
+
 ---
 
 ## Process

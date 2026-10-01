@@ -4,7 +4,7 @@ import zipfile
 import pandas as pd
 import pytest
 
-from medtext_redact.core.api_tools import CensusNamesApi
+from medtext_redact.core.api_tools import CensusDownloadError, CensusNamesApi
 
 
 class FakeRestAdapter:
@@ -76,6 +76,31 @@ class TestDownloadNames:
         api = CensusNamesApi(year="2010", rest_adapter=FailingAdapter())
         with pytest.raises(RuntimeError):
             api.download_names()
+
+    def test_html_rejection_page_raises_clear_error(self, tmp_path):
+        # census.gov's firewall can answer with a 200 OK HTML page, which the
+        # REST adapter returns as text, instead of the zip archive.
+        page = "<html><head><title>Request Rejected</title></head><body>The requested URL was rejected.</body></html>"
+        target = tmp_path / "names.txt"
+        api = CensusNamesApi(year="2010", save_file=target, rest_adapter=FakeRestAdapter(page))
+
+        with pytest.raises(CensusDownloadError) as excinfo:
+            api.download_names()
+
+        message = str(excinfo.value)
+        assert "did not return a zip archive" in message
+        assert "Request Rejected" in message
+        assert str(target) in message
+
+    def test_non_zip_bytes_raise_clear_error(self):
+        api = CensusNamesApi(year="2010", rest_adapter=FakeRestAdapter(b"not a zip"))
+        with pytest.raises(CensusDownloadError, match="did not return a zip archive"):
+            api.download_names()
+
+    def test_error_names_the_full_archive_url(self):
+        # Building the client makes no request, so this never touches the network.
+        api = CensusNamesApi(year="2010")
+        assert api.zip_url == "https://www2.census.gov/topics/genealogy/2010surnames/names.zip"
 
 
 class TestSaveToFile:
