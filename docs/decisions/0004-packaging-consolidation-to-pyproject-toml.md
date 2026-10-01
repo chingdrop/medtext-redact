@@ -18,7 +18,7 @@ None documented beyond matching the convention already used in this author's oth
 
 - One file to update when a dependency changes; no risk of `requirements.txt` silently drifting from what the code actually imports. The commit that made this change explicitly notes `requirements.txt` was "already stale — missing nltk" at the time.
 - `uv sync` / `uv run` become the documented setup and run path (README, CONTRIBUTING.md, CLAUDE.md, CI).
-- Scoped to the root package only: `integrations/spark-nlp/` and `integrations/philter/` keep their own separate `requirements.txt` files, since those describe different, intentionally isolated execution environments (a Docker image, and `philter-ucsf`'s own incompatible dependency pins) that don't belong in this project's own dependency graph.
+- Scoped to the root package only: `integrations/spark-nlp/` and `integrations/philter/` kept their own separate `requirements.txt` files, since those described different, intentionally isolated execution environments (a Docker image, and `philter-ucsf`'s own incompatible dependency pins). Both integrations have since been removed, so `pyproject.toml` now covers everything. It also uses `[tool.uv.sources]` to pin spaCy's `en_core_web_lg` model to its release wheel URL, since spaCy models aren't published to PyPI.
 
 ## Evidence
 

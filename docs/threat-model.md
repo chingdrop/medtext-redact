@@ -6,8 +6,9 @@ Medtext-Redact processes arbitrary text supplied by the user — directly via `-
 
 Confirmed by reading the code, not assumed:
 
-- `parse-report single` and `parse-report spreadsheet` — the redaction/highlighting commands — write **nothing to disk** beyond the explicit output the user requested: `single` writes only to stdout; `spreadsheet` writes only to the `--result` file. Neither logs report content; the only logging in this path (`core/utils/files_and_storage.py`) logs file paths and byte/character counts, never content.
-- The only network call anywhere in `src/medtext_redact` is a one-time, one-directional download of a public US Census surname list (`core/api_tools.py`). No user-provided text is ever transmitted over a network by this tool.
+- `parse-report single` and `parse-report spreadsheet` — the redaction/highlighting commands — write **no report content to disk** beyond the explicit output the user requested: `single` writes only to stdout; `spreadsheet` writes only to the `--result` file. Neither logs report content; the only logging in this path (`core/utils/files_and_storage.py`) logs file paths and byte/character counts, never content. The one other file written is the cached public Census surname list (`data/census_2010_names.txt`), on first use.
+- The only network call anywhere in `src/medtext_redact` is a one-time, one-directional download of a public US Census surname list (`core/api_tools.py`). No user-provided text is ever transmitted over a network by this tool. Presidio and spaCy run locally and make no network calls: the model is an installed package, and Presidio's email recognizer is pinned to `tldextract`'s bundled Public Suffix List rather than fetching it.
+- If the surname download fails — census.gov sometimes rejects automated requests with an HTML page — `parse-report` stops with an error (`CensusDownloadError`) explaining how to save the list manually. It never falls back to redacting without the surname gazetteer, which would silently lower recall.
 
 ## The detection boundary, with real numbers
 
@@ -31,7 +32,7 @@ Detection uses Microsoft Presidio: spaCy's `en_core_web_lg` NER model, Presidio'
 | IP addresses (IPv4 and IPv6) | 100% | 100% |
 | Highlighted keywords (symptoms, diagnoses, medications) | 100% | 100% |
 
-\* Bare first names are caught by NER alone; NER only, so it varies with the names drawn: 4 of 4 in the current fixture set, 3 of 4 in the previous one.
+\* Bare first names are caught by NER alone (the surname gazetteer has no first names), so this varies with the names the generator draws: 4 of 4 in the current fixture set, 3 of 4 in the previous one. Reported, not gated.
 
 Two measured false positives, stated plainly: a gazetteer surname used as an ordinary word ("Grace period") is masked in 4 of 4 cases, and a space-separated number triplet that reads as a count ("rechecked 9 28 1952 times") is masked in 4 of 4 cases.
 
@@ -43,7 +44,7 @@ URLs are covered by both Presidio's recognizer and a pattern of this project's o
 
 ## Residual risk: this repository's own history
 
-This repository's git history predates its current synthetic-only data policy (see [`docs/provenance-and-data-boundary.md`](provenance-and-data-boundary.md)) and was manually audited and cleaned before public release, combined with `gitleaks` and TruffleHog scans over full history (completed 2026-09-29). That audit is a **point-in-time human review, not an automated guarantee**. This repository's CI now runs `gitleaks` against full history (`fetch-depth: 0`) on every push, PR, and weekly, as a standing, automated supplement to that manual review — not a replacement for it. **Result of that scan as run for this document: 408 commits scanned, no leaks found.** If a future automated or manual review finds something this one didn't, that finding takes precedence over this statement.
+This repository's git history predates its current synthetic-only data policy (see [`docs/provenance-and-data-boundary.md`](provenance-and-data-boundary.md)) and was manually audited and cleaned before public release, combined with `gitleaks` and TruffleHog scans over full history (completed 2026-09-29). That audit is a **point-in-time human review, not an automated guarantee**. This repository's CI runs `gitleaks` as a standing, automated supplement to that manual review — not a replacement for it. On pushes and pull requests, the `gitleaks-action` scans only the new commits; the weekly scheduled run scans full history (`fetch-depth: 0`). Because `gitleaks` runs after `pip-audit` in the same CI job, a `pip-audit` failure skips it for that run — the scheduled run on 2026-09-28 never reached it. **Result of a full-history scan run locally for this document (gitleaks 8.30.1, 2026-10-01): 403 commits scanned, no leaks found.** If a future automated or manual review finds something this one didn't, that finding takes precedence over this statement.
 
 ## Scope
 
