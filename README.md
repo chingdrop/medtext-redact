@@ -119,7 +119,6 @@ This tool is intended for use by health data engineers, clinical researchers, an
 Medtext-Redact uses [uv](https://docs.astral.sh/uv/) for dependency management and packaging.
 
 ```bash
-git submodule update --init  # needed for the philter command, see below
 uv sync
 uv run medtext-redact --help
 ```
@@ -140,11 +139,3 @@ In addition to text redaction and highlighting, Medtext-Redact includes commands
 - **`compare-projects`**: Given a spreadsheet of paired studies (`file_1`/`file_2` plus their accession numbers), produces a normalized comparison ordered by project name.
 - **`validate-studies`**: Cross-references a project's reference spreadsheet against a sample spreadsheet to confirm each study's accession number appears where expected, flagging failures and prior/index study type.
 - **`audit-series-by-study`**: Summarizes which required 2D/3D image series are present or missing per study accession.
-
-Medtext-Redact also wraps the GPU-based Spark NLP / Spark OCR de-identification environment in [`integrations/spark-nlp/`](integrations/spark-nlp/):
-
-- **`spark-nlp`**: Passes arguments straight through to `docker compose`, run from the `integrations/spark-nlp/` directory (e.g. `medtext-redact spark-nlp down`, `medtext-redact spark-nlp logs -f`). With no arguments, it defaults to `up --build`, launching the Jupyter notebook environment. Requires Docker and an `integrations/spark-nlp/.env` file with the John Snow Labs license keys (see `integrations/spark-nlp/docker-compose.yaml`).
-
-Medtext-Redact's primary, production de-identification workflow is built on [Philter-UCSF](https://github.com/BCHSI/philter-ucsf), a peer-reviewed clinical text de-identifier ([Norgeot et al. 2020](https://doi.org/10.1038/s41746-020-0258-y)), vendored as a git submodule at [`integrations/philter/philter-ucsf`](integrations/philter/). After cloning, run `git submodule update --init` before use.
-
-- **`philter`**: Splits a reference CSV of reports (`Accession`, `Reports` columns) into per-accession text files, runs them through Philter-UCSF, and repackages the de-identified results back into a CSV (`--sample`/`--result`). Because `philter-ucsf` pins `pandas`/`numpy` versions that conflict with Medtext-Redact's own and depends on the long-removed `distutils` module, it cannot run in-process — it always runs as a subprocess in a separate Python interpreter, which you point at via `--python` or the `PHILTER_PYTHON` environment variable (see `integrations/philter/philter-ucsf/requirements.txt` for what that interpreter needs installed). Intermediate files are left in place for inspection if a run fails.

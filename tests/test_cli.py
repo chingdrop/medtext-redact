@@ -15,8 +15,6 @@ class TestCliGroup:
             "audit-series-by-study",
             "compare-projects",
             "parse-report",
-            "philter",
-            "spark-nlp",
             "validate-studies",
         ]:
             assert name in outcome.output
@@ -27,8 +25,6 @@ class TestCliGroup:
             "audit-series-by-study",
             "compare-projects",
             "parse-report",
-            "philter",
-            "spark-nlp",
             "validate-studies",
         ]:
             outcome = runner.invoke(cli, [name, "--help"])

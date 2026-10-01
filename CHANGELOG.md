@@ -35,6 +35,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Removed
 
+- The `spark-nlp` and `philter` commands, along with `integrations/` (the Spark NLP Docker environment and the Philter-UCSF submodule) and the `nltk` dependency only `philter` used, to focus the project on a single de-identification engine. Microsoft Presidio is planned to take that role.
 - The `py-shared-tools` git dependency (a separate, private repository) — replaced by the vendored copy under `src/medtext_redact/vendor/` (see Added, above), so a fresh clone no longer needs access to it.
 
 ### Fixed

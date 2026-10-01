@@ -21,7 +21,6 @@ dependencies = [
     "rich>=14.0.0",
     "pyahocorasick>=2.1.0",
     "openpyxl>=3.1.5",
-    "nltk>=3.9.1",
 ]
 
 [project.urls]
@@ -50,9 +49,6 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 120
 target-version = "py312"
-# integrations/ holds vendored/third-party code (a git submodule, a
-# notebook full of John Snow Labs' own idioms) that isn't ours to lint.
-extend-exclude = ["integrations/"]
 
 [tool.ruff.lint]
 select = [
@@ -71,5 +67,5 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 
 [[tool.mypy.overrides]]
-module = ["ahocorasick", "nltk"]
+module = ["ahocorasick"]
 ignore_missing_imports = true

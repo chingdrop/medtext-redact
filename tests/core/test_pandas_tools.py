@@ -7,10 +7,8 @@ from medtext_redact.core.pandas_tools import (
     create_project_comparison,
     find_column_for_value,
     merge_on_matched_column,
-    repackage_txts_to_csv,
     search_column_for_keywords,
     search_report_text,
-    split_csv_to_txt,
 )
 
 
@@ -165,50 +163,3 @@ class TestCreateProjectComparison:
         result = create_project_comparison(df)
         assert result.iloc[0]["project_1"] == "vega-100"
         assert result.iloc[0]["project_2"] == "vega-200"
-
-
-class TestSplitCsvToTxt:
-    def test_writes_one_txt_file_per_accession(self, tmp_path):
-        csv_path = tmp_path / "sample.csv"
-        pd.DataFrame(
-            {
-                "Accession": ["ACC001", "ACC002"],
-                "Reports": ["Report one text", "Report two text"],
-            }
-        ).to_csv(csv_path, index=False)
-        output_dir = tmp_path / "out"
-        output_dir.mkdir()
-
-        split_csv_to_txt(csv_path, output_dir)
-
-        assert (output_dir / "ACC001.txt").read_text(encoding="utf-8") == "Report one text"
-        assert (output_dir / "ACC002.txt").read_text(encoding="utf-8") == "Report two text"
-
-    def test_strips_whitespace_from_accession(self, tmp_path):
-        csv_path = tmp_path / "sample.csv"
-        pd.DataFrame(
-            {
-                "Accession": [" ACC001 "],
-                "Reports": ["text"],
-            }
-        ).to_csv(csv_path, index=False)
-        output_dir = tmp_path / "out"
-        output_dir.mkdir()
-
-        split_csv_to_txt(csv_path, output_dir)
-
-        assert (output_dir / "ACC001.txt").exists()
-
-
-class TestRepackageTxtsToCsv:
-    def test_round_trips_txt_files_into_csv(self, tmp_path):
-        input_dir = tmp_path / "in"
-        input_dir.mkdir()
-        (input_dir / "ACC001.txt").write_text("de-identified text", encoding="utf-8")
-        csv_path = tmp_path / "result.csv"
-
-        repackage_txts_to_csv(input_dir, csv_path)
-
-        result = pd.read_csv(csv_path)
-        assert result.iloc[0]["Filename"] == "ACC001"
-        assert result.iloc[0]["Contents"] == "de-identified text"

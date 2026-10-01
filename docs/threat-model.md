@@ -7,7 +7,6 @@ Medtext-Redact processes arbitrary text supplied by the user — directly via `-
 Confirmed by reading the code, not assumed:
 
 - `parse-report single` and `parse-report spreadsheet` — the redaction/highlighting commands — write **nothing to disk** beyond the explicit output the user requested: `single` writes only to stdout; `spreadsheet` writes only to the `--result` file. Neither logs report content; the only logging in this path (`core/utils/files_and_storage.py`) logs file paths and byte/character counts, never content.
-- The separate `philter` command (a Philter-UCSF wrapper, a different code path entirely) is **not** the same: `split_csv_to_txt` writes the user's raw, pre-redaction report text to per-accession `.txt` files in a system temp directory (`tempfile.mkdtemp(prefix="medtext_redact_philter_")`) so it can hand them to a separate subprocess. On success this directory is removed (`shutil.rmtree`). **On failure, it is left on disk** — the subprocess-failure path prints its location to stderr; the "interpreter not found" failure path does not mention it at all, though the directory (containing unredacted text) still exists on disk in both cases.
 - The only network call anywhere in `src/medtext_redact` is a one-time, one-directional download of a public US Census surname list (`core/api_tools.py`). No user-provided text is ever transmitted over a network by this tool.
 
 ## The detection boundary, with real numbers

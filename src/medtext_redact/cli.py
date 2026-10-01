@@ -1,8 +1,6 @@
 import click
 
-from medtext_redact.commands.philter import philter
 from medtext_redact.commands.reports import parse_report
-from medtext_redact.commands.spark_nlp import spark_nlp
 from medtext_redact.commands.studies import audit_series_by_study, compare_projects, validate_studies
 from medtext_redact.paths import DATA_DIRECTORY
 from medtext_redact.vendor.atomic_io import ensure_dir
@@ -16,8 +14,6 @@ def cli():
 cli.add_command(audit_series_by_study)
 cli.add_command(compare_projects)
 cli.add_command(parse_report)
-cli.add_command(philter)
-cli.add_command(spark_nlp)
 cli.add_command(validate_studies)
 
 

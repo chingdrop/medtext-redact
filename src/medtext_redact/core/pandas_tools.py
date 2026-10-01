@@ -1,5 +1,4 @@
 import re
-from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -223,31 +222,3 @@ def create_project_comparison(data_df: pd.DataFrame) -> pd.DataFrame:
             "accession_2": np.where(mask, data_df["file_2_accession"], data_df["file_1_accession"]),
         }
     )
-
-
-def split_csv_to_txt(csv_path: str | Path, output_path: Path) -> None:
-    """
-    Read a CSV and write each 'Reports' field to a separate text file
-    named <Accession>.txt under output_path.
-    """
-    df = pd.read_csv(csv_path, usecols=["Accession", "Reports"], dtype=str)
-
-    for accession, report in df.itertuples(index=False):
-        accession = accession.strip()
-        report = report or ""
-        outfile = output_path / f"{accession}.txt"
-        outfile.write_text(report, encoding="utf-8")
-
-
-def repackage_txts_to_csv(input_path: Path, csv_path: str | Path) -> None:
-    """
-    Read every .txt file in input_path and write out a CSV at csv_path
-    with columns: Filename (no .txt) and Contents.
-    """
-    data = []
-    for txt_file in input_path.glob("*.txt"):
-        contents = txt_file.read_text(encoding="utf-8")
-        data.append((txt_file.stem, contents))
-
-    df = pd.DataFrame(data, columns=["Filename", "Contents"])
-    df.to_csv(csv_path, index=False, encoding="utf-8")
