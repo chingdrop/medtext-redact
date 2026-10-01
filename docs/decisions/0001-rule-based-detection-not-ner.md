@@ -1,6 +1,6 @@
 # 0001. Rule-based detection, not NER
 
-Status: Accepted (predates recorded reasoning in this repository's history; earliest evidence 2025-06-04)
+Status: Superseded by [0007](0007-presidio-detection-with-ported-rules.md) (2026-10-01). Originally accepted; predates recorded reasoning in this repository's history; earliest evidence 2025-06-04.
 
 ## Context
 

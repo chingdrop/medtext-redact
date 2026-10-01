@@ -64,15 +64,13 @@ class TestSingle:
         assert "Smith" not in outcome.output
         assert "carcinoma" in outcome.output
 
-    def test_presidio_engine_masks_names_outside_the_gazetteer(self, config_path):
+    def test_masks_names_outside_the_gazetteer(self, config_path):
         runner = CliRunner()
         outcome = runner.invoke(
             parse_report,
             [
                 "--config",
                 str(config_path),
-                "--engine",
-                "presidio",
                 "single",
                 "--text",
                 "Dr. Novak examined Elena for left breast carcinoma",
@@ -84,14 +82,6 @@ class TestSingle:
         assert "Novak" not in outcome.output
         assert "Elena" not in outcome.output
         assert "carcinoma" in outcome.output
-
-    def test_unknown_engine_is_rejected(self, config_path):
-        runner = CliRunner()
-        outcome = runner.invoke(
-            parse_report, ["--config", str(config_path), "--engine", "spacy", "single", "--text", "x"]
-        )
-        assert outcome.exit_code != 0
-        assert "spacy" in outcome.output
 
 
 class TestSpreadsheet:
@@ -129,7 +119,7 @@ class TestSpreadsheet:
         assert row["FoundBiopsyResult"] == "benign"
         assert row["FoundPathologyType"] == "carcinoma"
 
-    def test_presidio_engine_redacts_and_keeps_search_columns(self, tmp_path, config_path):
+    def test_masks_names_outside_the_gazetteer_and_keeps_search_columns(self, tmp_path, config_path):
         sample_path = tmp_path / "sample.csv"
         pd.DataFrame(
             {
@@ -145,8 +135,6 @@ class TestSpreadsheet:
             [
                 "--config",
                 str(config_path),
-                "--engine",
-                "presidio",
                 "spreadsheet",
                 "--sample",
                 str(sample_path),

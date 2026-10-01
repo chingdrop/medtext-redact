@@ -5,10 +5,8 @@ import pandas as pd
 from rich.console import Console
 from rich.text import Text
 
-from medtext_redact.core.phi_patterns import ADDRESS_PATTERN, AGE_PATTERN, DATE_PATTERN, MRN_PATTERN, PHONE_PATTERN
 from medtext_redact.core.utils.enums import load_census_names
 from medtext_redact.core.utils.regex_utils import (
-    NameMasker,
     compile_keywords_pattern,
     mask_keywords,
     mask_regex_pattern,
@@ -18,7 +16,8 @@ from medtext_redact.vendor.config_loader import ConfigLoader
 
 class PhiSanitizer:
     """
-    Phi Sanitizer de-identifies sensitive information using regex patterns and a custom regex replacer.
+    Normalizes a report's whitespace, then de-identifies it: Presidio for PHI
+    detection, plus any keyword masks from the client config.
 
     Args:
         text (str): The report text.
@@ -46,60 +45,6 @@ class PhiSanitizer:
         self._text = mask_keywords(self._text, keywords)
         return self
 
-    def sanitize_names(self) -> "PhiSanitizer":
-        """Load census names and mask any occurrences."""
-        names = load_census_names()
-        nm = NameMasker(names)
-        self._text = nm.mask(self._text)
-        return self
-
-    def sanitize_dates(self) -> "PhiSanitizer":
-        """Mask all dates matching MM/DD/YYYY or M/D/YYYY."""
-        self._text = mask_regex_pattern(DATE_PATTERN, self._text)
-        return self
-
-    def sanitize_mrn(self) -> "PhiSanitizer":
-        """Mask medical record numbers labeled with 'MRN' (e.g. 'MRN-1234567')."""
-        self._text = mask_regex_pattern(MRN_PATTERN, self._text)
-        return self
-
-    def sanitize_phone(self) -> "PhiSanitizer":
-        """Mask US phone numbers in common formats."""
-        self._text = mask_regex_pattern(PHONE_PATTERN, self._text)
-        return self
-
-    def sanitize_address(self) -> "PhiSanitizer":
-        """Mask street addresses (house number + street name + USPS suffix)."""
-        self._text = mask_regex_pattern(ADDRESS_PATTERN, self._text)
-        return self
-
-    def sanitize_age(self) -> "PhiSanitizer":
-        """Mask age expressions like '34 years old' or '100-yrs-old'."""
-        self._text = mask_regex_pattern(AGE_PATTERN, self._text)
-        return self
-
-    def sanitize_gender(self) -> "PhiSanitizer":
-        """Mask simple gender terms."""
-        return self.sanitize_keywords(["male", "female", "males", "females"])
-
-    def sanitize_all(self, config: ConfigLoader, full: bool = False) -> "PhiSanitizer":
-        """
-        De‐identify PHI using the provided ConfigLoader.
-
-        Args:
-            config: a ConfigLoader instance whose config contains
-                    a 'Masking' section with 'Manufacturers' and 'Locations'.
-            full: if True, also mask gender + age
-        """
-        # MRN before phone: a labeled MRN ("MRN 1234567890") is otherwise
-        # digit-shaped enough to also match the phone pattern -- masking it
-        # first removes the ambiguity rather than relying on match order
-        # inside a single pass.
-        self.sanitize_names().sanitize_mrn().sanitize_phone().sanitize_address().sanitize_dates()
-        if full:
-            self.sanitize_gender().sanitize_age()
-        return self.sanitize_configured_keywords(config)
-
     def sanitize_configured_keywords(self, config: ConfigLoader) -> "PhiSanitizer":
         """Mask the config's 'Masking.Manufacturers' and 'Masking.Locations' keyword lists."""
         manufacturers = config.get("Masking.Manufacturers")
@@ -114,7 +59,7 @@ class PhiSanitizer:
 
     def sanitize_presidio(self) -> "PhiSanitizer":
         """Mask every entity Microsoft Presidio detects: its NER and built-in recognizers plus the ported rules."""
-        # Imported here so the rules engine doesn't pay for loading spaCy.
+        # Imported here so commands that never redact don't pay for loading spaCy.
         from medtext_redact.core.presidio_tools import presidio_redact
 
         self._text = presidio_redact(self._text, load_census_names())

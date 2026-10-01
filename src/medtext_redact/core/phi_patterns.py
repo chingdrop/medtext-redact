@@ -1,6 +1,7 @@
 """
-The regex patterns behind PHI detection, shared by both engines:
-PhiSanitizer's own masking and the Presidio recognizers built on them.
+Regex patterns for PHI that Presidio's built-in recognizers miss or only
+partly cover. core/presidio_recognizers.py wraps each one in a Presidio
+recognizer.
 """
 
 import re

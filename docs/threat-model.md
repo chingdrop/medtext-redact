@@ -11,29 +11,29 @@ Confirmed by reading the code, not assumed:
 
 ## The detection boundary, with real numbers
 
-`parse-report` has two detection engines. `--engine rules` (the default) is regex and a loaded surname gazetteer, with no NER — see [`docs/decisions/0001-rule-based-detection-not-ner.md`](decisions/0001-rule-based-detection-not-ner.md). `--engine presidio` uses Microsoft Presidio's built-in recognizers with spaCy's `en_core_web_lg` NER model, running entirely locally: the model ships as an installed package, and the domain lookups in Presidio's email recognizer are pinned to `tldextract`'s bundled Public Suffix List snapshot so they never fetch it over the network. Current measured recall/precision, from `tests/e2e/test_recall_precision.py`, run fresh for this document:
+Detection uses Microsoft Presidio: spaCy's `en_core_web_lg` NER model, Presidio's built-in recognizers, and custom recognizers ported from this project's earlier regex rules (ages, gender terms, labeled MRNs, street addresses, unvalidated US phone numbers, MM/DD/YYYY-family dates, and a US Census surname gazetteer) — see `src/medtext_redact/core/presidio_recognizers.py`. It runs entirely locally: the model ships as an installed package, and the domain lookups in Presidio's email recognizer are pinned to `tldextract`'s bundled Public Suffix List snapshot so they never fetch it over the network. Current measured recall/precision, from `tests/e2e/test_recall_precision.py`, run fresh for this document:
 
-| Category | `rules` recall | `rules` precision | `presidio` recall | `presidio` precision |
-|---|---|---|---|---|
-| Names (surname in the loaded gazetteer) | 100% | 100% | 85% | 100% |
-| Names (surname *not* in the gazetteer) | **0%** | n/a | 100% | 100% |
-| Bare first names | **0%** | n/a | 75% | 100% |
-| Dates (MM/DD/YYYY family, 1900–2099) | 100% | 100% | 95% | 100% |
-| Dates (mismatched separators, pre-1900) | **0%** | n/a | 100% | 100% |
-| Ages | 100% | 100% | **40%** | 100% |
-| Gender terms | 100% | 100% | **0%** | n/a |
-| Phone numbers | 100% | 100% | 60% | 100% |
-| Street addresses | 100% | 100% | **20%** | 100% |
-| Medical record numbers | 100% | 100% | **20%** | 100% |
-| Highlighted keywords (symptoms, diagnoses, medications) | 100% | 100% | 100% | 100% |
+| Category | Recall | Precision |
+|---|---|---|
+| Names (surname in the loaded gazetteer) | 100% | 100% |
+| Names (surname *not* in the gazetteer) | 100% | 100% |
+| Bare first names | **75%** | 100% |
+| Dates (MM/DD/YYYY family) | 100% | 100% |
+| Dates (mismatched separators, pre-1900 years) | 100% | 100% |
+| Ages | 100% | 100% |
+| Gender terms | 100% | 100% |
+| Phone numbers | 100% | 100% |
+| Street addresses | 100% | 100% |
+| Medical record numbers | 100% | 100% |
+| Highlighted keywords (symptoms, diagnoses, medications) | 100% | 100% |
 
-False positives on non-PHI decoys: a gazetteer surname used as an ordinary word ("Grace period") is masked by `rules` in 4 of 4 cases and by `presidio` in 0 of 4; a space-separated number triplet that reads as a count is masked by `presidio` in 1 of 4 cases and by `rules` in none.
+Two measured false positives, stated plainly: a gazetteer surname used as an ordinary word ("Grace period") is masked in 4 of 4 cases, and a space-separated number triplet that reads as a count ("rechecked 9 28 1952 times") is masked in 4 of 4 cases.
 
-**Identifier categories with no detector in `rules`**: fax numbers, email addresses, Social Security numbers, health plan beneficiary numbers, account numbers, certificate/license numbers, vehicle identifiers (including license plates), device identifiers, web URLs, IP addresses, biometric identifiers, and full-face photographs (this tool processes text only). `presidio` has built-in recognizers for several of these (email addresses, URLs, IP addresses, US SSNs, US bank account numbers, US driver's license and passport numbers, medical license numbers), but **none of them is measured by this repository's test suite yet** — treat them as unverified. Neither engine detects biometric identifiers, device identifiers, vehicle identifiers, or health plan beneficiary numbers.
+**Built-in Presidio categories not yet measured**: email addresses, URLs, IP addresses, US SSNs, US bank account, driver's license and passport numbers, and medical license numbers all have recognizers, but **no fixture in this repository's test suite exercises them** — treat them as unverified. **No detector at all**: fax numbers (unless phone-shaped), health plan beneficiary numbers, vehicle identifiers (including license plates), device identifiers, biometric identifiers, and full-face photographs (this tool processes text only).
 
 ## The single most important sentence in this document
 
-**This tool's recall is not 100% on real clinical text, under either engine.** The table above shows each engine missing whole categories the other catches: `rules` misses every name outside its surname gazetteer, every bare first name, and every date outside its pattern; `presidio` misses every gender term and most ages, MRNs, and street addresses. And the table only measures the categories this repository's synthetic fixtures contain — identifiers no fixture exercises are unmeasured, not safe. A real miss on real text means PHI remains in the "redacted" output. Anyone using this tool against real patient data must treat its output as **assistive, not authoritative**, and follow it with manual or clinically-validated review before relying on it for any compliance purpose.
+**This tool's recall is not 100% on real clinical text.** The table above is measured on synthetic notes built from a handful of templates, against a small stubbed surname gazetteer; real clinical text is far more varied, and spaCy's NER model was trained on general English, not clinical notes. It already misses 1 in 4 bare first names here. And the table only measures the categories this repository's fixtures contain — identifiers no fixture exercises are unmeasured, not safe. A real miss on real text means PHI remains in the "redacted" output. Anyone using this tool against real patient data must treat its output as **assistive, not authoritative**, and follow it with manual or clinically-validated review before relying on it for any compliance purpose.
 
 ## Residual risk: this repository's own history
 
@@ -41,4 +41,4 @@ This repository's git history predates its current synthetic-only data policy (s
 
 ## Scope
 
-This is a reference implementation demonstrating a rule-based approach to HIPAA Safe Harbor's identifier categories — not a certified or clinically validated de-identification product. See [`docs/provenance-and-data-boundary.md`](provenance-and-data-boundary.md) for the full scope disclaimer.
+This is a reference implementation of redaction aligned to HIPAA Safe Harbor's identifier categories — not a certified or clinically validated de-identification product. See [`docs/provenance-and-data-boundary.md`](provenance-and-data-boundary.md) for the full scope disclaimer.
