@@ -1,7 +1,7 @@
 # Data processing & Spark
 pandas==2.0.3
 pyarrow==23.0.1
-pyspark==3.5.1
+pyspark==3.5.2
 
 # Deep learning & GPU
 tensorflow==2.18.0
