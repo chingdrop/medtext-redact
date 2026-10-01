@@ -23,13 +23,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `src/medtext_redact/vendor/`, inlining the five shared-infrastructure modules this project actually imports (`RestAdapter`, `ConfigLoader`, `tabular_io`, `atomic_io`, `logging_setup`) — see [`docs/decisions/0005-vendor-inlined-shared-infrastructure.md`](docs/decisions/0005-vendor-inlined-shared-infrastructure.md).
 - `docs/provenance-and-data-boundary.md` and an "About this project" section in README.md, documenting this repository's pre-release history audit, its synthetic-data-only policy going forward, and its scope as a reference implementation.
 - `docs/decisions/`: six lightweight ADRs recording the load-bearing design decisions behind this repository's current form (rule-based detection, gazetteer name limits, synthetic-only testing, packaging, vendored infrastructure, and the pre-release rename).
-- CI (`.github/workflows/ci.yml`): lint (ruff check/format), type-check (mypy), and test (pytest across Python 3.12–3.14) jobs, plus a `security` job (`pip-audit` against locked dependencies, and `gitleaks` over new commits on push and PRs and over full history weekly).
+- CI (`.github/workflows/ci.yml`): lint (ruff check/format), type-check (mypy), and test (pytest across Python 3.12–3.14) jobs, plus separate `pip-audit` (against locked dependencies) and `gitleaks` (over new commits on push and PRs, and over full history weekly) jobs.
 - `.github/dependabot.yml` (uv and github-actions ecosystems, weekly, grouped minor/patch updates), `.github/workflows/codeql.yml` (Python analysis), `SECURITY.md`, and `docs/threat-model.md`.
 - `docs/limitations-and-roadmap.md`, separating known limitations (with real numbers) from possible next steps sourced only from existing TODO markers in the repo.
 
 ### Changed
 
 - Requires pandas 3 (`pandas>=3.0.0`). pandas 3 makes no-silent-downcasting the default, so the deprecated `future.no_silent_downcasting` opt-in, which warned on every CLI run, was removed.
+- CI's `security` job is split into separate `pip-audit` and `gitleaks` jobs, so a dependency advisory can no longer skip the secrets scan, as it did on the 2026-09-28 scheduled run. The `pip-audit` job no longer installs the project (`uv export` reads `uv.lock` directly), which skips the spaCy model download.
 - Documentation of CI's `gitleaks` scan corrected: on pushes and pull requests it scans only the new commits, not full history; the weekly scheduled run scans full history.
 - The recall/precision ground truth now labels surnames outside the gazetteer, bare first names, and dates with mismatched separators or pre-1900 years as PHI. They were previously labeled non-PHI because the rule-based engine was never designed to catch them, which hid those misses from its recall numbers.
 - Switched dependency management and packaging from `setuptools`/`pip` to `uv`, with `hatchling` as the build backend.

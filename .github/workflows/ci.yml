@@ -82,7 +82,31 @@ jobs:
           name: dist
           path: dist/
 
-  security:
+  # pip-audit and gitleaks are separate jobs so that a failure in one never
+  # skips the other. They used to be steps in one job, and the 2026-09-28
+  # scheduled run's pip-audit failure meant gitleaks never ran at all.
+  pip-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          python-version: "3.12"
+
+      # No `uv sync` needed: `uv export` reads uv.lock directly, so this job
+      # skips installing the project and its ~400 MB spaCy model.
+      - name: pip-audit (locked dependencies)
+        # --no-emit-project: without it, uv export emits an "-e ." line for
+        # this package itself, which pip-audit's internal pip invocation
+        # can't install under --require-hashes ("no single file to hash"),
+        # failing before it audits anything. Third-party dependencies are
+        # all pip-audit needs to check; the local package isn't on PyPI.
+        run: uv export --no-dev --no-emit-project --format requirements-txt | uvx pip-audit -r /dev/stdin
+
+  gitleaks:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -92,26 +116,12 @@ jobs:
         with:
           fetch-depth: 0 # full history: this repo's history is original and preserved, not reinitialized
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          enable-cache: true
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: uv sync --locked
-
-      - name: pip-audit (locked dependencies)
-        # --no-emit-project: without it, uv export emits an "-e ." line for
-        # this package itself, which pip-audit's internal pip invocation
-        # can't install under --require-hashes ("no single file to hash"),
-        # failing before it audits anything. Third-party dependencies are
-        # all pip-audit needs to check; the local package isn't on PyPI.
-        run: uv export --no-dev --no-emit-project --format requirements-txt | uvx pip-audit -r /dev/stdin
-
+      # gitleaks-action scans only the new commits on push and pull_request
+      # events, and the full history on the weekly scheduled run.
+      #
       # Pinned to the full commit SHA for the v3.0.0 tag, verified against
       # https://github.com/gitleaks/gitleaks-action/releases/tag/v3.0.0
-      - name: gitleaks (full history)
+      - name: gitleaks (new commits; full history weekly)
         uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
