@@ -12,7 +12,7 @@ Names are one of the hardest Safe Harbor categories to detect without NER: no fi
 
 ## Alternatives considered
 
-<!-- TODO(craig): no alternative to the gazetteer approach (e.g. a first-name list, NER, or a hybrid) is documented anywhere in the repo's history for this specific choice. -->
+Not recorded: no alternative to the gazetteer approach (e.g. a first-name list, NER, or a hybrid) is documented anywhere in the repo's history for this choice. The open question is tracked in [`TODO.md`](../../TODO.md). NER was later added alongside the gazetteer; see [0007](0007-presidio-detection-with-ported-rules.md).
 
 ## Consequences
 

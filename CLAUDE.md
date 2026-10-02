@@ -37,6 +37,8 @@ uv run ruff format src/ tests/ tools/
 uv run mypy src/medtext_redact tools/gen_fixtures.py
 ```
 
+Open work — planned features, known bugs, and unanswered questions — is tracked in `TODO.md`. Add new items there rather than as `TODO` comments or doc markers, and remove them when they land.
+
 ## Architecture
 
 **Command registration is explicit, not decorator-magic.** Each file under `src/medtext_redact/commands/` (`studies.py`, `reports.py`) defines its commands with plain `@click.command()`/`@click.group()` — not `@cli.command()`. `cli.py` imports each command function and wires it on with `cli.add_command(...)`. This avoids the common Click pattern of importing submodules purely for their registration side effects. When adding a new command, define it standalone in its own `commands/` module and add one `cli.add_command(...)` line in `cli.py`.

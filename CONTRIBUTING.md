@@ -57,6 +57,10 @@ uv run mypy src/medtext_redact tools/gen_fixtures.py  # type-check
 
 `pre-commit` (installed via `uv run pre-commit install`, see Setup) runs ruff on `src/` and `tests/` and mypy on `src/` automatically on `git commit`. It doesn't cover `tools/`, so run the commands above before committing changes there; CI checks all three directories.
 
+## Open work
+
+Planned features, known bugs, and open questions are tracked in [`TODO.md`](TODO.md). Add new items there rather than as `TODO` comments in code or docs, and remove an item in the same change that resolves it.
+
 ## Commit style
 
 Prefer small, focused commits over one large one — a structural change, a bug fix, and its test are each usually worth their own commit, even when they land in the same session. Commit messages should explain *why*, not just *what*; the diff already shows what changed.

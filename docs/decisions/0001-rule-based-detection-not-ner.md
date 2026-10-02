@@ -12,7 +12,7 @@ Medtext-Redact needs to detect and mask HIPAA Safe Harbor identifier categories 
 
 ## Alternatives considered
 
-<!-- TODO(craig): the repository doesn't record why NER was not used -- no commit message, code comment, or doc discusses this tradeoff. If there was a real reason (testability against synthetic ground truth without a trained model, no labeled corpus available, simplicity, etc.), state it here; otherwise this section should say no alternative was documented. -->
+Not recorded: no commit message, code comment, or doc discusses why NER wasn't used. The open question is tracked in [`TODO.md`](../../TODO.md).
 
 ## Consequences
 
