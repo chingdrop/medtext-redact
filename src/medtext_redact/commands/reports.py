@@ -22,7 +22,6 @@ def redact(text: str | None, config: ConfigLoader) -> str:
     return PhiSanitizer(text).sanitize_presidio().sanitize_configured_keywords(config).text
 
 
-# ToDo - Optimize the commands in parse_report, they are too slow.
 @click.group()
 @click.option("--config", "-c", type=click.Path(exists=True), required=True, help="Path to JSON config file.")
 @click.pass_context

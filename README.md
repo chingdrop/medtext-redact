@@ -123,7 +123,7 @@ Vulnerability reporting: [`SECURITY.md`](SECURITY.md). What this tool actually d
 
 ## Limitations, roadmap, and changelog
 
-What this tool measurably doesn't cover yet, and directions noted (not committed to) for closing those gaps, are in [`docs/limitations-and-roadmap.md`](docs/limitations-and-roadmap.md). Released and in-progress changes are tracked in [`CHANGELOG.md`](CHANGELOG.md).
+What this tool measurably doesn't cover yet is in [`docs/limitations-and-roadmap.md`](docs/limitations-and-roadmap.md); planned features, known bugs, and open questions are in [`TODO.md`](TODO.md). Released and in-progress changes are tracked in [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 

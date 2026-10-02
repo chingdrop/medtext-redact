@@ -1,6 +1,6 @@
 # Architecture decision records
 
-Lightweight [MADR](https://adr.github.io/madr/)-style records of the significant, load-bearing decisions behind this repository's current design. Each one is drafted only from what this repository actually records — the code, tests, README.md, `docs/provenance-and-data-boundary.md`, `CLAUDE.md`, and `git log` commit bodies — not from memory or invented rationale. Where the repository doesn't record *why* a choice was made, the record says so with a `TODO(craig)` marker rather than guessing.
+Lightweight [MADR](https://adr.github.io/madr/)-style records of the significant, load-bearing decisions behind this repository's current design. Each one is drafted only from what this repository actually records — the code, tests, README.md, `docs/provenance-and-data-boundary.md`, `CLAUDE.md`, and `git log` commit bodies — not from memory or invented rationale. Where the repository doesn't record *why* a choice was made, the record says so rather than guessing, and the open question is tracked in [`TODO.md`](../../TODO.md).
 
 | # | Title | Status |
 |---|---|---|
