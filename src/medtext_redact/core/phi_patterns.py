@@ -320,3 +320,19 @@ URL_PATTERN = re.compile(
         """,
     re.IGNORECASE | re.VERBOSE,
 )
+
+# ‣ 12-19 digits, either unbroken or in groups of four separated by a space
+#   or hyphen (the last group may be shorter)
+# ‣ Backstops Presidio's credit card recognizer, which stops at 16 digits
+#   and so leaves 19-digit Visa numbers completely unmasked. Callers must
+#   check the Luhn digit: without it, this matches any long number.
+CARD_PATTERN = re.compile(
+    r"""(?<![\d-])
+        (?:
+           \d{12,19}                      # unbroken
+         | \d{4}(?:[ -]\d{4}){2,3}(?:[ -]\d{1,3})?  # grouped
+        )
+        (?![\d-])
+        """,
+    re.VERBOSE,
+)

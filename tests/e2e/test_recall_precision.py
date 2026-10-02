@@ -28,7 +28,8 @@ sys.modules["gen_fixtures"] = gen_fixtures
 _spec.loader.exec_module(gen_fixtures)
 
 SEED = 20260925
-NOTE_COUNT = 40
+# A multiple of the template count, so every template appears equally often.
+NOTE_COUNT = 48
 
 HIGHLIGHT_PREFIX = "highlight_"
 HIGHLIGHT_START = "\x1b[1;33m"
@@ -222,6 +223,16 @@ def test_recall_and_precision_by_category(config_path, capsys):
         "ssn",
         "url",
         "ip_address",
+        "credit_card",
+        "bank_account",
+        "driver_license",
+        "passport",
+        "itin",
+        "medical_license",
+        "iban",
+        "crypto_wallet",
+        "mac_address",
+        "nhs_number",
         "highlight_symptom",
         "highlight_medication",
         "highlight_diagnosis",

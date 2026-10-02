@@ -1,6 +1,11 @@
 import pytest
 
-from medtext_redact.core.presidio_recognizers import SurnameGazetteerRecognizer, rule_recognizers
+from medtext_redact.core.presidio_recognizers import (
+    LuhnCardRecognizer,
+    SurnameGazetteerRecognizer,
+    luhn_valid,
+    rule_recognizers,
+)
 
 
 def detect(text: str, entity: str) -> list[str]:
@@ -46,3 +51,19 @@ class TestSurnameGazetteerRecognizer:
 
     def test_is_case_sensitive_like_the_rules(self):
         assert SurnameGazetteerRecognizer(["Hope"]).analyze("there is hope", ["PERSON"]) == []
+
+
+class TestLuhnCardRecognizer:
+    def test_luhn_check(self):
+        assert luhn_valid("4111111111111111")
+        assert luhn_valid("4796136791715267159")
+        assert not luhn_valid("4796136791715267158")
+
+    def test_detects_19_digit_visa(self):
+        # Presidio's own credit card recognizer stops at 16 digits.
+        text = "card 4796136791715267159 on file"
+        results = LuhnCardRecognizer().analyze(text, ["CREDIT_CARD"])
+        assert [text[r.start : r.end] for r in results] == ["4796136791715267159"]
+
+    def test_ignores_long_numbers_that_fail_luhn(self):
+        assert LuhnCardRecognizer().analyze("lab ref 4796136791715267158", ["CREDIT_CARD"]) == []

@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import random
 import re
@@ -96,12 +97,67 @@ def _fmt_date(d, sep: str) -> str:
     return f"{d.month}{sep}{d.day}{sep}{d.year}"
 
 
+_BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+
+
+def _bitcoin_address(rng: random.Random) -> str:
+    """A legacy (P2PKH) Bitcoin address with a valid Base58Check checksum,
+    as Presidio's crypto recognizer validates, over a random payload."""
+    payload = bytes([0]) + bytes(rng.getrandbits(8) for _ in range(20))
+    data = payload + hashlib.sha256(hashlib.sha256(payload).digest()).digest()[:4]
+    n = int.from_bytes(data, "big")
+    encoded = ""
+    while n:
+        n, r = divmod(n, 58)
+        encoded = _BASE58[r] + encoded
+    return "1" * (len(data) - len(data.lstrip(b"\0"))) + encoded
+
+
+def _dea_number(rng: random.Random) -> str:
+    """A DEA registration number (Presidio's MEDICAL_LICENSE) with a valid check digit."""
+    d = [rng.randint(0, 9) for _ in range(6)]
+    check = (d[0] + d[2] + d[4] + 2 * (d[1] + d[3] + d[5])) % 10
+    return rng.choice("ABFGM") + rng.choice("ABCDEFGHJKLMNPRSTW") + "".join(map(str, d)) + str(check)
+
+
+def _nhs_number(rng: random.Random) -> str:
+    """A UK NHS number with a valid mod-11 check digit, in its usual 3-3-4 grouping."""
+    while True:
+        d = [rng.randint(0, 9) for _ in range(9)]
+        check = 11 - sum(x * w for x, w in zip(d, range(10, 1, -1), strict=True)) % 11
+        check = 0 if check == 11 else check
+        if check != 10:  # 10 is never issued
+            digits = "".join(map(str, d)) + str(check)
+            return f"{digits[:3]} {digits[3:6]} {digits[6:]}"
+
+
+def _itin(rng: random.Random) -> str:
+    """An ITIN: 9XX-XX-XXXX with the middle group in an IRS-issued range."""
+    middle = rng.choice([*range(50, 66), *range(70, 89), *range(90, 93), *range(94, 100)])
+    return f"9{rng.randint(0, 99):02d}-{middle}-{rng.randint(0, 9999):04d}"
+
+
+def _driver_license(rng: random.Random) -> str:
+    """A US driver's license number in one of three common state formats."""
+    letter = rng.choice("ABCDEFGHJKLMNPRSTWY")
+    return rng.choice(
+        [
+            f"{letter}{rng.randint(0, 9_999_999):07d}",  # one letter + 7 digits (e.g. CA)
+            f"{rng.randint(100_000_000, 999_999_999)}",  # 9 digits (e.g. NY)
+            f"{letter}{rng.randint(0, 10**12 - 1):012d}",  # one letter + 12 digits (e.g. FL)
+        ]
+    )
+
+
 def _mrn(rng: random.Random) -> str:
     return "MRN-" + "".join(rng.choice("0123456789") for _ in range(7))
 
 
 def make_generators(fake: Faker, rng: random.Random) -> dict:
     """Each generator returns (text, category, expected_redacted, note)."""
+    # IBANs come from the UK locale; seed it from rng so output stays deterministic.
+    fake_gb = Faker("en_GB")
+    fake_gb.seed_instance(rng.randint(0, 2**32 - 1))
 
     def name_gazetteered(_):
         surname = rng.choice(GAZETTEER_SURNAMES)
@@ -192,6 +248,41 @@ def make_generators(fake: Faker, rng: random.Random) -> dict:
         address = fake.ipv4_public() if rng.random() < 0.5 else fake.ipv6()
         return address, "ip_address", True, "IPv4 or IPv6"
 
+    def credit_card_valid(_):
+        # visa19 included deliberately: Presidio's own recognizer stops at 16
+        # digits, so 19-digit Visa numbers exercise the Luhn backstop.
+        card_type = rng.choice(["visa16", "visa19", "mastercard", "amex", "discover"])
+        return fake.credit_card_number(card_type=card_type), "credit_card", True, card_type
+
+    def bank_account_valid(_):
+        digits = "".join(rng.choice("0123456789") for _ in range(rng.randint(8, 17)))
+        return digits, "bank_account", True, ""
+
+    def driver_license_valid(_):
+        return _driver_license(rng), "driver_license", True, ""
+
+    def passport_valid(_):
+        passport = rng.choice([f"{rng.randint(100_000_000, 999_999_999)}", f"A{rng.randint(0, 99_999_999):08d}"])
+        return passport, "passport", True, "9 digits, or the newer letter + 8 digits"
+
+    def itin_valid(_):
+        return _itin(rng), "itin", True, ""
+
+    def dea_valid(_):
+        return _dea_number(rng), "medical_license", True, "DEA registration number"
+
+    def iban_valid(_):
+        return fake_gb.iban(), "iban", True, ""
+
+    def crypto_valid(_):
+        return _bitcoin_address(rng), "crypto_wallet", True, "Bitcoin address"
+
+    def mac_valid(_):
+        return fake.mac_address(), "mac_address", True, "device identifier"
+
+    def nhs_valid(_):
+        return _nhs_number(rng), "nhs_number", True, ""
+
     def symptom(_):
         return rng.choice(CLINICAL_VOCAB["symptom"]), "highlight_symptom", True, ""
 
@@ -222,6 +313,16 @@ def make_generators(fake: Faker, rng: random.Random) -> dict:
         "ssn": ssn_valid,
         "url": url_valid,
         "ip": ip_valid,
+        "credit_card": credit_card_valid,
+        "bank_account": bank_account_valid,
+        "driver_license": driver_license_valid,
+        "passport": passport_valid,
+        "itin": itin_valid,
+        "dea": dea_valid,
+        "iban": iban_valid,
+        "crypto": crypto_valid,
+        "mac": mac_valid,
+        "nhs": nhs_valid,
         "symptom": symptom,
         "symptom2": symptom,
         "diagnosis": diagnosis,
@@ -257,6 +358,12 @@ TEMPLATES = [
     # intake note.
     "Patient portal account <<email>> (SSN <<ssn>>) last signed in from <<ip>>; "
     "records shared via <<url>> for <<diagnosis>>.",
+    # Billing and prescribing identifiers.
+    "Billing on file: card <<credit_card>>, bank account <<bank_account>>, ITIN <<itin>>; "
+    "<<medication>> prescribed under DEA <<dea>>; refund to IBAN <<iban>>.",
+    # Identity documents, a device identifier, and a non-US health number.
+    "Identity verified with driver's license <<driver_license>> and passport <<passport>>; "
+    "home monitor MAC <<mac>> paired; NHS number <<nhs>>; donation from wallet <<crypto>>.",
     # A note with no identifiers at all.
     "Routine follow-up visit. Patient reports improvement in <<symptom>>. Continue management for <<diagnosis>>.",
 ]

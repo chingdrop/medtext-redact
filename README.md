@@ -82,17 +82,27 @@ Recall/precision from the synthetic test suite ([`tests/e2e/test_recall_precisio
 | US Social Security numbers | 100% | 100% |
 | URLs | 100% | 100% |
 | IP addresses (IPv4 and IPv6) | 100% | 100% |
+| Credit card numbers (incl. 19-digit Visa) | 100% | 100% |
+| US bank account numbers | 100% | 100% |
+| US driver's license numbers | 100% | 100% |
+| US passport numbers | 100% | 100% |
+| US ITINs | 100% | 100% |
+| DEA registration numbers (medical license) | 100% | 100% |
+| IBANs | 100% | 100% |
+| Crypto wallet addresses | 100% | 100% |
+| MAC addresses (device identifiers) | 100% | 100% |
+| UK NHS numbers | 100% | 100% |
 | Highlighted keywords (symptoms, diagnoses, medications) | 100% | 100% |
 
 \* Bare first names are caught by NER alone (the surname gazetteer has no first names), so this varies with the names the generator draws: 4 of 4 in the current fixture set, 3 of 4 in the previous one. Reported, not gated.
 
-Two measured false positives, stated plainly: a gazetteer surname used as an ordinary word ("Grace period") is masked in 4 of 4 cases, and a space-separated number triplet that reads as a count ("rechecked 9 28 1952 times") is masked in 4 of 4 cases. The first comes from the surname gazetteer, which has no way to tell a surname from the same word used ordinarily; the second from treating any bare number from 0 to 150 as a possible age, a deliberate recall-over-precision choice. See [`docs/threat-model.md`](docs/threat-model.md) for what these numbers do and don't measure, and [`docs/provenance-and-data-boundary.md`](docs/provenance-and-data-boundary.md) for the full scope disclaimer.
+Two measured false positives, stated plainly: a gazetteer surname used as an ordinary word ("Grace period") is masked in 4 of 4 cases, and a space-separated number triplet that reads as a count ("rechecked 9 28 1952 times") is masked in 4 of 4 cases. The first comes from the surname gazetteer, which has no way to tell a surname from the same word used ordinarily; the second from treating any bare number from 0 to 150 as a possible age, a deliberate recall-over-precision choice. More broadly, any standalone number of 6 to 17 digits is masked, because Presidio's bank account, driver's license, and passport recognizers match bare digit runs and this tool applies no score threshold. See [`docs/threat-model.md`](docs/threat-model.md) for what these numbers do and don't measure, and [`docs/provenance-and-data-boundary.md`](docs/provenance-and-data-boundary.md) for the full scope disclaimer.
 
 ---
 
 ## Commands
 
-- **Redact** — `medtext-redact parse-report single --config <config.json> --text "..."` masks names, dates, ages, gender terms, phone numbers, street addresses, MRNs, email addresses, SSNs, URLs, IP addresses, and the other categories Presidio detects (see Results).
+- **Redact** — `medtext-redact parse-report single --config <config.json> --text "..."` masks names, dates, ages, gender terms, phone numbers, street addresses, MRNs, email addresses, SSNs, URLs, IP addresses, payment card and bank account numbers, and the other identifiers listed under Results.
 - **Highlight** — add `--keywords "term"` (repeatable) and `--verbose` to also highlight matching keywords in the result, without redacting them.
 
 Run `medtext-redact --help` or `medtext-redact parse-report --help` for the full command reference, including spreadsheet batch mode (`parse-report spreadsheet`) and the imaging-reconciliation commands described below.
@@ -144,7 +154,7 @@ The first redaction downloads the 2010 US Census surname list from census.gov an
 
 Medtext-Redact is implemented as a modular CLI using the Click framework. Redaction and highlighting are both delivered through `parse-report single` (one report) and `parse-report spreadsheet` (batch, via a CSV of reports) — there's no separate `redact`/`highlight` subcommand; redaction always runs, and passing `--keywords` additionally highlights matches in the result rather than masking them:
 
-- **Redaction**: [Microsoft Presidio](https://microsoft.github.io/presidio/) detects identifiers with spaCy's `en_core_web_lg` named-entity recognition model, its built-in recognizers (email addresses, URLs, IP addresses, SSNs, and others), and custom recognizers for clinical-text patterns it doesn't cover on its own: ages, gender terms, labeled MRNs, street addresses, US phone numbers, complete URLs, and a US Census surname gazetteer. Every match is masked character-for-character with `*`.
+- **Redaction**: [Microsoft Presidio](https://microsoft.github.io/presidio/) detects identifiers with spaCy's `en_core_web_lg` named-entity recognition model, its built-in recognizers (email addresses, URLs, IP addresses, SSNs, and others), and custom recognizers for clinical-text patterns it doesn't cover on its own: ages, gender terms, labeled MRNs, street addresses, US phone numbers, complete URLs, 19-digit card numbers, and a US Census surname gazetteer. Every match is masked character-for-character with `*`.
 - **Highlighting**: Scans the (already redacted) text for keywords supplied via `--keywords`/`--keywords-file`, applying color-coded emphasis for improved readability and interpretation.
 
 Both are accessible via a simple and extensible CLI interface designed for integration into larger preprocessing pipelines or standalone usage by analysts.
