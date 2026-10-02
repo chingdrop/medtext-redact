@@ -12,7 +12,7 @@ Confirmed by reading the code, not assumed:
 
 ## The detection boundary, with real numbers
 
-Detection uses Microsoft Presidio: spaCy's `en_core_web_lg` NER model, Presidio's built-in recognizers, and custom recognizers ported from this project's earlier regex rules (ages, gender terms, labeled MRNs, street addresses, unvalidated US phone numbers, MM/DD/YYYY-family dates, and a US Census surname gazetteer) — see `src/medtext_redact/core/presidio_recognizers.py`. It runs entirely locally: the model ships as an installed package, and the domain lookups in Presidio's email recognizer are pinned to `tldextract`'s bundled Public Suffix List snapshot so they never fetch it over the network. Current measured recall/precision, from `tests/e2e/test_recall_precision.py`, run fresh for this document:
+Detection uses Microsoft Presidio: spaCy's `en_core_web_lg` NER model, Presidio's built-in recognizers, and custom recognizers ported from this project's earlier regex rules (ages, gender terms, labeled MRNs, street addresses, unvalidated US phone numbers, MM/DD/YYYY-family dates, and a US Census surname gazetteer), plus two backstops for gaps in Presidio's own recognizers (complete URLs, and Luhn-valid card numbers up to 19 digits) — see `src/medtext_redact/core/presidio_recognizers.py`. It runs entirely locally: the model ships as an installed package, and the domain lookups in Presidio's email recognizer are pinned to `tldextract`'s bundled Public Suffix List snapshot so they never fetch it over the network. Current measured recall/precision, from `tests/e2e/test_recall_precision.py`, run fresh for this document:
 
 | Category | Recall | Precision |
 |---|---|---|
@@ -30,13 +30,23 @@ Detection uses Microsoft Presidio: spaCy's `en_core_web_lg` NER model, Presidio'
 | US Social Security numbers | 100% | 100% |
 | URLs | 100% | 100% |
 | IP addresses (IPv4 and IPv6) | 100% | 100% |
+| Credit card numbers (incl. 19-digit Visa) | 100% | 100% |
+| US bank account numbers | 100% | 100% |
+| US driver's license numbers | 100% | 100% |
+| US passport numbers | 100% | 100% |
+| US ITINs | 100% | 100% |
+| DEA registration numbers (medical license) | 100% | 100% |
+| IBANs | 100% | 100% |
+| Crypto wallet addresses | 100% | 100% |
+| MAC addresses (device identifiers) | 100% | 100% |
+| UK NHS numbers | 100% | 100% |
 | Highlighted keywords (symptoms, diagnoses, medications) | 100% | 100% |
 
 \* Bare first names are caught by NER alone (the surname gazetteer has no first names), so this varies with the names the generator draws: 4 of 4 in the current fixture set, 3 of 4 in the previous one. Reported, not gated.
 
-Two measured false positives, stated plainly: a gazetteer surname used as an ordinary word ("Grace period") is masked in 4 of 4 cases, and a space-separated number triplet that reads as a count ("rechecked 9 28 1952 times") is masked in 4 of 4 cases.
+Two measured false positives, stated plainly: a gazetteer surname used as an ordinary word ("Grace period") is masked in 4 of 4 cases, and a space-separated number triplet that reads as a count ("rechecked 9 28 1952 times") is masked in 4 of 4 cases. And by construction, any standalone number of 6 to 17 digits (a lab value, an accession number) is masked: Presidio's bank account, driver's license, and passport recognizers match bare digit runs, and no score threshold is applied.
 
-URLs are covered by both Presidio's recognizer and a pattern of this project's own (`URL_PATTERN`): Presidio's alone matches `miller.biz` as `miller.bi` and leaves the final letter visible. **Built-in Presidio categories not yet measured**: US bank account, driver's license, passport, ITIN, and medical license numbers, and credit card numbers all have recognizers, but **no fixture in this repository's test suite exercises them** — treat them as unverified. **No detector at all**: fax numbers (unless phone-shaped), health plan beneficiary numbers, vehicle identifiers (including license plates), device identifiers, biometric identifiers, and full-face photographs (this tool processes text only).
+Two backstops cover gaps found by these fixtures: Presidio's URL recognizer alone matches `miller.biz` as `miller.bi` and leaves the final letter visible (`URL_PATTERN` masks URLs whole), and its credit card recognizer stops at 16 digits, so 19-digit Visa numbers passed through unmasked (`LuhnCardRecognizer` catches Luhn-valid numbers of 12–19 digits). Every built-in recognizer active in this tool's analyzer is now measured. Presidio also ships recognizers for Medicare Beneficiary Identifiers, NPIs, and ABA routing numbers, but they aren't enabled by default and aren't enabled here. **No detector at all**: fax numbers (unless phone-shaped), health plan beneficiary numbers, vehicle identifiers (including license plates), device identifiers, biometric identifiers, and full-face photographs (this tool processes text only).
 
 ## The single most important sentence in this document
 

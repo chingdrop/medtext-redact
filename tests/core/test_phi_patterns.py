@@ -7,6 +7,7 @@ word-character masking presidio_redact() applies to every detected entity.
 from medtext_redact.core.phi_patterns import (
     ADDRESS_PATTERN,
     AGE_PATTERN,
+    CARD_PATTERN,
     DATE_PATTERN,
     MRN_PATTERN,
     PHONE_PATTERN,
@@ -181,3 +182,20 @@ class TestUrlPattern:
 
     def test_does_not_mask_bare_domain_words(self):
         assert mask_regex_pattern(URL_PATTERN, "the example.com domain") == "the example.com domain"
+
+
+class TestCardPattern:
+    def test_matches_unbroken_12_to_19_digits(self):
+        for digits in ["123456789012", "4796136791715267159"]:
+            assert CARD_PATTERN.fullmatch(digits)
+
+    def test_matches_groups_of_four(self):
+        assert CARD_PATTERN.fullmatch("4796 1367 9171 5267 159")
+        assert CARD_PATTERN.fullmatch("4111-1111-1111-1111")
+
+    def test_rejects_too_short_or_too_long(self):
+        assert not CARD_PATTERN.search("12345678901")
+        assert not CARD_PATTERN.search("12345678901234567890")
+
+    def test_does_not_match_inside_a_longer_hyphenated_number(self):
+        assert not CARD_PATTERN.search("ref-4111-1111-1111-1111-9999-1")

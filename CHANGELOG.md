@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Recall/precision fixtures for every remaining built-in Presidio recognizer active in this tool: credit card, US bank account, driver's license, passport, ITIN, DEA, IBAN, crypto wallet, MAC address, and UK NHS numbers, all measured at 100%. A `LuhnCardRecognizer` backstops Presidio's credit card recognizer, which stops at 16 digits and left 19-digit Visa numbers completely unmasked. The suite now generates 48 notes, 4 from each of 12 templates.
 - Recall/precision fixtures for email addresses, US SSNs, URLs, and IP addresses (IPv4 and IPv6), all measured at 100%. A `URL_PATTERN` recognizer backstops Presidio's URL recognizer, which matches `.biz` as `.bi` and leaves the final letter unmasked.
 - PHI detection with Microsoft Presidio and spaCy's `en_core_web_lg` NER model (`core/presidio_tools.py`), with the previous regex rules and surname gazetteer ported in as custom Presidio recognizers (`core/presidio_recognizers.py`). Catches names outside the gazetteer, bare first names (NER only), and dates in formats the rules missed, and adds Presidio's built-in recognizers for email addresses, URLs, IP addresses, SSNs and more. See [`docs/decisions/0007-presidio-detection-with-ported-rules.md`](docs/decisions/0007-presidio-detection-with-ported-rules.md).
 - Consolidated `vt-console`, `vega-spark-nlp`, and `vega-philter` into this repo, preserving each repo's full commit history.
