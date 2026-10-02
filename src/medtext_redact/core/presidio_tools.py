@@ -18,8 +18,8 @@ def _analyzer() -> AnalyzerEngine:
     """Build the analyzer once per process -- loading the spaCy model takes seconds."""
     # Presidio's email recognizer calls tldextract.extract(), whose shared
     # default extractor downloads the Public Suffix List on first use. Swap
-    # in one that only reads tldextract's bundled snapshot, so the census
-    # surname download stays this tool's only network call.
+    # in one that only reads tldextract's bundled snapshot, so the tool
+    # makes no network calls.
     tldextract.tldextract.TLD_EXTRACTOR = tldextract.TLDExtract(suffix_list_urls=())
     provider = NlpEngineProvider(
         nlp_configuration={"nlp_engine_name": "spacy", "models": [{"lang_code": "en", "model_name": SPACY_MODEL}]}
