@@ -22,16 +22,19 @@ uv run pre-commit install
 src/medtext_redact/
     cli.py             # entry point; registers every command onto the top-level group
     commands/          # one module per command domain (studies, reports)
-    core/              # domain logic: PHI patterns, Presidio recognizers and engine, DICOM audits, census API
+    core/              # domain logic: PHI patterns, Presidio recognizers and engine, DICOM audits
+    data/              # bundled public reference data (the 2010 Census surname list)
     vendor/            # generic infrastructure inlined from a shared library (HTTP, config, file I/O)
     paths.py           # PROJECT_DIRECTORY / DATA_DIRECTORY constants
 tests/
     core/              # unit tests for core/
     commands/          # integration tests for commands/, driven through Click's CliRunner
     e2e/               # recall/precision suite against synthetic notes
+    tools/             # tests for the scripts in tools/
     vendor/            # unit tests for vendor/
 tools/
     gen_fixtures.py    # synthetic clinical-note generator with a ground-truth manifest
+    build_surname_list.py  # rebuilds the bundled Census surname list
 docs/                  # threat model, limitations, provenance, and design decisions (ADRs)
 ```
 
@@ -41,7 +44,7 @@ docs/                  # threat model, limitations, provenance, and design decis
 uv run pytest
 ```
 
-Tests are organized to mirror `src/medtext_redact/`. `tests/core/` covers the library layer directly; `tests/commands/` and `tests/test_cli.py` drive the actual CLI commands end-to-end through `click.testing.CliRunner`, mocking only genuine external boundaries (the census name API) rather than internal collaborators.
+Tests are organized to mirror `src/medtext_redact/`. `tests/core/` covers the library layer directly; `tests/commands/` and `tests/test_cli.py` drive the actual CLI commands end-to-end through `click.testing.CliRunner`, faking only genuine external boundaries rather than internal collaborators.
 
 If you add a new function or command, add tests alongside it in the mirrored location.
 
@@ -52,7 +55,7 @@ If you add a new function or command, add tests alongside it in the mirrored loc
 ```bash
 uv run ruff check --fix src/ tests/ tools/   # lint
 uv run ruff format src/ tests/ tools/        # format
-uv run mypy src/medtext_redact tools/gen_fixtures.py  # type-check
+uv run mypy src/medtext_redact tools/  # type-check
 ```
 
 `pre-commit` (installed via `uv run pre-commit install`, see Setup) runs ruff on `src/` and `tests/` and mypy on `src/` automatically on `git commit`. It doesn't cover `tools/`, so run the commands above before committing changes there; CI checks all three directories.

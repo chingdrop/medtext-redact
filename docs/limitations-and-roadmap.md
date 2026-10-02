@@ -14,8 +14,6 @@ This is a reference implementation of redaction aligned to HIPAA Safe Harbor's i
 
 **Not detected**: Presidio ships recognizers for Medicare Beneficiary Identifiers (a health plan beneficiary number), NPIs, and ABA routing numbers, but they aren't enabled. Nothing detects health plan beneficiary numbers, vehicle or device identifiers, biometric identifiers, or full-face photographs (this tool processes text only).
 
-**The census surname download can be rejected.** census.gov sometimes answers automated requests with a "Request Rejected" HTML page instead of the archive. `parse-report` then stops with an error explaining how to download the list in a browser and save it to `data/census_2010_names.txt`; it never redacts without the gazetteer.
-
 ## Possible next steps
 
 Planned features, known bugs, and open questions are tracked in [`TODO.md`](../TODO.md).

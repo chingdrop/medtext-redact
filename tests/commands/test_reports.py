@@ -6,12 +6,11 @@ from click.testing import CliRunner
 
 from medtext_redact.commands.reports import parse_report
 from medtext_redact.core import text_tools
-from medtext_redact.core.api_tools import CensusDownloadError
 
 
 @pytest.fixture(autouse=True)
 def fake_census_names(monkeypatch):
-    """sanitize_names() would otherwise hit the real census network API."""
+    """A one-name gazetteer keeps these tests independent of the bundled census list."""
     monkeypatch.setattr(text_tools, "load_census_names", lambda: ["Smith"])
 
 
@@ -201,36 +200,4 @@ class TestSpreadsheet:
 
         assert outcome.exit_code == 1
         assert "Could not read sample spreadsheet" in outcome.output
-        assert not result_path.exists()
-
-
-def fail_census_download():
-    raise CensusDownloadError("census download rejected; save the surnames to data/census_2010_names.txt")
-
-
-class TestCensusDownloadFailure:
-    """A failed surname download must stop redaction with a readable error, not a traceback,
-    and must never fall back to redacting without the gazetteer."""
-
-    def test_single_exits_with_message(self, monkeypatch, config_path):
-        monkeypatch.setattr(text_tools, "load_census_names", fail_census_download)
-        outcome = CliRunner().invoke(parse_report, ["--config", str(config_path), "single", "--text", "Smith"])
-        assert outcome.exit_code == 1
-        assert "Error: census download rejected" in outcome.output
-        assert "Smith" not in outcome.output
-        assert outcome.exception is None or isinstance(outcome.exception, SystemExit)
-
-    def test_spreadsheet_exits_with_message_and_writes_nothing(self, monkeypatch, tmp_path, config_path):
-        monkeypatch.setattr(text_tools, "load_census_names", fail_census_download)
-        sample_path = tmp_path / "sample.csv"
-        pd.DataFrame({"Accession": ["A1"], "ReportText": ["Smith has carcinoma"]}).to_csv(sample_path, index=False)
-        result_path = tmp_path / "result.csv"
-
-        outcome = CliRunner().invoke(
-            parse_report,
-            ["--config", str(config_path), "spreadsheet", "--sample", str(sample_path), "--result", str(result_path)],
-        )
-
-        assert outcome.exit_code == 1
-        assert "Error: census download rejected" in outcome.output
         assert not result_path.exists()

@@ -19,6 +19,7 @@ None documented other than keeping the git dependency as-is, which was rejected 
 - A fresh clone has zero dependency on `py-shared-tools` and needs no submodule step for it — verified by resolving `pyproject.toml` and running the full test suite from a clean clone with no access to that repo.
 - `py-shared-tools` is the author's own original, sole-authored work, so inlining and relicensing these five modules under this repository's license (MIT) raised no licensing concern.
 - This repository's copy of these five modules will not receive future fixes made upstream in `py-shared-tools`; it now owns them independently.
+- Update: `RestAdapter` was later removed, along with its `requests`/`certifi`/`urllib3`/`charset-normalizer` dependencies, once the census surname list was bundled with the package instead of downloaded through it. Four vendored modules remain.
 
 ## Evidence
 

@@ -7,7 +7,7 @@ from medtext_redact.core.text_tools import PhiSanitizer, white_rabbit_parse_repo
 
 @pytest.fixture(autouse=True)
 def fake_census_names(monkeypatch):
-    """sanitize_names() calls load_census_names(), which would otherwise hit the network."""
+    """A two-name gazetteer keeps these tests independent of the bundled census list."""
     monkeypatch.setattr(text_tools, "load_census_names", lambda: ["Smith", "Jones"])
 
 

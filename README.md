@@ -58,7 +58,7 @@ Contacted ********* at (***) ***-**** regarding the [1;33mcommunity-acquired pn
 diagnosis noted on *.**.****.
 ```
 
-The name, phone number, and date are gone; the diagnosis term is highlighted, not redacted, since it was passed via `--keywords` rather than matched as an identifier. The first run also downloads the US Census surname list; if census.gov rejects that download, see [Installation](#installation).
+The name, phone number, and date are gone; the diagnosis term is highlighted, not redacted, since it was passed via `--keywords` rather than matched as an identifier.
 
 ---
 
@@ -146,7 +146,7 @@ uv run medtext-redact --help
 
 `uv sync` installs Microsoft Presidio and spaCy's `en_core_web_lg` model (about 400 MB, pinned to spaCy's official release wheel since spaCy models aren't on PyPI). Loading the model takes several seconds once per run; after that, redaction is fast.
 
-The first redaction downloads the 2010 US Census surname list from census.gov and caches it at `data/census_2010_names.txt`. census.gov sometimes rejects automated downloads, answering with a "Request Rejected" page instead of the archive; `parse-report` then stops with an error rather than redacting without the surname list. To work around it, download [the archive](https://www2.census.gov/topics/genealogy/2010surnames/names.zip) in a web browser, open the CSV inside, and save the surnames from its first column (without the header row), one per line, to `data/census_2010_names.txt`.
+The PERSON gazetteer uses the 2010 US Census surname list (every surname reported 100 or more times, public domain), bundled with the package at `src/medtext_redact/data/census_2010_surnames.txt`, so redaction makes no network calls. `tools/build_surname_list.py` rebuilds it from the Census Bureau's `names.zip` or the Census Data API.
 
 ---
 

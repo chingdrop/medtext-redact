@@ -6,9 +6,8 @@ Medtext-Redact processes arbitrary text supplied by the user — directly via `-
 
 Confirmed by reading the code, not assumed:
 
-- `parse-report single` and `parse-report spreadsheet` — the redaction/highlighting commands — write **no report content to disk** beyond the explicit output the user requested: `single` writes only to stdout; `spreadsheet` writes only to the `--result` file. Neither logs report content; the only logging in this path (`core/utils/files_and_storage.py`) logs file paths and byte/character counts, never content. The one other file written is the cached public Census surname list (`data/census_2010_names.txt`), on first use.
-- The only network call anywhere in `src/medtext_redact` is a one-time, one-directional download of a public US Census surname list (`core/api_tools.py`). No user-provided text is ever transmitted over a network by this tool. Presidio and spaCy run locally and make no network calls: the model is an installed package, and Presidio's email recognizer is pinned to `tldextract`'s bundled Public Suffix List rather than fetching it.
-- If the surname download fails — census.gov sometimes rejects automated requests with an HTML page — `parse-report` stops with an error (`CensusDownloadError`) explaining how to save the list manually. It never falls back to redacting without the surname gazetteer, which would silently lower recall.
+- `parse-report single` and `parse-report spreadsheet` — the redaction/highlighting commands — write **no report content to disk** beyond the explicit output the user requested: `single` writes only to stdout; `spreadsheet` writes only to the `--result` file. Neither logs report content; the only logging in this path (`core/utils/files_and_storage.py`) logs file paths and byte/character counts, never content.
+- Nothing in `src/medtext_redact` makes a network call. The US Census surname list is bundled with the package (`src/medtext_redact/data/census_2010_surnames.txt`); spaCy's NER model is an installed package; and Presidio's email recognizer is pinned to `tldextract`'s bundled Public Suffix List rather than fetching it. No user-provided text is ever transmitted over a network by this tool. Only the maintainer script `tools/build_surname_list.py`, which rebuilds the bundled list, contacts the Census Bureau.
 
 ## The detection boundary, with real numbers
 
