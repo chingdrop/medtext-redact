@@ -15,7 +15,8 @@ worrying about handler duplication).
 
 Stdlib-only, no third-party dependency.
 
-Inlined from py-shared-tools (shared_tools.logging_setup) -- see
+Inlined from py-shared-tools (shared_tools.logging_setup), v1.3.1, commit d54dcd6;
+the code is unchanged apart from docstrings and import paths. See
 medtext_redact/vendor/__init__.py.
 """
 

@@ -1,6 +1,6 @@
 """Generic infrastructure helpers factored out of py-shared-tools and inlined
-here directly, so this repo has no dependency on that separate (private)
-repo and a fresh clone works fully offline.
+here directly, so this repo has no dependency on that separate repo and a
+fresh clone works fully offline.
 
 Only the specific modules this project actually imports were copied:
 ``atomic_io``, ``config_loader``, ``logging_setup``, and ``tabular_io``

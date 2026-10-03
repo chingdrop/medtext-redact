@@ -18,7 +18,8 @@ branch before creating a directory it's about to write into.
 
 Stdlib-only, no third-party dependency.
 
-Inlined from py-shared-tools (shared_tools.atomic_io) -- see
+Inlined from py-shared-tools (shared_tools.atomic_io), v1.3.1, commit d54dcd6;
+the code is unchanged apart from docstrings and import paths. See
 medtext_redact/vendor/__init__.py.
 """
 
