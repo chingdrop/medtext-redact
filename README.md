@@ -38,7 +38,7 @@ cat /tmp/demo/notes/note_0001.txt
 ```
 
 ```
-Contacted Delacroix at (260) 181-5908 regarding the community-acquired pneumonia diagnosis noted on 2.22.1951.
+Contacted Okafor at (260) 181-5908 regarding the hypertension diagnosis noted on 2/24/1951.
 ```
 
 Redact it, highlighting a diagnosis term along the way:
@@ -47,15 +47,15 @@ Redact it, highlighting a diagnosis term along the way:
 echo '{"Masking": {"Manufacturers": [], "Locations": []}}' > config.json
 uv run medtext-redact parse-report --config config.json single \
   --text "$(cat /tmp/demo/notes/note_0001.txt)" \
-  --keywords "community-acquired pneumonia" --verbose
+  --keywords "hypertension" --verbose
 ```
 
 ```ansi
 --------------------------------------------------------------------------------------------------------
 
 Verbose mode is on.
-Contacted ********* at (***) ***-**** regarding the [1;33mcommunity-acquired pneumonia[0m
-diagnosis noted on *.**.****.
+Contacted ****** at (***) ***-**** regarding the [1;33mhypertension[0m diagnosis noted on
+*/**/****.
 ```
 
 The name, phone number, and date are gone; the diagnosis term is highlighted, not redacted, since it was passed via `--keywords` rather than matched as an identifier.
