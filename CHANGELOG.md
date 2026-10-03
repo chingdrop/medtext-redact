@@ -51,6 +51,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- The surname gazetteer masked capitalized common words, typically at the start of every sentence: 107 of spaCy's 326 English stop words are real 2010 Census surnames ("The", "And", "In", "May", ...), as are many clinical words ("Patient", "Plan", "Chief"). Common and clinical words now match only directly after a title ("Dr. Hand", "Nurse Back"), and other matches are skipped when spaCy tags them as a verb, adjective, or other non-name word class ("Seen by...", "Long term..."). Surname recall in the suite stays at 100%. New tests run against the real bundled list, which the recall/precision suite's 8-name stand-in hid this from.
 - Redaction failed with a misleading "Could not extract census names CSV" traceback whenever census.gov rejected the surname-list download, which its firewall does for automated requests from some networks. The list is now bundled with the package (see Changed), so redaction no longer downloads anything.
 - `PROJECT_DIRECTORY` was computed from the current working directory at runtime instead of the install location, so running the CLI from anywhere but one specific directory silently pointed `DATA_DIRECTORY` at the wrong place.
 - `ConfigLoader` had no `.copy()` method, so `parse-report single` and `parse-report spreadsheet` crashed with `AttributeError` on every invocation.

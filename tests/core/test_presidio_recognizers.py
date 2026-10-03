@@ -52,6 +52,16 @@ class TestSurnameGazetteerRecognizer:
     def test_is_case_sensitive_like_the_rules(self):
         assert SurnameGazetteerRecognizer(["Hope"]).analyze("there is hope", ["PERSON"]) == []
 
+    @pytest.mark.parametrize("word", ["The", "And", "May", "Patient", "Plan", "Chief"])
+    def test_common_and_clinical_words_need_a_title(self, word):
+        # All real 2010 Census surnames, and all capitalized constantly in notes.
+        assert SurnameGazetteerRecognizer([word]).analyze(f"{word} chart reviewed.", ["PERSON"]) == []
+
+    @pytest.mark.parametrize("text", ["Seen by Dr. Hand today.", "Nurse Hand charted.", "Called Mrs. Hand back."])
+    def test_title_marks_a_common_word_as_a_name(self, text):
+        results = SurnameGazetteerRecognizer(["Hand"]).analyze(text, ["PERSON"])
+        assert [text[r.start : r.end] for r in results] == ["Hand"]
+
 
 class TestLuhnCardRecognizer:
     def test_luhn_check(self):
