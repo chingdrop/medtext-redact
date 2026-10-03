@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- A branch-coverage gate (`pytest-cov`): `fail_under = 96`, the measured 98.21% baseline minus 2.
+- Pre-commit hooks for gitleaks, `detect-private-key`, and `check-added-large-files` (500 KB).
+- `.python-version` (3.12) and [ADR 0008](docs/decisions/0008-adopt-shared-python-tooling-standard.md), recording the shared Python tooling standard.
 - `TODO.md`, tracking planned features, known bugs, and open questions in one place. The `TODO(craig)` markers from ADRs 0001 and 0002, the `parse-report` performance `ToDo` comment, and the roadmap list in `docs/limitations-and-roadmap.md` moved into it.
 - Recall/precision fixtures for every remaining built-in Presidio recognizer active in this tool: credit card, US bank account, driver's license, passport, ITIN, DEA, IBAN, crypto wallet, MAC address, and UK NHS numbers, all measured at 100%. A `LuhnCardRecognizer` backstops Presidio's credit card recognizer, which stops at 16 digits and left 19-digit Visa numbers completely unmasked. The suite now generates 48 notes, 4 from each of 12 templates.
 - Recall/precision fixtures for email addresses, US SSNs, URLs, and IP addresses (IPv4 and IPv6), all measured at 100%. A `URL_PATTERN` recognizer backstops Presidio's URL recognizer, which matches `.biz` as `.bi` and leaves the final letter unmasked.
@@ -31,6 +34,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Packaging uses SPDX license metadata (`license = "MIT"`, `license-files`).
+- ruff also runs flake8-bandit (`S`) rules; mypy adds `strict_equality` and `check_untyped_defs`. Pre-commit's ruff hooks now cover `tools/`.
+- CI pins every action to a full commit SHA, sets `persist-credentials: false` on checkout, tests on Python 3.12 only (was 3.12–3.14) with coverage, type-checks all of `tools/`, and pins pip-audit to 2.10.1. CodeQL gets a concurrency group.
+- Vendored `vendor/` modules record the py-shared-tools version they match (v1.3.1, commit `d54dcd6`).
 - The 2010 US Census surname list is bundled with the package (`src/medtext_redact/data/census_2010_surnames.txt`) instead of downloaded on first use, so the tool makes no network calls at all. It's read once per process instead of once per report. `tools/build_surname_list.py` rebuilds it from the Census Bureau's `names.zip` or the Census Data API.
 - Requires pandas 3 (`pandas>=3.0.0`). pandas 3 makes no-silent-downcasting the default, so the deprecated `future.no_silent_downcasting` opt-in, which warned on every CLI run, was removed.
 - CI's `security` job is split into separate `pip-audit` and `gitleaks` jobs, so a dependency advisory can no longer skip the secrets scan, as it did on the 2026-09-28 scheduled run. The `pip-audit` job no longer installs the project (`uv export` reads `uv.lock` directly), which skips the spaCy model download.

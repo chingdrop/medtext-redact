@@ -3,12 +3,14 @@
 A lazy, reloadable ``MutableMapping`` over a JSON or YAML file, with
 dot-separated nested-key lookup and optional environment-variable expansion.
 
-Inlined from py-shared-tools (shared_tools.config_loader) -- see
-medtext_redact/vendor/__init__.py. ``ConfigError`` is defined directly here
-rather than in a separate module, since it's the only symbol this project
-ever needed from py-shared-tools' ``shared_tools.config`` (that module also
-carried unrelated S3/secret-management helpers for other projects that
-consumed py-shared-tools, none of which medtext-redact ever used).
+Inlined from py-shared-tools (shared_tools.config_loader), v1.3.1, commit
+d54dcd6; the code is unchanged apart from docstrings and import paths, and
+``ConfigError``, which is defined inline here. See
+medtext_redact/vendor/__init__.py. ``ConfigError`` lives here rather than in
+a separate module because it's the only symbol this project ever needed from
+py-shared-tools' ``shared_tools.config`` (that module also carried unrelated
+S3/secret-management helpers for other projects that consumed
+py-shared-tools, none of which medtext-redact ever used).
 """
 
 from __future__ import annotations

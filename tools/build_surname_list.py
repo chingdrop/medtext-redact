@@ -54,7 +54,7 @@ def surnames_from_zip(path: Path) -> list[str]:
 def surnames_from_api(key: str) -> list[str]:
     """Fetch every surname from the Census Data API, in rank order."""
     query = urllib.parse.urlencode({"get": "NAME,RANK", "RANK": "1:999999", "key": key})
-    with urllib.request.urlopen(f"{API_URL}?{query}", timeout=120) as response:
+    with urllib.request.urlopen(f"{API_URL}?{query}", timeout=120) as response:  # noqa: S310 - constant https endpoint
         body = response.read()
     try:
         header, *rows = json.loads(body)

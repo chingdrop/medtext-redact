@@ -1,5 +1,10 @@
 # Contributing
 
+## Prerequisites
+
+- Python 3.12, pinned in [`.python-version`](.python-version). `uv` reads that file and installs the interpreter if it's missing.
+- [uv](https://docs.astral.sh/uv/) for dependency management.
+
 ## Setup
 
 ```bash
@@ -24,7 +29,7 @@ src/medtext_redact/
     commands/          # one module per command domain (studies, reports)
     core/              # domain logic: PHI patterns, Presidio recognizers and engine, DICOM audits
     data/              # bundled public reference data (the 2010 Census surname list)
-    vendor/            # generic infrastructure inlined from a shared library (HTTP, config, file I/O)
+    vendor/            # generic infrastructure inlined from py-shared-tools (config, file I/O, logging)
     paths.py           # PROJECT_DIRECTORY / DATA_DIRECTORY constants
 tests/
     core/              # unit tests for core/
@@ -44,7 +49,7 @@ docs/                  # threat model, limitations, provenance, and design decis
 uv run pytest
 ```
 
-Tests are organized to mirror `src/medtext_redact/`. `tests/core/` covers the library layer directly; `tests/commands/` and `tests/test_cli.py` drive the actual CLI commands end-to-end through `click.testing.CliRunner`, faking only genuine external boundaries rather than internal collaborators.
+Tests mirror `src/medtext_redact/`: once a repository has more than 10 test modules, each `tests/` subdirectory matches the source package it tests, and this one already does. `tests/core/` covers the library layer directly; `tests/commands/` and `tests/test_cli.py` drive the actual CLI commands end-to-end through `click.testing.CliRunner`, faking only genuine external boundaries rather than internal collaborators.
 
 If you add a new function or command, add tests alongside it in the mirrored location.
 
@@ -58,7 +63,34 @@ uv run ruff format src/ tests/ tools/        # format
 uv run mypy src/medtext_redact tools/  # type-check
 ```
 
-`pre-commit` (installed via `uv run pre-commit install`, see Setup) runs ruff on `src/` and `tests/` and mypy on `src/` automatically on `git commit`. It doesn't cover `tools/`, so run the commands above before committing changes there; CI checks all three directories.
+`pre-commit` (installed via `uv run pre-commit install`, see Setup) runs automatically on `git commit`: ruff check and format on `src/`, `tests/`, and `tools/`; mypy on `src/` only; plus gitleaks, a private-key check, and a 500 KB limit on newly added files. CI runs mypy on both `src/medtext_redact` and `tools/`, so run the type-check command above before committing changes to `tools/`.
+
+## Before opening a PR
+
+Run the same checks CI does:
+
+```bash
+uv run ruff check src/ tests/ tools/
+uv run ruff format --check src/ tests/ tools/
+uv run mypy src/medtext_redact tools/
+uv run pytest --cov
+```
+
+## Coverage
+
+`uv run pytest --cov` measures branch coverage and fails below `fail_under` in `pyproject.toml`'s `[tool.coverage.report]`. The floor is the measured baseline minus 2, rounded down. When the measured baseline climbs more than 4 points above the floor, raise the floor in the same PR.
+
+## Design decisions (ADRs)
+
+Significant, load-bearing decisions are recorded in [`docs/decisions/`](docs/decisions/README.md). To add one, take the next number, follow the existing records' sections (Status, Context, Decision, Alternatives considered, Consequences, Evidence), and add a row to the index table in `docs/decisions/README.md` with its Status, as the other rows do. Write only what the repository actually records; where it doesn't say why, say so rather than guessing. When a decision changes, update the old record's Status (e.g. "Superseded by 0007") rather than rewriting it.
+
+## Changelog
+
+Record user-visible changes in [`CHANGELOG.md`](CHANGELOG.md), under `[Unreleased]`, in the matching `Added`/`Changed`/`Removed`/`Fixed`/`Security` subsection. Don't edit entries for past releases.
+
+## Vendored code
+
+`src/medtext_redact/vendor/` holds copies of modules from [py-shared-tools](https://github.com/chingdrop/py-shared-tools); see [ADR 0005](docs/decisions/0005-vendor-inlined-shared-infrastructure.md). Each module's docstring records which upstream version it matches.
 
 ## Open work
 

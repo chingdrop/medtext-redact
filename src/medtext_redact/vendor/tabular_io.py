@@ -9,7 +9,8 @@ Text-based formats (csv/txt/json/html) are written through
 round trip as cheap as the text formats', so it's written directly and is
 not atomic.
 
-Inlined from py-shared-tools (shared_tools.tabular_io) -- see
+Inlined from py-shared-tools (shared_tools.tabular_io), v1.3.1, commit d54dcd6;
+the code is unchanged apart from docstrings and import paths. See
 medtext_redact/vendor/__init__.py.
 """
 
