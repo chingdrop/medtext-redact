@@ -8,13 +8,11 @@ This is a reference implementation of redaction aligned to HIPAA Safe Harbor's i
 
 - **Bare first names.** Caught only by spaCy's NER (the gazetteer holds surnames only), so recall depends on the names drawn: 4 of 4 in the current fixture set, 3 of 4 in the previous one. Not gated.
 - **Clinical text in general.** spaCy's `en_core_web_lg` was trained on general English, not clinical notes, and the suite's notes come from ten hand-written templates. The numbers above say how the detectors behave on those templates, not on real clinical prose.
-- **"Grace period": 4 of 4 false positives.** The surname gazetteer masks any listed surname, including when it's used as an ordinary word. spaCy's parse could tell the two apart here ("Grace" modifies a noun), but the same filter would drop real names in phrases like "the Okafor family", so recall wins.
+- **"Grace period": 4 of 4 false positives.** The surname gazetteer screens out common English and clinical words ("The", "May", "Patient", "Plan") unless a title precedes them, and skips matches spaCy tags as verbs, adjectives, and other non-name word classes — but "Grace" here is a noun, and nouns still count, because a surname that's also a noun is sometimes tagged as one where it's plainly a name. spaCy's parse could tell the two apart here ("Grace" modifies a noun), but the same filter would drop real names in phrases like "the Okafor family", so recall wins.
 - **Space-separated number triplets: 4 of 4 false positives.** The age recognizer treats any bare number from 0 to 150 as a possible age (a deliberate recall-over-precision choice), and spaCy tags the year as a date, so a count like "rechecked 9 28 1952 times" is fully masked.
 - **Long numbers: masked regardless of meaning.** Presidio's bank account, driver's license, and passport recognizers match bare digit runs, and this tool applies no score threshold, so any standalone number of 6 to 17 digits — a lab value, an accession number — is masked. A threshold or context requirement would restore those, at the cost of missing identifiers written without a label.
 
 **Not detected**: Presidio ships recognizers for Medicare Beneficiary Identifiers (a health plan beneficiary number), NPIs, and ABA routing numbers, but they aren't enabled. Nothing detects health plan beneficiary numbers, vehicle or device identifiers, biometric identifiers, or full-face photographs (this tool processes text only).
-
-**The census surname download can be rejected.** census.gov sometimes answers automated requests with a "Request Rejected" HTML page instead of the archive. `parse-report` then stops with an error explaining how to download the list in a browser and save it to `data/census_2010_names.txt`; it never redacts without the gazetteer.
 
 ## Possible next steps
 

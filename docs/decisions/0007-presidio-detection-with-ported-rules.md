@@ -28,7 +28,7 @@ Detect PHI with [Microsoft Presidio](https://microsoft.github.io/presidio/) (`pr
 - Precision: the gazetteer still masks "Grace period" (4 of 4), as the rules always did. New: a space-separated number triplet that reads as a count is fully masked (4 of 4), because the age recognizer masks the small numbers and spaCy tags the year as a date.
 - Presidio's built-in recognizers add detectors for email addresses, URLs, IP addresses, SSNs, and other categories the rules never covered — but none is measured by the test suite yet.
 - The install grows by about 400 MB (the spaCy model, pinned to its official release wheel since spaCy models aren't on PyPI), and the analyzer takes several seconds to load once per process.
-- The census surname download remains the tool's only network call: Presidio's email recognizer is pinned to `tldextract`'s bundled Public Suffix List rather than fetching it.
+- Presidio adds no network calls: its email recognizer is pinned to `tldextract`'s bundled Public Suffix List rather than fetching it. (The census surname download was then the tool's only network call; the list has since been bundled with the package, so there are none.)
 
 ## Evidence
 

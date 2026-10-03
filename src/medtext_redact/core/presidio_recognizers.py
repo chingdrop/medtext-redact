@@ -13,6 +13,7 @@ from re import Pattern as RePattern
 
 from presidio_analyzer import EntityRecognizer, Pattern, PatternRecognizer, RecognizerResult
 from presidio_analyzer.nlp_engine import NlpArtifacts
+from spacy.lang.en.stop_words import STOP_WORDS
 
 from medtext_redact.core.phi_patterns import (
     ADDRESS_PATTERN,
@@ -91,8 +92,107 @@ class LuhnCardRecognizer(PatternRecognizer):
         return luhn_valid(re.sub(r"\D", "", pattern_text))
 
 
+#   Clinical-note words that are also 2010 Census surnames: section headers,
+#   roles, body parts, symptoms. Capitalized constantly in notes ("Plan:",
+#   "Chief complaint", "Patient reports..."), almost never as a name.
+#   Months and weekdays are deliberately absent: they're date elements, and
+#   masking a capitalized "March" or "Monday" costs nothing.
+CLINICAL_WORDS = frozenset(
+    (
+        "arm",
+        "billing",
+        "blood",
+        "bone",
+        "brain",
+        "cancer",
+        "care",
+        "chart",
+        "chest",
+        "chief",
+        "class",
+        "cough",
+        "course",
+        "daily",
+        "doctor",
+        "dose",
+        "ear",
+        "eye",
+        "fever",
+        "foot",
+        "general",
+        "grade",
+        "hand",
+        "head",
+        "heart",
+        "kidney",
+        "lab",
+        "labs",
+        "left",
+        "level",
+        "lung",
+        "male",
+        "mass",
+        "miss",
+        "morning",
+        "neck",
+        "night",
+        "nose",
+        "note",
+        "nurse",
+        "oral",
+        "pain",
+        "past",
+        "patient",
+        "plan",
+        "present",
+        "prior",
+        "rate",
+        "service",
+        "signs",
+        "sir",
+        "stable",
+        "stage",
+        "surgeon",
+        "vital",
+    )
+)
+
+#   Words a surname gazetteer would otherwise mask whenever they're capitalized
+#   -- typically at the start of a sentence. 107 of spaCy's 326 English stop
+#   words are real census surnames ("The", "And", "In", "May", "Will", ...).
+COMMON_WORDS = frozenset(STOP_WORDS) | CLINICAL_WORDS
+
+#   A title directly before a word marks it as a name, even when it's also a
+#   common word: "Dr. Hand", "Nurse Back", "Mrs. Doctor". spaCy's NER misses
+#   these, while catching common-word surnames in fuller name contexts
+#   ("Will Smith", "Mr. Head", "May Johnson").
+_TITLE_BEFORE = re.compile(r"(?:\b(?:Dr|Mr|Mrs|Ms|Mx|Prof)\.?|\b(?:Miss|Nurse|Doctor))\s+$")
+
+
+#   spaCy part-of-speech tags a surname is never used as. PROPN, NOUN, and
+#   X (other) are deliberately absent.
+_NON_NAME_POS = frozenset(
+    {"ADJ", "ADP", "ADV", "AUX", "CCONJ", "DET", "INTJ", "NUM", "PART", "PRON", "PUNCT", "SCONJ", "SYM", "VERB"}
+)
+
+
 class SurnameGazetteerRecognizer(EntityRecognizer):
-    """Detects PERSON entities by exact, whole-word match against a surname list."""
+    """Detects PERSON entities by exact, whole-word match against a surname list.
+
+    Many census surnames are also ordinary words ("The", "Seen", "May",
+    "Patient"), which a plain match masks whenever they're capitalized --
+    typically at the start of a sentence. So a match counts only when:
+
+    1. a title directly precedes it ("Dr. Hand", "Nurse Back"), or
+    2. it isn't a common English or clinical word, and spaCy doesn't tag it
+       as a non-name word class: "Seen" and "Called" open sentences as VERBs,
+       "Long" as an ADJ. Nouns still count -- a surname that's also a noun is
+       sometimes tagged NOUN where it's plainly a name ("Chart ... for Grace
+       at ..."), and recall comes first.
+
+    Everything else is left to NER. Without spaCy's analysis (nlp_artifacts
+    is None), rule 2 matches any non-common word.
+    """
 
     def __init__(self, surnames: list[str]) -> None:
         self._masker = NameMasker(surnames)
@@ -104,4 +204,10 @@ class SurnameGazetteerRecognizer(EntityRecognizer):
     def analyze(
         self, text: str, entities: list[str], nlp_artifacts: NlpArtifacts | None = None
     ) -> list[RecognizerResult]:
-        return [RecognizerResult("PERSON", start, end, RULE_SCORE) for start, end in self._masker.spans(text)]
+        pos_at = {tok.idx: tok.pos_ for tok in nlp_artifacts.tokens} if nlp_artifacts else {}
+        return [
+            RecognizerResult("PERSON", start, end, RULE_SCORE)
+            for start, end in self._masker.spans(text)
+            if _TITLE_BEFORE.search(text, 0, start)
+            or (text[start:end].lower() not in COMMON_WORDS and pos_at.get(start) not in _NON_NAME_POS)
+        ]

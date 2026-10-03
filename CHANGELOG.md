@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- The 2010 US Census surname list is bundled with the package (`src/medtext_redact/data/census_2010_surnames.txt`) instead of downloaded on first use, so the tool makes no network calls at all. It's read once per process instead of once per report. `tools/build_surname_list.py` rebuilds it from the Census Bureau's `names.zip` or the Census Data API.
 - Requires pandas 3 (`pandas>=3.0.0`). pandas 3 makes no-silent-downcasting the default, so the deprecated `future.no_silent_downcasting` opt-in, which warned on every CLI run, was removed.
 - CI's `security` job is split into separate `pip-audit` and `gitleaks` jobs, so a dependency advisory can no longer skip the secrets scan, as it did on the 2026-09-28 scheduled run. The `pip-audit` job no longer installs the project (`uv export` reads `uv.lock` directly), which skips the spaCy model download.
 - Documentation of CI's `gitleaks` scan corrected: on pushes and pull requests it scans only the new commits, not full history; the weekly scheduled run scans full history.
@@ -43,13 +44,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Removed
 
+- `CensusNamesApi` and the vendored `RestAdapter` HTTP client, along with the `requests`, `certifi`, `urllib3`, and `charset-normalizer` dependencies, all of which existed only to download the census surname list.
 - The rule-based detection methods on `PhiSanitizer` (`sanitize_names`, `sanitize_dates`, `sanitize_all`, etc.), now superseded by the Presidio recognizers built from the same patterns. Their regex tests live on in `tests/core/test_phi_patterns.py`.
 - The `spark-nlp` and `philter` commands, along with `integrations/` (the Spark NLP Docker environment and the Philter-UCSF submodule) and the `nltk` dependency only `philter` used, to focus the project on a single de-identification engine, Microsoft Presidio.
 - The `py-shared-tools` git dependency (a separate, private repository) — replaced by the vendored copy under `src/medtext_redact/vendor/` (see Added, above), so a fresh clone no longer needs access to it.
 
 ### Fixed
 
-- When census.gov rejected the surname-list download with an HTML page instead of the zip archive, the tool failed with a misleading "Could not extract census names CSV" traceback. `CensusNamesApi` now checks for a zip archive and raises `CensusDownloadError` naming the URL, the start of the response, and how to save the list manually, and `parse-report` prints that as a one-line error instead of a traceback. Redaction still stops rather than running without the surname list.
+- The surname gazetteer masked capitalized common words, typically at the start of every sentence: 107 of spaCy's 326 English stop words are real 2010 Census surnames ("The", "And", "In", "May", ...), as are many clinical words ("Patient", "Plan", "Chief"). Common and clinical words now match only directly after a title ("Dr. Hand", "Nurse Back"), and other matches are skipped when spaCy tags them as a verb, adjective, or other non-name word class ("Seen by...", "Long term..."). Surname recall in the suite stays at 100%. New tests run against the real bundled list, which the recall/precision suite's 8-name stand-in hid this from.
+- Redaction failed with a misleading "Could not extract census names CSV" traceback whenever census.gov rejected the surname-list download, which its firewall does for automated requests from some networks. The list is now bundled with the package (see Changed), so redaction no longer downloads anything.
 - `PROJECT_DIRECTORY` was computed from the current working directory at runtime instead of the install location, so running the CLI from anywhere but one specific directory silently pointed `DATA_DIRECTORY` at the wrong place.
 - `ConfigLoader` had no `.copy()` method, so `parse-report single` and `parse-report spreadsheet` crashed with `AttributeError` on every invocation.
 - `search_column_for_keywords` raised `ValueError: pattern contains no capture groups` on every call, which also broke `search_report_text` and therefore `parse-report spreadsheet`.

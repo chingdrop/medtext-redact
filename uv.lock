@@ -633,8 +633,6 @@ name = "medtext-redact"
 version = "2.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "certifi" },
-    { name = "charset-normalizer" },
     { name = "click" },
     { name = "en-core-web-lg" },
     { name = "numpy" },
@@ -642,9 +640,7 @@ dependencies = [
     { name = "pandas" },
     { name = "presidio-analyzer" },
     { name = "pyahocorasick" },
-    { name = "requests" },
     { name = "rich" },
-    { name = "urllib3" },
 ]
 
 [package.dev-dependencies]
@@ -660,8 +656,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "certifi", specifier = ">=2024.7.4" },
-    { name = "charset-normalizer", specifier = ">=3.0.1" },
     { name = "click", specifier = ">=7.1.2" },
     { name = "en-core-web-lg", url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl" },
     { name = "numpy", specifier = ">=1.24.3,<3.0.0" },
@@ -669,9 +663,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=3.0.0,<4.0.0" },
     { name = "presidio-analyzer", specifier = ">=2.2.360,<3" },
     { name = "pyahocorasick", specifier = ">=2.1.0" },
-    { name = "requests", specifier = ">=2.32" },
     { name = "rich", specifier = ">=14.0.0" },
-    { name = "urllib3", specifier = ">=2.0" },
 ]
 
 [package.metadata.requires-dev]
