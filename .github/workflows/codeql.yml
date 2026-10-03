@@ -8,6 +8,10 @@ on:
   schedule:
     - cron: "0 6 * * 1" # weekly
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -19,7 +23,9 @@ jobs:
       security-events: write # required to upload CodeQL results to code scanning
       actions: read # required by the analyze step to query workflow-run info
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # Pinned to the full commit SHA for each tag (originally v3.38.2, now
       # v4.38.1 via Dependabot) -- verify a new SHA the same way before

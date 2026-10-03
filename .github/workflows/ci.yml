@@ -20,10 +20,12 @@ jobs:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
           python-version: "3.12"
@@ -38,37 +40,43 @@ jobs:
         run: uv run ruff format --check src/ tests/ tools/
 
       - name: mypy
-        run: uv run mypy src/medtext_redact tools/gen_fixtures.py
+        run: uv run mypy src/medtext_redact tools/
 
+  # A single job on Python 3.12, the requires-python floor and the
+  # .python-version pin.
   test:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.12", "3.13", "3.14"]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.12"
 
       - name: Install dependencies
         run: uv sync --locked
 
+      # The coverage floor lives in pyproject.toml ([tool.coverage.report]
+      # fail_under): the baseline measured 2026-10-03 was 98.21% branch
+      # coverage, and the floor is that baseline minus 2.
       - name: Run tests
-        run: uv run pytest -v
+        run: uv run pytest -v --cov
 
   build:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
           python-version: "3.12"
@@ -77,7 +85,7 @@ jobs:
         run: uv build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dist
           path: dist/
@@ -88,23 +96,33 @@ jobs:
   pip-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
           python-version: "3.12"
 
       # No `uv sync` needed: `uv export` reads uv.lock directly, so this job
       # skips installing the project and its ~400 MB spaCy model.
+      #
+      # --no-emit-project: without it, uv export emits an "-e ." line for
+      # this package itself, which pip-audit can't resolve. Third-party
+      # dependencies are all pip-audit needs to check; the local package
+      # isn't on PyPI.
+      #
+      # --no-deps --disable-pip: the export already pins every dependency,
+      # so pip-audit checks the list as-is instead of building a venv to
+      # resolve it. It skips the spaCy model, a URL requirement that isn't
+      # on PyPI.
+      - name: Export locked dependencies
+        run: uv export --locked --no-dev --no-emit-project --format requirements-txt -o "$RUNNER_TEMP/requirements-audit.txt"
+
       - name: pip-audit (locked dependencies)
-        # --no-emit-project: without it, uv export emits an "-e ." line for
-        # this package itself, which pip-audit's internal pip invocation
-        # can't install under --require-hashes ("no single file to hash"),
-        # failing before it audits anything. Third-party dependencies are
-        # all pip-audit needs to check; the local package isn't on PyPI.
-        run: uv export --no-dev --no-emit-project --format requirements-txt | uvx pip-audit -r /dev/stdin
+        run: uvx pip-audit@2.10.1 -r "$RUNNER_TEMP/requirements-audit.txt" --no-deps --disable-pip
 
   gitleaks:
     runs-on: ubuntu-latest
@@ -112,8 +130,9 @@ jobs:
       contents: read
       pull-requests: write # gitleaks-action posts a PR comment on findings
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0 # full history: this repo's history is original and preserved, not reinitialized
 
       # gitleaks-action scans only the new commits on push and pull_request

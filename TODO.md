@@ -22,8 +22,6 @@ Open bugs, planned features, and unanswered questions. Add new items here; remov
 
 ## CI
 
-- [ ] **Type-check all of `tools/` in CI.** `.github/workflows/ci.yml` runs `mypy src/medtext_redact tools/gen_fixtures.py`; change it to `tools/` so `tools/build_surname_list.py` is checked too.
-- [ ] **Add the missing final newline** to `.github/workflows/ci.yml`.
 - [ ] **Confirm the first full-history gitleaks run** in the new standalone `gitleaks` job: the weekly scheduled run on Monday 2026-10-05 at 06:00 UTC.
 
 ## Open questions
