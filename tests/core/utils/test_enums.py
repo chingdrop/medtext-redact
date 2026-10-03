@@ -46,3 +46,17 @@ class TestLoadCensusNames:
     def test_missing_file_explains_how_to_rebuild(self, surnames_file):
         with pytest.raises(FileNotFoundError, match="tools/build_surname_list.py"):
             load_census_names()
+
+
+class TestBundledSurnameList:
+    """The real list must ship with the package: a .gitignore rule once hid it from git and the wheel."""
+
+    def test_is_present_complete_and_in_rank_order(self):
+        load_census_names.cache_clear()
+        try:
+            names = load_census_names()
+        finally:
+            load_census_names.cache_clear()
+        assert len(names) == 162_253
+        assert names[:3] == ("Smith", "Johnson", "Williams")
+        assert len(set(names)) == len(names)

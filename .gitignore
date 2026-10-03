@@ -2,7 +2,9 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
 .obsidian/
-data/
+# The runtime DATA_DIRECTORY at the repo root -- not src/medtext_redact/data/,
+# which holds bundled package data.
+/data/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
