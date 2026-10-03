@@ -38,7 +38,7 @@ cat /tmp/demo/notes/note_0001.txt
 ```
 
 ```
-Contacted Delacroix at (260) 181-5908 regarding the community-acquired pneumonia diagnosis noted on 2.22.1951.
+Contacted Okafor at (260) 181-5908 regarding the hypertension diagnosis noted on 2/24/1951.
 ```
 
 Redact it, highlighting a diagnosis term along the way:
@@ -47,18 +47,20 @@ Redact it, highlighting a diagnosis term along the way:
 echo '{"Masking": {"Manufacturers": [], "Locations": []}}' > config.json
 uv run medtext-redact parse-report --config config.json single \
   --text "$(cat /tmp/demo/notes/note_0001.txt)" \
-  --keywords "community-acquired pneumonia" --verbose
+  --keywords "hypertension" --verbose
 ```
 
 ```ansi
 --------------------------------------------------------------------------------------------------------
 
 Verbose mode is on.
-Contacted ********* at (***) ***-**** regarding the [1;33mcommunity-acquired pneumonia[0m
-diagnosis noted on *.**.****.
+Contacted ****** at (***) ***-**** regarding the [1;33mhypertension[0m diagnosis noted on
+*/**/****.
 ```
 
 The name, phone number, and date are gone; the diagnosis term is highlighted, not redacted, since it was passed via `--keywords` rather than matched as an identifier.
+
+![medtext-redact demo: generating synthetic notes, then redacting one, which masks its MRN, surname, street address, and dosage while highlighting the medication and diagnosis](docs/demo.gif)
 
 ---
 
@@ -97,6 +99,11 @@ Recall/precision from the synthetic test suite ([`tests/e2e/test_recall_precisio
 \* Bare first names are caught by NER alone (the surname gazetteer has no first names), so this varies with the names the generator draws: 4 of 4 in the current fixture set, 3 of 4 in the previous one. Reported, not gated.
 
 Two measured false positives, stated plainly: a gazetteer surname used as an ordinary word ("Grace period") is masked in 4 of 4 cases, and a space-separated number triplet that reads as a count ("rechecked 9 28 1952 times") is masked in 4 of 4 cases. The first comes from the surname gazetteer, which has no way to tell a surname from the same word used ordinarily; the second from treating any bare number from 0 to 150 as a possible age, a deliberate recall-over-precision choice. More broadly, any standalone number of 6 to 17 digits is masked, because Presidio's bank account, driver's license, and passport recognizers match bare digit runs and this tool applies no score threshold. See [`docs/threat-model.md`](docs/threat-model.md) for what these numbers do and don't measure, and [`docs/provenance-and-data-boundary.md`](docs/provenance-and-data-boundary.md) for the full scope disclaimer.
+
+
+![Results sheet for one run of the recall/precision suite: 128 of 128 synthetic identifiers masked, all 26 identifier categories at 100% recall, 48 of 48 clinical terms kept readable and highlighted, and 8 of 12 look-alike decoys masked, with before-and-after examples of three notes](docs/results-sheet.png)
+
+*One run of the recall/precision suite on one page, built from the suite's own output (`uv run python tools/results_sheet.py --png docs/results-sheet.png`). Grey marks text masked although it wasn't a labeled identifier, such as "Patient" in "Patient Castellano"; see [`TODO.md`](TODO.md).*
 
 ---
 

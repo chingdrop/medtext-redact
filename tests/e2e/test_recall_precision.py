@@ -11,6 +11,7 @@ thresholds or trims hard cases to make a number look better.
 
 import importlib.util
 import json
+import os
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -144,6 +145,7 @@ def test_recall_and_precision_by_category(config_path, capsys):
     tn = defaultdict(int)
     misses: list[str] = []
     false_positives: list[str] = []
+    scored_notes: list[dict] = []
 
     for note in notes:
         output = run_single(runner, config_path, note["text"], keywords)
@@ -156,6 +158,16 @@ def test_recall_and_precision_by_category(config_path, capsys):
         body = body[:-1]
 
         rendered, highlight_ranges = extract_highlights(body)
+        scored_spans: list[dict] = []
+        scored_notes.append(
+            {
+                "note_id": note["note_id"],
+                "template_index": note["template_index"],
+                "text": note["text"],
+                "rendered": rendered,
+                "spans": scored_spans,
+            }
+        )
 
         for span in note["spans"]:
             category = span["category"]
@@ -165,6 +177,7 @@ def test_recall_and_precision_by_category(config_path, capsys):
                 hit = is_fully_highlighted(highlight_ranges, start, end)
             else:
                 hit = is_fully_masked(rendered, text, start, end)
+            scored_spans.append({**span, "hit": hit})
 
             if span["expected_redacted"]:
                 if hit:
@@ -203,6 +216,23 @@ def test_recall_and_precision_by_category(config_path, capsys):
     report = "\n".join(report_lines)
     with capsys.disabled():
         print("\n" + report)
+
+    # tools/results_sheet.py renders the README's results image from this
+    # run's own output, rather than from numbers typed in by hand.
+    if results_path := os.environ.get("MEDTEXT_RESULTS_JSON"):
+        Path(results_path).write_text(
+            json.dumps(
+                {
+                    "seed": SEED,
+                    "note_count": NOTE_COUNT,
+                    "template_count": len(gen_fixtures.TEMPLATES),
+                    "results": results,
+                    "notes": scored_notes,
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
 
     # Presidio's NER plus the ported rule recognizers: perfect recall and
     # precision on every category with a detector, including what NER adds
