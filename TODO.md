@@ -22,6 +22,7 @@ Open bugs, planned features, and unanswered questions. Add new items here; remov
 
 ## CI
 
+- [ ] **Confirm the first CI run of the hardened workflows** (ADR 0008): `pip-audit` with the exported requirements file and `--no-deps --disable-pip` (tested locally only); `gitleaks` with `persist-credentials: false` and `fetch-depth: 0` (it posts PR comments with `GITHUB_TOKEN` passed via `env`, not the checkout credentials); CodeQL on the SHA-pinned checkout; and setup-uv v10.2.0's cache with `enable-cache: true`.
 - [ ] **Confirm the first full-history gitleaks run** in the new standalone `gitleaks` job: the weekly scheduled run on Monday 2026-10-05 at 06:00 UTC.
 
 ## Open questions

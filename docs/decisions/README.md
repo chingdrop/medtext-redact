@@ -11,6 +11,7 @@ Lightweight [MADR](https://adr.github.io/madr/)-style records of the significant
 | [0005](0005-vendor-inlined-shared-infrastructure.md) | Vendor-inlined shared infrastructure instead of a second-repo dependency | Accepted |
 | [0006](0006-repository-rename-before-public-release.md) | Repository renamed before public release | Accepted |
 | [0007](0007-presidio-detection-with-ported-rules.md) | Presidio detection, with the regex rules ported in as recognizers | Accepted |
+| [0008](0008-adopt-shared-python-tooling-standard.md) | Adopt the shared Python tooling standard | Accepted |
 
 Two candidate decisions were considered for this index and **not** written up, because the actual code contradicts their premise:
 
