@@ -6,7 +6,8 @@ build-backend = "hatchling.build"
 name = "medtext-redact"
 description = "A Command-Line Interface for HIPAA Redaction and Semantic Highlighting in Medical Text"
 authors = [{ name = "Craig Hurley", email = "chingdorp@pm.me" }]
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 version = "2.1.0"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -30,6 +31,7 @@ medtext-redact = "medtext_redact.cli:main"
 [dependency-groups]
 dev = [
     "pytest>=8.3",
+    "pytest-cov>=7.1.0",
     "ruff>=0.8",
     "mypy>=1.13",
     "pre-commit>=4.0",
