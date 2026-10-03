@@ -408,7 +408,10 @@ def generate_notes(seed: int, count: int) -> list[dict]:
         # PhiSanitizer._format_text() would produce, or span offsets recorded
         # here would silently drift from the sanitizer's output.
         normalized = re.sub(r"\s+", " ", text).strip()
-        assert normalized == text, f"template produced non-normalized text: {text!r}"
+        # An explicit raise, not assert: `python -O` strips asserts, which
+        # would let a drifted manifest through silently.
+        if normalized != text:
+            raise ValueError(f"template produced non-normalized text: {text!r}")
         notes.append(
             {
                 "note_id": i,
