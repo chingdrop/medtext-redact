@@ -50,6 +50,16 @@ packages = ["src/medtext_redact"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+[tool.coverage.run]
+source = ["medtext_redact"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+# Floor = measured baseline (98.21% branch coverage, 2026-10-03) minus 2, rounded down.
+fail_under = 96
+
 [tool.ruff]
 line-length = 120
 target-version = "py312"
