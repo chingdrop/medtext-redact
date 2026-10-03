@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- A demo GIF in the README (`docs/demo.gif`, recorded from `docs/demo.tape` with vhs) and a one-page results sheet (`docs/results-sheet.png`), rendered by `tools/results_sheet.py` from the recall/precision suite's own output. The suite writes that output as JSON when `MEDTEXT_RESULTS_JSON` is set.
 - A branch-coverage gate (`pytest-cov`): `fail_under = 96`, the measured 98.21% baseline minus 2.
 - Pre-commit hooks for gitleaks, `detect-private-key`, and `check-added-large-files` (500 KB).
 - `.python-version` (3.12) and [ADR 0008](docs/decisions/0008-adopt-shared-python-tooling-standard.md), recording the shared Python tooling standard.

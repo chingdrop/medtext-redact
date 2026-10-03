@@ -40,7 +40,8 @@ tests/
 tools/
     gen_fixtures.py    # synthetic clinical-note generator with a ground-truth manifest
     build_surname_list.py  # rebuilds the bundled Census surname list
-docs/                  # threat model, limitations, provenance, and design decisions (ADRs)
+    results_sheet.py   # renders docs/results-sheet.png from a run of the recall/precision suite
+docs/                  # threat model, limitations, provenance, ADRs, and the README's demo.gif (demo.tape) and results-sheet.png
 ```
 
 ## Running tests
@@ -53,7 +54,7 @@ Tests mirror `src/medtext_redact/`: once a repository has more than 10 test modu
 
 If you add a new function or command, add tests alongside it in the mirrored location.
 
-`tests/e2e/test_recall_precision.py` prints a per-category recall/precision table. If you add or change a detector, add a matching generator and template to `tools/gen_fixtures.py`, gate the new category in the e2e suite, and update the numbers in the README, `docs/threat-model.md`, `docs/provenance-and-data-boundary.md`, and `docs/limitations-and-roadmap.md` from a fresh run. New test data must be synthetic; see [`docs/provenance-and-data-boundary.md`](docs/provenance-and-data-boundary.md).
+`tests/e2e/test_recall_precision.py` prints a per-category recall/precision table. If you add or change a detector, add a matching generator and template to `tools/gen_fixtures.py`, gate the new category in the e2e suite, and update the numbers in the README, `docs/threat-model.md`, `docs/provenance-and-data-boundary.md`, and `docs/limitations-and-roadmap.md` from a fresh run. Then regenerate the README's results image with `uv run python tools/results_sheet.py --png docs/results-sheet.png` (it reruns the suite; a new category also needs a label in its `GROUPS`). New test data must be synthetic; see [`docs/provenance-and-data-boundary.md`](docs/provenance-and-data-boundary.md).
 
 ## Code quality
 
